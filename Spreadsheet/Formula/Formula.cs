@@ -1,4 +1,5 @@
 ﻿// Skeleton written by Joe Zachary for CS 3500, January 2017
+// Remainder implementation wrriten by Nithin Chalapathi - u0847388 - Spring 18
 
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,12 @@ namespace Formulas
     /// </summary>
     public class Formula
     {
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        private LinkedList<string> formulaTokens;
+
         /// <summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
@@ -37,7 +44,69 @@ namespace Formulas
         /// </summary>
         public Formula(String formula)
         {
+            //Generate the linked list
+            formulaTokens = new LinkedList<string>();
+
+            //Go through the list of tokens 
+            //We don't use a foreach loop in order to manually control enumeration
+            var tokens = GetTokens(formula).GetEnumerator();
+
+            //left paren
+            int numLeftParen = 0;
+
+            //right paren
+            int numRightParen = 0;
+
+            while (tokens.MoveNext())
+            {
+
+                //Checking the token for whether it is a variable
+                //Checking if the token is a one of the four binary operations
+                //Cheacking if the token is a parentheses and the subsequent checks
+
+                /*
+                 * There can be no invalid tokens.  (Valid tokens are described in the Formula class. and code is provided to detect them.)
+
+There must be at least one token.
+
+When reading tokens from left to right, at no point should the number of closing parentheses seen so far be greater than the number of opening parentheses seen so far.
+
+The total number of opening parentheses must equal the total number of closing parentheses.
+
+The first token of a formula must be a number, a variable, or an opening parenthesis.
+
+The last token of a formula must be a number, a variable, or a closing parenthesis.
+
+Any token that immediately follows an opening parenthesis or an operator must be either a number, a variable, or an opening parenthesis.
+
+Any token that immediately follows a number, a variable, or a closing parenthesis must be either an operator or a closing parenthesis.
+
+                 */
+            }
+
         }
+
+        /// <summary>
+        /// Private helper to determine if the passed token is a variable (a letter followed by zero or more letters and/or digits).
+        /// </summary>
+        private bool IsVar(string token)
+        {
+            char[] variable = token.ToCharArray();
+
+            if (variable.Length == 0 || !char.IsLetter(variable[0])) return false;
+
+            foreach(char c in variable)
+            {
+                if (!char.IsLetterOrDigit(c))
+                {
+                    return false;
+                }
+            }
+
+            //All the checks are done for this to be a proper variable
+            return true;
+        }
+
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
         /// delegate takes a variable name as a parameter and returns its value (if it has one) or throws
