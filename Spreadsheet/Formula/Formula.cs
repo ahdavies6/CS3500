@@ -167,7 +167,53 @@ namespace Formulas
         /// </summary>
         public double Evaluate(Lookup lookup)
         {
-            return 0;
+            //Create the two stacks
+            Stack<double> values = new Stack<double>();
+            Stack<string> ops = new Stack<string>();
+
+            //operaters and parens
+            string times = "*";
+            string divide = "/";
+            string add = "+";
+            string minus = "-";
+            string leftParen = "(";
+            string rightParen = ")";
+
+            //Iterate through all tokens
+            foreach (string token in formulaTokens)
+            {
+                //Double case
+                double d;
+                if(double.TryParse(token, out d))
+                {
+                    if(ops.Peek().Equals(times))
+                    {
+                        double otherVal = values.Pop();
+                        ops.Pop();
+                        values.Push(d * otherVal);
+                    }
+                    else if(ops.Peek().Equals(divide))
+                    {
+                        double otherVal = values.Pop();
+                        ops.Pop();
+                        try
+                        {
+                            values.Push(d / otherVal);
+                        }
+                        catch (DivideByZeroException e)
+                        {
+                            throw new FormulaEvaluationException("Division by zero is not possible.");
+                        }
+                    }
+                    else
+                    {
+                        values.Push(d);
+                    }
+                }
+
+                //variable case
+            }
+
         }
 
         /// <summary>
