@@ -16,7 +16,7 @@ namespace Formulas
     /// </summary>
     public class Formula
     {
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -57,33 +57,82 @@ namespace Formulas
             //right paren
             int numRightParen = 0;
 
-            while (tokens.MoveNext())
+            //Formula token types 
+            string leftParen = "(";
+            string rightParen = ")";
+
+            //valid operaters
+            string operators = "+-/*";
+
+            //Add all valid tokens to the linkedlist
+            foreach (string token in GetTokens(formula))
             {
-
-                //Checking the token for whether it is a variable
-                //Checking if the token is a one of the four binary operations
-                //Cheacking if the token is a parentheses and the subsequent checks
-
-                /*
-                 * There can be no invalid tokens.  (Valid tokens are described in the Formula class. and code is provided to detect them.)
-
-There must be at least one token.
-
-When reading tokens from left to right, at no point should the number of closing parentheses seen so far be greater than the number of opening parentheses seen so far.
-
-The total number of opening parentheses must equal the total number of closing parentheses.
-
-The first token of a formula must be a number, a variable, or an opening parenthesis.
-
-The last token of a formula must be a number, a variable, or a closing parenthesis.
-
-Any token that immediately follows an opening parenthesis or an operator must be either a number, a variable, or an opening parenthesis.
-
-Any token that immediately follows a number, a variable, or a closing parenthesis must be either an operator or a closing parenthesis.
-
-                 */
+                if (IsVar(token) || token.Equals(leftParen) || token.Equals(rightParen) || operators.Contains(token))
+                {
+                    formulaTokens.AddLast(token);
+                }
+                else
+                {
+                    throw new FormulaFormatException("Invalid Token was passed.");
+                }
             }
 
+            for (var currNode = formulaTokens.First; currNode != null && currNode.Next != null; currNode = currNode.Next)
+            {
+
+                if (numRightParen > numLeftParen)
+                {
+                    throw new FormulaFormatException("The number of closing parentheses is greater than the number of opening parentheses at some point.");
+                }
+
+                //Var case and number and closing paren case  where the next token is not an operator or right paren
+                if ((IsVar(currNode.Value) || double.TryParse(currNode.Value, out double n) || currNode.Value.Equals(rightParen))
+                    && !(operators.Contains(currNode.Next.Value) || currNode.Next.Value.Equals(rightParen)))
+                {
+                    throw new FormulaFormatException("One of the tokens following a variable, double, or closing parenthsis, was not an operator or closing parenthesis.");
+                }
+
+                //Open parenthesis or operator case where the next token is not a number, variable, or an opening paren
+                else if ((operators.Contains(currNode.Value) || currNode.Value.Equals(leftParen))
+                    && !(double.TryParse(currNode.Next.Value, out double number) || IsVar(currNode.Next.Value) || currNode.Next.Value.Equals(leftParen)))
+                {
+                    throw new FormulaFormatException("One of the tokens following an open parenthesis or an operator was not a number, variable, or opening parenthesis");
+                }
+
+                //Counting the parethesis
+                if (currNode.Value.Equals(leftParen))
+                {
+                    numLeftParen++;
+                }
+                else if (currNode.Value.Equals(rightParen))
+                {
+                    numRightParen++;
+                }
+
+            }
+
+            //first token case must be a number, variable, or opening parenthesis
+            if (!(double.TryParse(formulaTokens.First.Value, out double num) || IsVar(formulaTokens.First.Value) || formulaTokens.First.Value.Equals(leftParen)))
+            {
+                throw new FormulaFormatException("First token was not a number, variable, or opening parenthesis");
+            }
+
+
+            if (formulaTokens.Count == 0)
+            {
+                throw new FormulaFormatException("No valid tokens were passed.");
+            }
+
+            //Last token must be a number or variable or closing parenthesis
+            if (!(double.TryParse(formulaTokens.Last.Value, out double d) || IsVar(formulaTokens.Last.Value) || formulaTokens.Last.Value.Equals(rightParen)))
+            {
+                throw new FormulaFormatException("The last token is not a number, variable, or closing parenthesis.");
+            }
+
+            if (numLeftParen != numRightParen)
+            {
+                throw new FormulaFormatException("The number of left parentheses does not equal the number of right parentheses.");
+            }
         }
 
         /// <summary>
@@ -95,7 +144,7 @@ Any token that immediately follows a number, a variable, or a closing parenthesi
 
             if (variable.Length == 0 || !char.IsLetter(variable[0])) return false;
 
-            foreach(char c in variable)
+            foreach (char c in variable)
             {
                 if (!char.IsLetterOrDigit(c))
                 {
