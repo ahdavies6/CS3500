@@ -67,13 +67,13 @@ namespace Formulas
             //Add all valid tokens to the linkedlist
             foreach (string token in GetTokens(formula))
             {
-                if (IsVar(token) || token.Equals(leftParen) || token.Equals(rightParen) || operators.Contains(token))
+                if (double.TryParse(token, out double dummy) || IsVar(token) || token.Equals(leftParen) || token.Equals(rightParen) || operators.Contains(token))
                 {
                     formulaTokens.AddLast(token);
                 }
                 else
                 {
-                    throw new FormulaFormatException("Invalid Token was passed.");
+                    throw new FormulaFormatException("Invalid Token was passed: " + token);
                 }
             }
 
@@ -183,22 +183,22 @@ namespace Formulas
             foreach (string token in formulaTokens)
             {
                 //Double case
-                double d;
-                if(double.TryParse(token, out d))
+                double value;
+                if (double.TryParse(token, out value))
                 {
-                    if(ops.Peek().Equals(times))
+                    if (ops.Count > 0 && ops.Peek().Equals(times))
                     {
                         double otherVal = values.Pop();
                         ops.Pop();
-                        values.Push(d * otherVal);
+                        values.Push(value * otherVal);
                     }
-                    else if(ops.Peek().Equals(divide))
+                    else if (ops.Count > 0 && ops.Peek().Equals(divide))
                     {
                         double otherVal = values.Pop();
                         ops.Pop();
                         try
                         {
-                            values.Push(d / otherVal);
+                            values.Push(otherVal / value);
                         }
                         catch (DivideByZeroException e)
                         {
@@ -207,11 +207,147 @@ namespace Formulas
                     }
                     else
                     {
-                        values.Push(d);
+                        values.Push(value);
                     }
                 }
 
                 //variable case
+                if (IsVar(token))
+                {
+                    try
+                    {
+                        value = lookup(token);
+                    }
+                    catch (UndefinedVariableException e)
+                    {
+                        throw new FormulaEvaluationException("One of the variables doesn't have a lookup value.");
+                    }
+
+                    //Same procedure as a number
+                    if (ops.Count > 0 && ops.Peek().Equals(times))
+                    {
+                        double otherVal = values.Pop();
+                        ops.Pop();
+                        values.Push(value * otherVal);
+                    }
+                    else if (ops.Count > 0 && ops.Peek().Equals(divide))
+                    {
+                        double otherVal = values.Pop();
+                        ops.Pop();
+                        try
+                        {
+                            values.Push(otherVal / value);
+                        }
+                        catch (DivideByZeroException e)
+                        {
+                            throw new FormulaEvaluationException("Division by zero is not possible.");
+                        }
+                    }
+                    else
+                    {
+                        values.Push(value);
+                    }
+
+                }
+
+                //+ and - case 
+                if (token.Equals(add) || token.Equals(minus))
+                {
+                    if (ops.Count > 0 && ops.Peek().Equals(add))
+                    {
+                        ops.Pop();
+                        double val1 = values.Pop();
+                        double val2 = values.Pop();
+                        values.Push(val1 + val2);
+                    }
+                    else if (ops.Count > 0 && ops.Peek().Equals(minus))
+                    {
+                        ops.Pop();
+                        double val1 = values.Pop();
+                        double val2 = values.Pop();
+                        values.Push(val2 - val1);
+                    }
+
+                    ops.Push(token);
+                }
+
+                // * or / case
+                if (token.Equals(divide) || token.Equals(times))
+                {
+                    ops.Push(token);
+                }
+
+                // ( case 
+                if (token.Equals(leftParen))
+                {
+                    ops.Push(token);
+                }
+
+                // ) case
+                if (token.Equals(rightParen))
+                {
+
+                    if (ops.Count > 0 && ops.Peek().Equals(add))
+                    {
+                        ops.Pop();
+                        double val1 = values.Pop();
+                        double val2 = values.Pop();
+                        values.Push(val1 + val2);
+                    }
+                    else if (ops.Count > 0 && ops.Peek().Equals(minus))
+                    {
+                        ops.Pop();
+                        double val1 = values.Pop();
+                        double val2 = values.Pop();
+                        values.Push(val2 - val1);
+                    }
+
+                    //Pops the top (
+                    ops.Pop();
+
+                    if (ops.Count > 0 && ops.Peek().Equals(times))
+                    {
+                        ops.Pop();
+                        double val1 = values.Pop();
+                        double val2 = values.Pop();
+                        values.Push(val1 * val2);
+                    }
+                    else if (ops.Count > 0 && ops.Peek().Equals(divide))
+                    {
+                        ops.Pop();
+                        double val1 = values.Pop();
+                        double val2 = values.Pop();
+                        values.Push(val2 / val1);
+                    }
+
+                }
+
+
+            }
+
+            //After all tokens are processed, the final actions
+            if (ops.Count == 0)
+            {
+                return values.Pop();
+            }
+            else
+            {
+                if (ops.Peek().Equals(add))
+                {
+                    ops.Pop();
+                    double val1 = values.Pop();
+                    double val2 = values.Pop();
+                    values.Push(val1 + val2);
+                }
+                else if (ops.Peek().Equals(minus))
+                {
+                    ops.Pop();
+                    double val1 = values.Pop();
+                    double val2 = values.Pop();
+                    values.Push(val2 - val1);
+                }
+
+                return values.Pop();
             }
 
         }
