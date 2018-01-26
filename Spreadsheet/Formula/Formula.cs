@@ -2,6 +2,7 @@
 // Remainder implementation wrriten by Nithin Chalapathi - u0847388 - Spring 18
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -20,7 +21,7 @@ namespace Formulas
         /// <summary>
         /// Contains all of the tokens parsed when the constructor is called.
         /// </summary>
-        private LinkedList<string> formulaTokens;
+        private ArrayList formulaTokens;
 
         /// <summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
@@ -45,7 +46,7 @@ namespace Formulas
         public Formula(String formula)
         {
             //Generate the linked list
-            formulaTokens = new LinkedList<string>();
+            formulaTokens = new ArrayList();
 
             //Go through the list of tokens 
             //We don't use a foreach loop in order to manually control enumeration
@@ -69,7 +70,7 @@ namespace Formulas
             {
                 if (double.TryParse(token, out double dummy) || IsVar(token) || token.Equals(leftParen) || token.Equals(rightParen) || operators.Contains(token))
                 {
-                    formulaTokens.AddLast(token);
+                    formulaTokens.Add(token);
                 }
                 else
                 {
@@ -77,21 +78,22 @@ namespace Formulas
                 }
             }
 
-            for (var currNode = formulaTokens.First; currNode != null; currNode = currNode.Next)
+            //for (var currNode = formulaTokens.First; currNode != null; currNode = currNode.Next)
+            for(int i = 0; i < formulaTokens.Count; i++) 
             {
 
                 //Counting the parethesis
-                if (currNode.Value.Equals(leftParen))
+                if (formulaTokens[i].Equals(leftParen))
                 {
                     numLeftParen++;
                 }
-                else if (currNode.Value.Equals(rightParen))
+                else if (formulaTokens[i].Equals(rightParen))
                 {
                     numRightParen++;
                 }
 
                 //If this is the last element, break out
-                if (currNode.Next is null)
+                if (i == formulaTokens.Count-1)
                 {
                     break;
                 }
@@ -102,15 +104,15 @@ namespace Formulas
                 }
 
                 //Var case and number and closing paren case  where the next token is not an operator or right paren
-                if ((IsVar(currNode.Value) || double.TryParse(currNode.Value, out double n) || currNode.Value.Equals(rightParen))
-                    && !(operators.Contains(currNode.Next.Value) || currNode.Next.Value.Equals(rightParen)))
+                if ((IsVar(formulaTokens[i].ToString()) || double.TryParse(formulaTokens[i].ToString(), out double n) || formulaTokens[i].Equals(rightParen))
+                    && !(operators.Contains(formulaTokens[i+1].ToString()) || formulaTokens[i+1].Equals(rightParen)))
                 {
                     throw new FormulaFormatException("One of the tokens following a variable, double, or closing parenthsis, was not an operator or closing parenthesis.");
                 }
 
                 //Open parenthesis or operator case where the next token is not a number, variable, or an opening paren
-                else if ((operators.Contains(currNode.Value) || currNode.Value.Equals(leftParen))
-                    && !(double.TryParse(currNode.Next.Value, out double number) || IsVar(currNode.Next.Value) || currNode.Next.Value.Equals(leftParen)))
+                else if ((operators.Contains(formulaTokens[i].ToString()) || formulaTokens[i].Equals(leftParen))
+                    && !(double.TryParse(formulaTokens[i+1].ToString(), out double number) || IsVar(formulaTokens[i+1].ToString()) || formulaTokens[i+1].Equals(leftParen)))
                 {
                     throw new FormulaFormatException("One of the tokens following an open parenthesis or an operator was not a number, variable, or opening parenthesis");
                 }
@@ -124,13 +126,13 @@ namespace Formulas
             }
 
             //first token case must be a number, variable, or opening parenthesis
-            if (!(double.TryParse(formulaTokens.First.Value, out double num) || IsVar(formulaTokens.First.Value) || formulaTokens.First.Value.Equals(leftParen)))
+            if (!(double.TryParse(formulaTokens[0].ToString(), out double num) || IsVar(formulaTokens[0].ToString()) || formulaTokens[0].Equals(leftParen)))
             {
                 throw new FormulaFormatException("First token was not a number, variable, or opening parenthesis");
             }
 
             //Last token must be a number or variable or closing parenthesis
-            if (!(double.TryParse(formulaTokens.Last.Value, out double d) || IsVar(formulaTokens.Last.Value) || formulaTokens.Last.Value.Equals(rightParen)))
+            if (!(double.TryParse(formulaTokens[formulaTokens.Count-1].ToString(), out double d) || IsVar(formulaTokens[formulaTokens.Count-1].ToString()) || formulaTokens[formulaTokens.Count-1].Equals(rightParen)))
             {
                 throw new FormulaFormatException("The last token is not a number, variable, or closing parenthesis.");
             }
@@ -225,7 +227,7 @@ namespace Formulas
                 if (token.Equals(add) || token.Equals(minus))
                 {
 
-                    if(!TryAddition(ops, values))
+                    if (!TryAddition(ops, values))
                     {
                         TrySubtration(ops, values);
                     }
@@ -248,7 +250,7 @@ namespace Formulas
                 // ) case
                 if (token.Equals(rightParen))
                 {
-                    if(!TryAddition(ops, values))
+                    if (!TryAddition(ops, values))
                     {
                         TrySubtration(ops, values);
                     }
@@ -272,7 +274,7 @@ namespace Formulas
             }
             else
             {
-                if(!TryAddition(ops, values))
+                if (!TryAddition(ops, values))
                 {
                     TrySubtration(ops, values);
                 }
