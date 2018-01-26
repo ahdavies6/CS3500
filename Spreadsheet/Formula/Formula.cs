@@ -189,37 +189,16 @@ namespace Formulas
             foreach (string token in formulaTokens)
             {
                 //Double case
-                double value;
-                if (double.TryParse(token, out value))
+                if (double.TryParse(token, out double value))
                 {
-                    if (ops.Count > 0 && ops.Peek().Equals(times))
+
+                    values.Push(value);
+
+                    if (!TryMultiply(ops, values))
                     {
-                        double otherVal = values.Pop();
-                        ops.Pop();
-                        values.Push(value * otherVal);
+                        TryDivide(ops, values);
                     }
-                    else if (ops.Count > 0 && ops.Peek().Equals(divide))
-                    {
-                        double otherVal = values.Pop();
-                        ops.Pop();
-                        try
-                        {
-                            double result = otherVal / value;
-                            if (double.IsInfinity(result))
-                            {
-                                throw new DivideByZeroException();
-                            }
-                            values.Push(result);
-                        }
-                        catch (DivideByZeroException e)
-                        {
-                            throw new FormulaEvaluationException("Division by zero is not possible.");
-                        }
-                    }
-                    else
-                    {
-                        values.Push(value);
-                    }
+
                 }
 
                 //variable case
@@ -227,7 +206,7 @@ namespace Formulas
                 {
                     try
                     {
-                        value = lookup(token);
+                        values.Push(lookup(token));
                     }
                     catch (UndefinedVariableException e)
                     {
@@ -235,33 +214,9 @@ namespace Formulas
                     }
 
                     //Same procedure as a number
-                    if (ops.Count > 0 && ops.Peek().Equals(times))
+                    if (!TryMultiply(ops, values))
                     {
-                        double otherVal = values.Pop();
-                        ops.Pop();
-                        values.Push(value * otherVal);
-                    }
-                    else if (ops.Count > 0 && ops.Peek().Equals(divide))
-                    {
-                        double otherVal = values.Pop();
-                        ops.Pop();
-                        try
-                        {
-                            double result = otherVal / value;
-                            if (double.IsInfinity(result))
-                            {
-                                throw new DivideByZeroException();
-                            }
-                            values.Push(result);
-                        }
-                        catch (DivideByZeroException e)
-                        {
-                            throw new FormulaEvaluationException("Division by zero is not possible.");
-                        }
-                    }
-                    else
-                    {
-                        values.Push(value);
+                        TryDivide(ops, values);
                     }
 
                 }
@@ -321,35 +276,12 @@ namespace Formulas
                     //Pops the top (
                     ops.Pop();
 
-                    if (ops.Count > 0 && ops.Peek().Equals(times))
+                    if (!TryMultiply(ops, values))
                     {
-                        ops.Pop();
-                        double val1 = values.Pop();
-                        double val2 = values.Pop();
-                        values.Push(val1 * val2);
-                    }
-                    else if (ops.Count > 0 && ops.Peek().Equals(divide))
-                    {
-                        ops.Pop();
-                        double val1 = values.Pop();
-                        double val2 = values.Pop();
-                        try
-                        {
-                            double result = val2 / val1;
-                            if (double.IsInfinity(result))
-                            {
-                                throw new DivideByZeroException();
-                            }
-                            values.Push(val2 / val1);
-                        }
-                        catch (DivideByZeroException e)
-                        {
-                            throw new FormulaEvaluationException("Divide by zero.");
-                        }
+                        TryDivide(ops, values);
                     }
 
                 }
-
 
             }
 
@@ -378,6 +310,83 @@ namespace Formulas
                 return values.Pop();
             }
 
+        }
+
+        /// <summary>
+        /// A helper method that given the ops stack and the values stack, it attempts to do a divide operation if and only if
+        /// the top operator is a divide. Throws a FormulaEvalutionException when trying to divide by zero. 
+        /// 
+        /// Return true if the divide was successful, otherwise return false
+        /// </summary>
+        private bool TryDivide(Stack<string> ops, Stack<double> values)
+        {
+            //Case when the ops stack is empty
+            //Case when the values stack doesn't have enough values
+            if (ops.Count == 0 || values.Count < 2)
+            {
+                return false;
+            }
+
+            if (ops.Peek().Equals("/"))
+            {
+                ops.Pop();
+                double val1 = values.Pop();
+                double val2 = values.Pop();
+                try
+                {
+                    double result = val2 / val1;
+
+                    //Sometimes dividing by a zero double means dividing by a very very small number, not zero
+                    if (double.IsInfinity(result))
+                    {
+                        throw new FormulaEvaluationException("Divide by zero");
+                    }
+
+                    values.Push(result);
+                }
+                catch (DivideByZeroException e)
+                {
+                    throw new FormulaFormatException("Divide by zero");
+                }
+
+                //Divide operation was successful
+                return true;
+            }
+
+            //Case when the top is not a divide
+            return false;
+        }
+
+        /// <summary>
+        /// A helper method that given the ops stack and the values stack, it attempts to do a multiply operation if and only if
+        /// the top operator is a multiply. 
+        /// 
+        /// Return true if the multiply was successful, otherwise return false
+        /// </summary>
+        private bool TryMultiply(Stack<string> ops, Stack<double> values)
+        {
+            //Case when the ops stack is empty
+            //Case when the values stack doesn't have enough values
+            if (ops.Count == 0 || values.Count < 2)
+            {
+                return false;
+            }
+
+            //Case next op is times
+            if (ops.Peek().Equals("*"))
+            {
+
+                ops.Pop();
+                double val1 = values.Pop();
+                double val2 = values.Pop();
+
+                values.Push(val1 * val2);
+
+                return true;
+            }
+
+            //Case when the next op is not times
+            return false;
         }
 
         /// <summary>
