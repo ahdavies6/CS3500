@@ -224,19 +224,10 @@ namespace Formulas
                 //+ and - case 
                 if (token.Equals(add) || token.Equals(minus))
                 {
-                    if (ops.Count > 0 && ops.Peek().Equals(add))
+
+                    if(!TryAddition(ops, values))
                     {
-                        ops.Pop();
-                        double val1 = values.Pop();
-                        double val2 = values.Pop();
-                        values.Push(val1 + val2);
-                    }
-                    else if (ops.Count > 0 && ops.Peek().Equals(minus))
-                    {
-                        ops.Pop();
-                        double val1 = values.Pop();
-                        double val2 = values.Pop();
-                        values.Push(val2 - val1);
+                        TrySubtration(ops, values);
                     }
 
                     ops.Push(token);
@@ -257,20 +248,9 @@ namespace Formulas
                 // ) case
                 if (token.Equals(rightParen))
                 {
-
-                    if (ops.Count > 0 && ops.Peek().Equals(add))
+                    if(!TryAddition(ops, values))
                     {
-                        ops.Pop();
-                        double val1 = values.Pop();
-                        double val2 = values.Pop();
-                        values.Push(val1 + val2);
-                    }
-                    else if (ops.Count > 0 && ops.Peek().Equals(minus))
-                    {
-                        ops.Pop();
-                        double val1 = values.Pop();
-                        double val2 = values.Pop();
-                        values.Push(val2 - val1);
+                        TrySubtration(ops, values);
                     }
 
                     //Pops the top (
@@ -292,19 +272,9 @@ namespace Formulas
             }
             else
             {
-                if (ops.Peek().Equals(add))
+                if(!TryAddition(ops, values))
                 {
-                    ops.Pop();
-                    double val1 = values.Pop();
-                    double val2 = values.Pop();
-                    values.Push(val1 + val2);
-                }
-                else if (ops.Peek().Equals(minus))
-                {
-                    ops.Pop();
-                    double val1 = values.Pop();
-                    double val2 = values.Pop();
-                    values.Push(val2 - val1);
+                    TrySubtration(ops, values);
                 }
 
                 return values.Pop();
@@ -380,12 +350,78 @@ namespace Formulas
                 double val1 = values.Pop();
                 double val2 = values.Pop();
 
-                values.Push(val1 * val2);
+                values.Push(val2 * val1);
 
                 return true;
             }
 
             //Case when the next op is not times
+            return false;
+        }
+
+
+
+        /// <summary>
+        /// A helper method that given the ops stack and the values stack, it attempts to do an addition operation if and only if
+        /// the top operator is an addition. 
+        /// 
+        /// Return true if the addition was successful, otherwise return false
+        /// </summary>
+        private bool TryAddition(Stack<string> ops, Stack<double> values)
+        {
+            //Case when the ops stack is empty
+            //Case when the values stack doesn't have enough values
+            if (ops.Count == 0 || values.Count < 2)
+            {
+                return false;
+            }
+
+            //Case next op is addition
+            if (ops.Peek().Equals("+"))
+            {
+
+                ops.Pop();
+                double val1 = values.Pop();
+                double val2 = values.Pop();
+
+                values.Push(val2 + val1);
+
+                return true;
+            }
+
+            //Case when the next op is not addition
+            return false;
+        }
+
+        /// <summary>
+        /// A helper method that given the ops stack and the values stack, it attempts to do a subtration operation if and only if
+        /// the top operator is a subtration operation. 
+        /// 
+        /// Return true if the subtration was successful, otherwise return false
+        /// </summary>
+        private bool TrySubtration(Stack<string> ops, Stack<double> values)
+        {
+            //Case when the ops stack is empty
+            //Case when the values stack doesn't have enough values
+            if (ops.Count == 0 || values.Count < 2)
+            {
+                return false;
+            }
+
+            //Case next op is subtration
+            if (ops.Peek().Equals("-"))
+            {
+
+                ops.Pop();
+                double val1 = values.Pop();
+                double val2 = values.Pop();
+
+                values.Push(val2 - val1);
+
+                return true;
+            }
+
+            //Case when the next op is not subtration
             return false;
         }
 
