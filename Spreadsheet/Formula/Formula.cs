@@ -18,7 +18,7 @@ namespace Formulas
     {
 
         /// <summary>
-        /// 
+        /// Contains all of the tokens parsed when the constructor is called.
         /// </summary>
         private LinkedList<string> formulaTokens;
 
@@ -77,12 +77,28 @@ namespace Formulas
                 }
             }
 
-            for (var currNode = formulaTokens.First; currNode != null && currNode.Next != null; currNode = currNode.Next)
+            for (var currNode = formulaTokens.First; currNode != null; currNode = currNode.Next)
             {
+
+                //Counting the parethesis
+                if (currNode.Value.Equals(leftParen))
+                {
+                    numLeftParen++;
+                }
+                else if (currNode.Value.Equals(rightParen))
+                {
+                    numRightParen++;
+                }
+
+                //If this is the last element, break out
+                if (currNode.Next is null)
+                {
+                    break;
+                }
 
                 if (numRightParen > numLeftParen)
                 {
-                    throw new FormulaFormatException("The number of closing parentheses is greater than the number of opening parentheses at some point.");
+                    throw new FormulaFormatException("The number of closing parentheses is greater than the number of opening parentheses at some point. Left: " + numLeftParen + " Right: " + numRightParen);
                 }
 
                 //Var case and number and closing paren case  where the next token is not an operator or right paren
@@ -99,28 +115,18 @@ namespace Formulas
                     throw new FormulaFormatException("One of the tokens following an open parenthesis or an operator was not a number, variable, or opening parenthesis");
                 }
 
-                //Counting the parethesis
-                if (currNode.Value.Equals(leftParen))
-                {
-                    numLeftParen++;
-                }
-                else if (currNode.Value.Equals(rightParen))
-                {
-                    numRightParen++;
-                }
 
+            }
+
+            if (formulaTokens.Count == 0)
+            {
+                throw new FormulaFormatException("No valid tokens were passed.");
             }
 
             //first token case must be a number, variable, or opening parenthesis
             if (!(double.TryParse(formulaTokens.First.Value, out double num) || IsVar(formulaTokens.First.Value) || formulaTokens.First.Value.Equals(leftParen)))
             {
                 throw new FormulaFormatException("First token was not a number, variable, or opening parenthesis");
-            }
-
-
-            if (formulaTokens.Count == 0)
-            {
-                throw new FormulaFormatException("No valid tokens were passed.");
             }
 
             //Last token must be a number or variable or closing parenthesis
@@ -198,7 +204,12 @@ namespace Formulas
                         ops.Pop();
                         try
                         {
-                            values.Push(otherVal / value);
+                            double result = otherVal / value;
+                            if (double.IsInfinity(result))
+                            {
+                                throw new DivideByZeroException();
+                            }
+                            values.Push(result);
                         }
                         catch (DivideByZeroException e)
                         {
@@ -236,7 +247,12 @@ namespace Formulas
                         ops.Pop();
                         try
                         {
-                            values.Push(otherVal / value);
+                            double result = otherVal / value;
+                            if (double.IsInfinity(result))
+                            {
+                                throw new DivideByZeroException();
+                            }
+                            values.Push(result);
                         }
                         catch (DivideByZeroException e)
                         {
@@ -317,7 +333,19 @@ namespace Formulas
                         ops.Pop();
                         double val1 = values.Pop();
                         double val2 = values.Pop();
-                        values.Push(val2 / val1);
+                        try
+                        {
+                            double result = val2 / val1;
+                            if (double.IsInfinity(result))
+                            {
+                                throw new DivideByZeroException();
+                            }
+                            values.Push(val2 / val1);
+                        }
+                        catch (DivideByZeroException e)
+                        {
+                            throw new FormulaEvaluationException("Divide by zero.");
+                        }
                     }
 
                 }

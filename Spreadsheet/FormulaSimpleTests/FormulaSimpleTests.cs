@@ -15,6 +15,8 @@ namespace FormulaTestCases
     [TestClass]
     public class UnitTests
     {
+        //////////////////////////////////BEGIN CONSTRUCTOR EXCEPTION TESTING //////////////////////////
+
         /// <summary>
         /// This tests that a syntactically incorrect parameter to Formula results
         /// in a FormulaFormatException.
@@ -45,6 +47,178 @@ namespace FormulaTestCases
         {
             Formula f = new Formula("2 3");
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void SpacedStringFormulaTest()
+        {
+            Formula f = new Formula("  ");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void EmptyStringFormulaTest()
+        {
+            Formula f = new Formula(" ");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void FirstTokenInvalid()
+        {
+            Formula f = new Formula("_x+y");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void LastTokenInvalid()
+        {
+            Formula f = new Formula("x+y\\");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void MoreLeftParenThanRightTest()
+        {
+            Formula f = new Formula("((x+y)");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void MoreRightParenThanLeftTest()
+        {
+            Formula f = new Formula("(x+y)))");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void VariableFollowedByVariableTest()
+        {
+            Formula f = new Formula("x86 x64");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void InValidExampleFromDocComment1()
+        {
+            Formula f = new Formula("_");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void InValidExampleFromDocComment2()
+        {
+            Formula f = new Formula("-.5.3");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void InValidExampleFromDocComment3()
+        {
+            Formula f = new Formula("2 5 +3");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void FirstTokenCloseParenTest()
+        {
+            Formula f = new Formula(")1+3");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void InvalidEndingTokenOpenParenTest()
+        {
+            Formula f = new Formula("x+y(");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void ClosingParenFollowedByOpenParenTest()
+        {
+            Formula f = new Formula("(x+y)(x+z)");
+        }
+
+        [TestMethod] 
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void OpenParenFollowedByClosingParen()
+        {
+            Formula f = new Formula("()");
+        }
+
+        ///////////////////////////////////BEGIN EVALUTE EXCEPTION//////////////////////////
+
+        /// <summary>
+        /// Helper method that defines certain variables for testing.
+        /// </summary>
+        public double lookupHelper(string x)
+        {
+            switch (x)
+            {
+                case "x": return 1;
+                case "y": return 2;
+                case "z": return 5;
+                case "a": return 0;
+                case "b": return .5;
+                default: throw new UndefinedVariableException(x);
+            }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaEvaluationException))]
+        public void DivideByZeroErrorTest()
+        {
+            Formula f = new Formula("z / a");
+            f.Evaluate(lookupHelper);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaEvaluationException))]
+        public void LookUpFailedException()
+        {
+            Formula f = new Formula("a+j");
+            f.Evaluate(lookupHelper);
+        }
+
+        /////////////////////////////// NORMAL EVALUTE TESTS ////////////////////////////////
+        [TestMethod]
+        public void AdditionOpsTest()
+        {
+            Formula f = new Formula("a+b+x+y+z");
+            Assert.AreEqual(f.Evaluate(lookupHelper), 8.5, 1e-6);
+            f = new Formula("(a+b)+(x+y)");
+            Assert.AreEqual(f.Evaluate(lookupHelper), 3.5, 1e-6);
+        }
+
+        [TestMethod]
+        public void SubtractionOpsTest()
+        {
+            Formula f = new Formula("0-a-b-x-y-z");
+            Assert.AreEqual(f.Evaluate(lookupHelper), -8.5, 1e-6);
+            f = new Formula("(0-a-b)+(0-x-y)");
+            Assert.AreEqual(f.Evaluate(lookupHelper), -3.5, 1e-6);
+        }
+
+        [TestMethod]
+        public void MultiplicationOpsTest()
+        {
+            Formula f = new Formula("a*b*x*y*z");
+            Assert.AreEqual(f.Evaluate(lookupHelper), 0, 1e-6);
+            f = new Formula("(a*b)+(x*y)");
+            Assert.AreEqual(f.Evaluate(lookupHelper), 2, 1e-6);
+        }
+
+        [TestMethod]
+        public void DivideOpsTest()
+        {
+            Formula f = new Formula("x/y");
+            Assert.AreEqual(f.Evaluate(lookupHelper), .5, 1e-6);
+            f = new Formula("z/y");
+            Assert.AreEqual(f.Evaluate(lookupHelper), 2.5, 1e-6);
+        }
+
+        /////////////////////////////////////JOE'S EVALUATE TESTS////////////////////////////
+
 
         /// <summary>
         /// Makes sure that "2+3" evaluates to 5.  Since the Formula
@@ -101,7 +275,7 @@ namespace FormulaTestCases
         /// This uses one of each kind of token.
         /// </summary>
         [TestMethod]
-        public void Evaluate5 ()
+        public void Evaluate5()
         {
             Formula f = new Formula("(x + y) * (z / x) * 1.0");
             Assert.AreEqual(f.Evaluate(Lookup4), 20.0, 1e-6);
