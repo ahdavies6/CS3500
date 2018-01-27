@@ -79,7 +79,7 @@ namespace Formulas
             }
 
             //for (var currNode = formulaTokens.First; currNode != null; currNode = currNode.Next)
-            for(int i = 0; i < formulaTokens.Count; i++) 
+            for (int i = 0; i < formulaTokens.Count; i++)
             {
 
                 //Counting the parethesis
@@ -93,7 +93,7 @@ namespace Formulas
                 }
 
                 //If this is the last element, break out
-                if (i == formulaTokens.Count-1)
+                if (i == formulaTokens.Count - 1)
                 {
                     break;
                 }
@@ -105,14 +105,14 @@ namespace Formulas
 
                 //Var case and number and closing paren case  where the next token is not an operator or right paren
                 if ((IsVar(formulaTokens[i].ToString()) || double.TryParse(formulaTokens[i].ToString(), out double n) || formulaTokens[i].Equals(rightParen))
-                    && !(operators.Contains(formulaTokens[i+1].ToString()) || formulaTokens[i+1].Equals(rightParen)))
+                    && !(operators.Contains(formulaTokens[i + 1].ToString()) || formulaTokens[i + 1].Equals(rightParen)))
                 {
                     throw new FormulaFormatException("One of the tokens following a variable, double, or closing parenthsis, was not an operator or closing parenthesis.");
                 }
 
                 //Open parenthesis or operator case where the next token is not a number, variable, or an opening paren
                 else if ((operators.Contains(formulaTokens[i].ToString()) || formulaTokens[i].Equals(leftParen))
-                    && !(double.TryParse(formulaTokens[i+1].ToString(), out double number) || IsVar(formulaTokens[i+1].ToString()) || formulaTokens[i+1].Equals(leftParen)))
+                    && !(double.TryParse(formulaTokens[i + 1].ToString(), out double number) || IsVar(formulaTokens[i + 1].ToString()) || formulaTokens[i + 1].Equals(leftParen)))
                 {
                     throw new FormulaFormatException("One of the tokens following an open parenthesis or an operator was not a number, variable, or opening parenthesis");
                 }
@@ -132,7 +132,7 @@ namespace Formulas
             }
 
             //Last token must be a number or variable or closing parenthesis
-            if (!(double.TryParse(formulaTokens[formulaTokens.Count-1].ToString(), out double d) || IsVar(formulaTokens[formulaTokens.Count-1].ToString()) || formulaTokens[formulaTokens.Count-1].Equals(rightParen)))
+            if (!(double.TryParse(formulaTokens[formulaTokens.Count - 1].ToString(), out double d) || IsVar(formulaTokens[formulaTokens.Count - 1].ToString()) || formulaTokens[formulaTokens.Count - 1].Equals(rightParen)))
             {
                 throw new FormulaFormatException("The last token is not a number, variable, or closing parenthesis.");
             }
@@ -204,7 +204,7 @@ namespace Formulas
                 }
 
                 //variable case
-                if (IsVar(token))
+                else if (IsVar(token))
                 {
                     try
                     {
@@ -212,7 +212,7 @@ namespace Formulas
                     }
                     catch (UndefinedVariableException e)
                     {
-                        throw new FormulaEvaluationException("One of the variables doesn't have a lookup value.");
+                        throw new FormulaEvaluationException("One of the variables doesn't have a lookup value. Variable:" + token);
                     }
 
                     //Same procedure as a number
@@ -224,35 +224,35 @@ namespace Formulas
                 }
 
                 //+ and - case 
-                if (token.Equals(add) || token.Equals(minus))
+                else if (token.Equals(add) || token.Equals(minus))
                 {
 
                     if (!TryAddition(ops, values))
                     {
-                        TrySubtration(ops, values);
+                        TrySubtraction(ops, values);
                     }
 
                     ops.Push(token);
                 }
 
                 // * or / case
-                if (token.Equals(divide) || token.Equals(times))
+                else if (token.Equals(divide) || token.Equals(times))
                 {
                     ops.Push(token);
                 }
 
                 // ( case 
-                if (token.Equals(leftParen))
+                else if (token.Equals(leftParen))
                 {
                     ops.Push(token);
                 }
 
                 // ) case
-                if (token.Equals(rightParen))
+                else if (token.Equals(rightParen))
                 {
                     if (!TryAddition(ops, values))
                     {
-                        TrySubtration(ops, values);
+                        TrySubtraction(ops, values);
                     }
 
                     //Pops the top (
@@ -276,7 +276,7 @@ namespace Formulas
             {
                 if (!TryAddition(ops, values))
                 {
-                    TrySubtration(ops, values);
+                    TrySubtraction(ops, values);
                 }
 
                 return values.Pop();
@@ -309,6 +309,7 @@ namespace Formulas
                     double result = val2 / val1;
 
                     //Sometimes dividing by a zero double means dividing by a very very small number, not zero
+                    //Leading to infinity
                     if (double.IsInfinity(result))
                     {
                         throw new FormulaEvaluationException("Divide by zero");
@@ -361,8 +362,6 @@ namespace Formulas
             return false;
         }
 
-
-
         /// <summary>
         /// A helper method that given the ops stack and the values stack, it attempts to do an addition operation if and only if
         /// the top operator is an addition. 
@@ -399,9 +398,9 @@ namespace Formulas
         /// A helper method that given the ops stack and the values stack, it attempts to do a subtration operation if and only if
         /// the top operator is a subtration operation. 
         /// 
-        /// Return true if the subtration was successful, otherwise return false
+        /// Return true if the subtraction was successful, otherwise return false
         /// </summary>
-        private bool TrySubtration(Stack<string> ops, Stack<double> values)
+        private bool TrySubtraction(Stack<string> ops, Stack<double> values)
         {
             //Case when the ops stack is empty
             //Case when the values stack doesn't have enough values
