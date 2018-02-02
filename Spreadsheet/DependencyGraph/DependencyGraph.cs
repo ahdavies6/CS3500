@@ -1,4 +1,5 @@
 ﻿// Skeleton implementation written by Joe Zachary for CS 3500, January 2018.
+// Remainder implementation written by Nithin Chalapathi u0847388, CS3500, spring '18
 
 using System;
 using System.Collections.Generic;
