@@ -664,5 +664,64 @@ namespace DependencyGraphTestCases
             Assert.AreEqual(9, dg.Size);
 
         }
+
+
+        ////////////////////////////////////////STRESS TEST///////////////////////////////////////////////
+
+        /// <summary>
+        /// Stress test using 100,000 different dependencies
+        /// </summary>
+        [TestMethod]
+        public void StressTest100000()
+        {
+            Random rnd = new Random();
+
+            DependencyGraph dg = new DependencyGraph();
+
+            int gen = 10000;
+
+            for (int i = 0; i < 100000; i++)
+            {
+                dg.AddDependency(rnd.Next(gen).ToString(), rnd.Next(gen).ToString());
+            }
+
+            for (int i = 0; i < 100; i++)
+            {
+                foreach (string s in dg.GetDependees(rnd.Next(gen).ToString()))
+                {
+                    Assert.AreEqual(s, s);
+                }
+            }
+
+            for (int i = 0; i < 100; i++)
+            {
+                foreach (string s in dg.GetDependents(rnd.Next(gen).ToString()))
+                {
+                    Assert.AreEqual(s, s);
+                }
+            }
+
+            for (int i = 0; i < 100; i++)
+            {
+                Assert.AreEqual(dg.Size, dg.Size);
+            }
+
+            string[] toAdd = new string[100];
+
+            for (int i = 0; i < 100; i++)
+            {
+                toAdd[i] = rnd.Next(gen).ToString();
+            }
+
+            for (int i = 0; i < 100; i++)
+            {
+                dg.ReplaceDependees(rnd.Next(gen).ToString(), toAdd);
+            }
+
+            for (int i = 0; i < 100; i++)
+            {
+                dg.ReplaceDependents(rnd.Next(gen).ToString(), toAdd);
+            }
+        }
     }
 }
