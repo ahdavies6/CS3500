@@ -27,9 +27,9 @@ namespace DependencyGraphTestCases
             DependencyGraph dg = new DependencyGraph();
             Assert.AreEqual(0, dg.Size);
 
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
-                dg.AddDependency(possibleVals[i], possibleVals[i + 1]);
+                dg.AddDependency(possibleVals[i], possibleVals[i +1]);
             }
 
             Assert.AreEqual(possibleVals.Length - 1, dg.Size);
@@ -64,7 +64,7 @@ namespace DependencyGraphTestCases
 
             //Case 3
             dg = new DependencyGraph();
-            for (int i = 1; i < possibleVals.Length - 1; i++)
+            for (int i = 1; i < possibleVals.Length; i++)
             {
                 dg.AddDependency(possibleVals[0], possibleVals[i]);
             }
@@ -74,13 +74,13 @@ namespace DependencyGraphTestCases
             //Case 4
             dg = new DependencyGraph();
 
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 dg.AddDependency(possibleVals[i], possibleVals[i + 1]);
             }
 
             //All of the elements in possible vals but the last one has a dependant 
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 Assert.IsTrue(dg.HasDependents(possibleVals[i]));
             }
@@ -106,7 +106,7 @@ namespace DependencyGraphTestCases
             DependencyGraph dg = new DependencyGraph();
             foreach (string s in possibleVals)
             {
-                Assert.IsTrue(dg.HasDependees(s));
+                Assert.IsFalse(dg.HasDependees(s));
             }
 
             //Case 2 
@@ -116,7 +116,7 @@ namespace DependencyGraphTestCases
 
             //Case 3
             dg = new DependencyGraph();
-            for (int i = 1; i < possibleVals.Length - 1; i++)
+            for (int i = 1; i < possibleVals.Length ; i++)
             {
                 dg.AddDependency(possibleVals[i], possibleVals[0]);
             }
@@ -125,19 +125,19 @@ namespace DependencyGraphTestCases
             //Case 4
             dg = new DependencyGraph();
 
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 dg.AddDependency(possibleVals[i], possibleVals[i + 1]);
             }
 
             //Checking all the values in possibleVals but the first element
-            for (int i = 1; i < possibleVals.Length - 1; i++)
+            for (int i = 1; i < possibleVals.Length ; i++)
             {
                 Assert.IsTrue(dg.HasDependees(possibleVals[i]));
             }
 
             //First element that doesnt have any dependees
-            Assert.IsTrue(dg.HasDependees(possibleVals[0]));
+            Assert.IsFalse(dg.HasDependees(possibleVals[0]));
 
         }
 
@@ -172,7 +172,7 @@ namespace DependencyGraphTestCases
 
             foreach (string t in dg.GetDependents(possibleVals[0]))
             {
-                Assert.Equals(possibleVals[1], t);
+                Assert.AreEqual(possibleVals[1], t);
                 dependents++;
             }
 
@@ -184,7 +184,7 @@ namespace DependencyGraphTestCases
 
             //Case 3
             dg = new DependencyGraph();
-            for (int i = 1; i < possibleVals.Length - 1; i++)
+            for (int i = 1; i < possibleVals.Length; i++)
             {
                 dg.AddDependency(possibleVals[0], possibleVals[i]);
             }
@@ -194,7 +194,7 @@ namespace DependencyGraphTestCases
             int index = 1;
             foreach (string t in dg.GetDependents(possibleVals[0]))
             {
-                Assert.Equals(possibleVals[index], t);
+                Assert.AreEqual(possibleVals[index], t);
                 dependents++;
                 index++;
             }
@@ -207,23 +207,23 @@ namespace DependencyGraphTestCases
             //Case 4
             dg = new DependencyGraph();
 
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 dg.AddDependency(possibleVals[i], possibleVals[i + 1]);
             }
 
             dependents = 0;
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 dependents = 0;
                 foreach (string t in dg.GetDependents(possibleVals[i]))
                 {
-                    Assert.Equals(possibleVals[i], t);
+                    Assert.AreEqual(possibleVals[i+1], t);
                     dependents++;
                 }
 
                 //Each should only have 1 dependent
-                Assert.Equals(1, dependents);
+                Assert.AreEqual(1, dependents);
             }
 
             //Last element with no dependents
@@ -233,7 +233,7 @@ namespace DependencyGraphTestCases
                 dependents++;
             }
 
-            Assert.Equals(0, dependents);
+            Assert.AreEqual(0, dependents);
         }
 
         /// <summary>
@@ -267,7 +267,7 @@ namespace DependencyGraphTestCases
 
             foreach (string s in dg.GetDependees(possibleVals[1]))
             {
-                Assert.Equals(possibleVals[0], s);
+                Assert.AreEqual(possibleVals[0], s);
                 dependees++;
             }
 
@@ -279,7 +279,7 @@ namespace DependencyGraphTestCases
 
             //Case 3
             dg = new DependencyGraph();
-            for (int i = 1; i < possibleVals.Length - 1; i++)
+            for (int i = 1; i < possibleVals.Length ; i++)
             {
                 dg.AddDependency(possibleVals[i], possibleVals[0]);
             }
@@ -289,7 +289,7 @@ namespace DependencyGraphTestCases
             int index = 1;
             foreach (string s in dg.GetDependees(possibleVals[0]))
             {
-                Assert.Equals(possibleVals[index], s);
+                Assert.AreEqual(possibleVals[index], s);
                 dependees++;
                 index++;
             }
@@ -302,33 +302,33 @@ namespace DependencyGraphTestCases
             //Case 4
             dg = new DependencyGraph();
 
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 dg.AddDependency(possibleVals[i], possibleVals[i + 1]);
             }
 
             dependees = 0;
-            for (int i = 1; i < possibleVals.Length - 1; i++)
+            for (int i = 1; i < possibleVals.Length ; i++)
             {
                 dependees = 0;
                 foreach (string s in dg.GetDependees(possibleVals[i]))
                 {
-                    Assert.Equals(possibleVals[i], s);
+                    Assert.AreEqual(possibleVals[i-1], s);
                     dependees++;
                 }
 
                 //Each should only have 1 dependee
-                Assert.Equals(1, dependees);
+                Assert.AreEqual(1, dependees);
             }
 
             //First element with not depenedees 
             dependees = 0;
-            foreach (string t in dg.GetDependents(possibleVals[0]))
+            foreach (string t in dg.GetDependees(possibleVals[0]))
             {
                 dependees++;
             }
 
-            Assert.Equals(0, dependees);
+            Assert.AreEqual(0, dependees);
         }
 
         /// <summary>
@@ -347,64 +347,64 @@ namespace DependencyGraphTestCases
             DependencyGraph dg = new DependencyGraph();
             dg.AddDependency(possibleVals[0], possibleVals[1]);
             dg.RemoveDependency(possibleVals[0], possibleVals[1]);
-            Assert.Equals(0, dg.Size);
+            Assert.AreEqual(0, dg.Size);
 
             //Case 2
             dg = new DependencyGraph();
             dg.AddDependency(possibleVals[0], possibleVals[1]);
-            Assert.Equals(1, dg.Size);
+            Assert.AreEqual(1, dg.Size);
             dg.AddDependency(possibleVals[1], possibleVals[2]);
-            Assert.Equals(2, dg.Size);
+            Assert.AreEqual(2, dg.Size);
             dg.RemoveDependency(possibleVals[0], possibleVals[1]);
-            Assert.Equals(1, dg.Size);
+            Assert.AreEqual(1, dg.Size);
 
             foreach (string t in dg.GetDependents(possibleVals[1]))
             {
-                Assert.Equals(possibleVals[2], t);
+                Assert.AreEqual(possibleVals[2], t);
             }
 
             foreach (string s in dg.GetDependees(possibleVals[2]))
             {
-                Assert.Equals(possibleVals[1], s);
+                Assert.AreEqual(possibleVals[1], s);
             }
 
             //Case 3
             dg = new DependencyGraph();
 
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 dg.AddDependency(possibleVals[i], possibleVals[i + 1]);
             }
 
-            Assert.Equals(possibleVals.Length - 1, dg.Size);
+            Assert.AreEqual(possibleVals.Length - 1, dg.Size);
 
             //Making sure the dependees are there
-            for (int i = 1; i < possibleVals.Length - 1; i++)
+            for (int i = 1; i < possibleVals.Length ; i++)
             {
                 foreach (string s in dg.GetDependees(possibleVals[i]))
                 {
-                    Assert.Equals(possibleVals[i - 1], s);
+                    Assert.AreEqual(possibleVals[i - 1], s);
                 }
             }
 
             //Making sure the dependents are there
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 foreach (string t in dg.GetDependents(possibleVals[i]))
                 {
-                    Assert.Equals(possibleVals[i + 1], t);
+                    Assert.AreEqual(possibleVals[i + 1], t);
                 }
             }
 
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 dg.RemoveDependency(possibleVals[i], possibleVals[i + 1]);
             }
 
-            Assert.Equals(0, dg.Size);
+            Assert.AreEqual(0, dg.Size);
 
             //Making sure the dependees are there
-            for (int i = 1; i < possibleVals.Length - 1; i++)
+            for (int i = 1; i < possibleVals.Length ; i++)
             {
                 foreach (string s in dg.GetDependees(possibleVals[i]))
                 {
@@ -413,7 +413,7 @@ namespace DependencyGraphTestCases
             }
 
             //Making sure the dependents are there
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 foreach (string t in dg.GetDependents(possibleVals[i]))
                 {
@@ -438,7 +438,7 @@ namespace DependencyGraphTestCases
         {
             //Case 1 
             DependencyGraph dg = new DependencyGraph();
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 dg.AddDependency(possibleVals[i], possibleVals[i + 1]);
             }
@@ -446,7 +446,7 @@ namespace DependencyGraphTestCases
             //Making a IEnumerable
             string[] newDependents = { possibleVals[possibleVals.Length - 1] };
 
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 dg.ReplaceDependents(possibleVals[i], newDependents);
             }
@@ -459,7 +459,7 @@ namespace DependencyGraphTestCases
             foreach (string s in dg.GetDependees(possibleVals[possibleVals.Length - 1]))
             {
                 numDependees++;
-                for (int i = 0; i < checkDependees.Length - 2; i++)
+                for (int i = 0; i < checkDependees.Length - 1; i++)
                 {
                     if (!(checkDependees[i] is null) && s.Equals(checkDependees[i]))
                     {
@@ -471,15 +471,15 @@ namespace DependencyGraphTestCases
             //Check all of the checkDependees is null and the foreach only ran the proper amount of times
             foreach (string elem in checkDependees)
             {
-                Assert.Equals(null, elem);
+                Assert.AreEqual(null, elem);
             }
-            Assert.Equals(checkDependees.Length - 1, numDependees);
+            Assert.AreEqual(checkDependees.Length - 1, numDependees);
 
 
 
             //Case 2
             dg = new DependencyGraph();
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 dg.AddDependency(possibleVals[i], possibleVals[i + 1]);
             }
@@ -492,7 +492,7 @@ namespace DependencyGraphTestCases
             int index = 0;
             foreach (string t in dg.GetDependents(possibleVals[0]))
             {
-                Assert.Equals(AddDeps[index], t);
+                Assert.AreEqual(AddDeps[index], t);
                 index++;
             }
 
@@ -513,7 +513,7 @@ namespace DependencyGraphTestCases
         {
             //Case 1 
             DependencyGraph dg = new DependencyGraph();
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length -1; i++)
             {
                 dg.AddDependency(possibleVals[i], possibleVals[i + 1]);
             }
@@ -521,7 +521,7 @@ namespace DependencyGraphTestCases
             //Making a IEnumerable
             string[] newDependees = { possibleVals[possibleVals.Length - 1] };
 
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 dg.ReplaceDependees(possibleVals[i], newDependees);
             }
@@ -534,7 +534,7 @@ namespace DependencyGraphTestCases
             foreach (string s in dg.GetDependents(possibleVals[possibleVals.Length - 1]))
             {
                 numDependents++;
-                for (int i = 0; i < checkDependents.Length - 2; i++)
+                for (int i = 0; i < checkDependents.Length - 1; i++)
                 {
                     if (!(checkDependents[i] is null) && s.Equals(checkDependents[i]))
                     {
@@ -546,15 +546,15 @@ namespace DependencyGraphTestCases
             //Check all of the checkDependents is null and the foreach only ran the proper amount of times
             foreach (string elem in checkDependents)
             {
-                Assert.Equals(null, elem);
+                Assert.AreEqual(null, elem);
             }
-            Assert.Equals(checkDependents.Length - 1, numDependents);
+            Assert.AreEqual(checkDependents.Length - 1, numDependents);
 
 
 
             //Case 2
             dg = new DependencyGraph();
-            for (int i = 0; i < possibleVals.Length - 2; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 dg.AddDependency(possibleVals[i], possibleVals[i + 1]);
             }
@@ -567,7 +567,7 @@ namespace DependencyGraphTestCases
             int index = 0;
             foreach (string t in dg.GetDependees(possibleVals[0]))
             {
-                Assert.Equals(AddDeps[index], t);
+                Assert.AreEqual(AddDeps[index], t);
                 index++;
             }
 
