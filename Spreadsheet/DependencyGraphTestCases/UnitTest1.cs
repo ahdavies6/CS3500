@@ -29,7 +29,7 @@ namespace DependencyGraphTestCases
 
             for (int i = 0; i < possibleVals.Length - 1; i++)
             {
-                dg.AddDependency(possibleVals[i], possibleVals[i +1]);
+                dg.AddDependency(possibleVals[i], possibleVals[i + 1]);
             }
 
             Assert.AreEqual(possibleVals.Length - 1, dg.Size);
@@ -116,7 +116,7 @@ namespace DependencyGraphTestCases
 
             //Case 3
             dg = new DependencyGraph();
-            for (int i = 1; i < possibleVals.Length ; i++)
+            for (int i = 1; i < possibleVals.Length; i++)
             {
                 dg.AddDependency(possibleVals[i], possibleVals[0]);
             }
@@ -131,7 +131,7 @@ namespace DependencyGraphTestCases
             }
 
             //Checking all the values in possibleVals but the first element
-            for (int i = 1; i < possibleVals.Length ; i++)
+            for (int i = 1; i < possibleVals.Length; i++)
             {
                 Assert.IsTrue(dg.HasDependees(possibleVals[i]));
             }
@@ -218,7 +218,7 @@ namespace DependencyGraphTestCases
                 dependents = 0;
                 foreach (string t in dg.GetDependents(possibleVals[i]))
                 {
-                    Assert.AreEqual(possibleVals[i+1], t);
+                    Assert.AreEqual(possibleVals[i + 1], t);
                     dependents++;
                 }
 
@@ -279,7 +279,7 @@ namespace DependencyGraphTestCases
 
             //Case 3
             dg = new DependencyGraph();
-            for (int i = 1; i < possibleVals.Length ; i++)
+            for (int i = 1; i < possibleVals.Length; i++)
             {
                 dg.AddDependency(possibleVals[i], possibleVals[0]);
             }
@@ -308,12 +308,12 @@ namespace DependencyGraphTestCases
             }
 
             dependees = 0;
-            for (int i = 1; i < possibleVals.Length ; i++)
+            for (int i = 1; i < possibleVals.Length; i++)
             {
                 dependees = 0;
                 foreach (string s in dg.GetDependees(possibleVals[i]))
                 {
-                    Assert.AreEqual(possibleVals[i-1], s);
+                    Assert.AreEqual(possibleVals[i - 1], s);
                     dependees++;
                 }
 
@@ -379,7 +379,7 @@ namespace DependencyGraphTestCases
             Assert.AreEqual(possibleVals.Length - 1, dg.Size);
 
             //Making sure the dependees are there
-            for (int i = 1; i < possibleVals.Length ; i++)
+            for (int i = 1; i < possibleVals.Length; i++)
             {
                 foreach (string s in dg.GetDependees(possibleVals[i]))
                 {
@@ -404,7 +404,7 @@ namespace DependencyGraphTestCases
             Assert.AreEqual(0, dg.Size);
 
             //Making sure the dependees are there
-            for (int i = 1; i < possibleVals.Length ; i++)
+            for (int i = 1; i < possibleVals.Length; i++)
             {
                 foreach (string s in dg.GetDependees(possibleVals[i]))
                 {
@@ -513,7 +513,7 @@ namespace DependencyGraphTestCases
         {
             //Case 1 
             DependencyGraph dg = new DependencyGraph();
-            for (int i = 0; i < possibleVals.Length -1; i++)
+            for (int i = 0; i < possibleVals.Length - 1; i++)
             {
                 dg.AddDependency(possibleVals[i], possibleVals[i + 1]);
             }
@@ -570,6 +570,98 @@ namespace DependencyGraphTestCases
                 Assert.AreEqual(AddDeps[index], t);
                 index++;
             }
+
+        }
+
+
+        /////////////////////////////////////BEGIN WHITE BOX TESTING////////////////////////////////////////
+
+        /// <summary>
+        /// Mainly for code coverage purposes for the assignment. Assignment specs dont specificy null cases
+        /// but I still made checks. This means in order to get close to 100% coverage, they have to be tested.
+        /// 
+        /// All of the null cases don't throw an exception or anything, they merely return without changing the dependency graph
+        /// 
+        /// This test can be expanded on in the future, should null cases become relevant.
+        /// </summary>
+        [TestMethod]
+        public void TestNullCases()
+        {
+            //AddDependency
+            DependencyGraph dg = new DependencyGraph();
+            dg.AddDependency(null, "test");
+            dg.AddDependency("test", null);
+            dg.AddDependency(null, null);
+            Assert.AreEqual(0, dg.Size);
+
+            //RemoveDependency
+            dg = new DependencyGraph();
+            dg.AddDependency("1", "2");
+            dg.RemoveDependency("1", null);
+            dg.RemoveDependency(null, "2");
+            Assert.AreEqual(1, dg.Size);
+
+            //HasDependents
+            dg = new DependencyGraph();
+            Assert.IsFalse(dg.HasDependents(null));
+
+            //HasDependees 
+            dg = new DependencyGraph();
+            Assert.IsFalse(dg.HasDependees(null));
+
+            //GetDependents
+            dg = new DependencyGraph();
+            foreach (string t in dg.GetDependents(null))
+            {
+                Assert.Fail("There should be no Dependents in the null case.");
+            }
+
+            //GetDependees
+            dg = new DependencyGraph();
+            foreach (string s in dg.GetDependees(null))
+            {
+                Assert.Fail("There should be no dependees in the null case.");
+            }
+
+            //ReplaceDependees
+            dg = new DependencyGraph();
+            dg.ReplaceDependees("s", null);
+            string[] toAdd = { "1" };
+            dg.ReplaceDependees(null, toAdd);
+            dg.ReplaceDependees(null, null);
+            Assert.AreEqual(0, dg.Size);
+
+            //ReplaceDependents
+            dg = new DependencyGraph();
+            dg.ReplaceDependents("s", null);
+            dg.ReplaceDependents(null, toAdd);
+            dg.ReplaceDependents(null, null);
+            Assert.AreEqual(0, dg.Size);
+
+        }
+
+        /// <summary>
+        /// Method that tests the two ways that Size is calculated (by counting elements in 
+        /// dependents or dependees).
+        /// </summary>
+        [TestMethod]
+        public void WhiteBoxTestSize()
+        {
+            //Forcing a large dependee structure and small dependents structure
+            DependencyGraph dg = new DependencyGraph();
+            for (int i = 0; i < possibleVals.Length - 1; i++)
+            {
+                dg.AddDependency(possibleVals[i], possibleVals[possibleVals.Length - 1]);
+            }
+            Assert.AreEqual(9, dg.Size);
+
+            //Forcing a small dependee strcuture and a large dependents structure
+            dg = new DependencyGraph();
+            for (int i = 0; i < possibleVals.Length - 1; i++)
+            {
+                dg.AddDependency(possibleVals[possibleVals.Length - 1], possibleVals[i]);
+            }
+            Assert.AreEqual(9, dg.Size);
 
         }
     }
