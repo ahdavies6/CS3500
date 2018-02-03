@@ -256,6 +256,32 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            //Loops through all the dependents of s and deletes s from their linkedlist
+            if (dependees.ContainsKey(s)) 
+            {
+                foreach (string t in dependees[s])
+                {
+                    if (dependents.ContainsKey(t))
+                    {
+                        dependents[t].Remove(s);
+                    }
+                }
+
+                //Replaces the old list of dependents with a new one
+                dependees[s] = new LinkedList<string>();
+            }
+            else
+            {
+                //creates an entry for s
+                dependees.Add(s, new LinkedList<string>());
+            }
+
+
+            //Add each one of the new dependents
+            foreach(string t in newDependents)
+            {
+                AddDependency(s, t);
+            }
         }
 
         /// <summary>
@@ -265,6 +291,31 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
+            //Loops through all the dependees of t and deletes t from the linkedlist of those dependees
+            if (dependents.ContainsKey(t))
+            {
+                foreach(string s in dependents[t])
+                {
+                    if (dependees.ContainsKey(s))
+                    {
+                        dependees[s].Remove(t);
+                    }
+                }
+
+                //Create a new linked list
+                dependents[t] = new LinkedList<string>();
+            }
+            else
+            {
+                //Creates an entry for t if it doesn't exist
+                dependents.Add(t, new LinkedList<string>());
+            }
+
+            //Add each of the new dependees
+            foreach(string s in newDependees)
+            {
+                AddDependency(s, t);
+            }
         }
     }
 }
