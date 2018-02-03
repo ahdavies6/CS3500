@@ -50,10 +50,22 @@ namespace Dependencies
     public class DependencyGraph
     {
         /// <summary>
+        /// Contains a list of all the dependees in the graph and a linkedlist of all the dependants it links to 
+        /// </summary>
+        private Dictionary<string, LinkedList<string>> dependees;
+
+        /// <summary>
+        /// Contains a list of all possible dependents and a linked list of all the dependees it links to
+        /// </summary>
+        private Dictionary<string, LinkedList<string>> dependents;
+
+        /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
         /// </summary>
         public DependencyGraph()
         {
+            dependents = new Dictionary<string, LinkedList<string>>();
+            dependees = new Dictionary<string, LinkedList<string>>();
         }
 
         /// <summary>
@@ -61,7 +73,25 @@ namespace Dependencies
         /// </summary>
         public int Size
         {
-            get { return 0; }
+            get
+            {
+                int sum = 0;
+                if (dependees.Count < dependents.Count)
+                {
+                    foreach (LinkedList<string> list in dependees.Values)
+                    {
+                        sum += list.Count;
+                    }
+                }
+                else
+                {
+                    foreach (LinkedList<string> list in dependents.Values)
+                    {
+                        sum += list.Count;
+                    }
+                }
+                return sum;
+            }
         }
 
         /// <summary>
@@ -69,7 +99,22 @@ namespace Dependencies
         /// </summary>
         public bool HasDependents(string s)
         {
-            return false;
+            //Null check
+            if (s is null)
+            {
+                return false;
+            }
+
+
+            //If key exists and the associated linkedlist is longer than 0, return true
+            if (dependees.ContainsKey(s) && dependees[s].Count > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -77,7 +122,21 @@ namespace Dependencies
         /// </summary>
         public bool HasDependees(string s)
         {
-            return false;
+            //Null check 
+            if (s is null)
+            {
+                return false;
+            }
+
+            //If key s exists and the associated linked list is longer than length 0, return true
+            if (dependents.ContainsKey(s) && dependents[s].Count > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -85,7 +144,21 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return null;
+
+            //null case
+            if (s is null)
+            {
+                yield break;
+            }
+
+            //If s is a key, return each dependent
+            if (dependees.ContainsKey(s))
+            {
+                foreach (string dep in dependees[s])
+                {
+                    yield return dep;
+                }
+            }
         }
 
         /// <summary>
@@ -93,7 +166,20 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return null;
+            //Null case 
+            if (s is null)
+            {
+                yield break;
+            }
+
+            //If s is a key, return each dependee
+            if (dependents.ContainsKey(s))
+            {
+                foreach (string dep in dependents[s])
+                {
+                    yield return dep;
+                }
+            }
         }
 
         /// <summary>
@@ -103,6 +189,37 @@ namespace Dependencies
         /// </summary>
         public void AddDependency(string s, string t)
         {
+            //Null case
+            if (s is null || t is null)
+            {
+                return;
+            }
+
+            //Check to see if s is in the dependees
+            //If not, add it and createa new linked list
+            //Add t to the end of the linked list
+            if (!dependees.ContainsKey(s))
+            {
+                dependees.Add(s, new LinkedList<string>());
+            }
+
+            if (!dependees[s].Contains(t))
+            {
+                dependees[s].AddLast(t);
+            }
+
+            //Check to see if t is in the dependents
+            //If not, add it and createa new linked list
+            //Add s to the end of the linked list
+            if (!dependents.ContainsKey(t))
+            {
+                dependents.Add(t, new LinkedList<string>());
+            }
+
+            if (!dependents[t].Contains(s))
+            {
+                dependents[t].AddLast(s);
+            }
         }
 
         /// <summary>
@@ -112,6 +229,24 @@ namespace Dependencies
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
+            //Null case
+            if (s is null || t is null)
+            {
+                return;
+            }
+
+            //Removing from the dependee dict
+            if (dependees.ContainsKey(s))
+            {
+                dependees[s].Remove(t);
+            }
+
+            //Removing from the dependent dict
+            if (dependents.ContainsKey(t))
+            {
+                dependents[t].Remove(s);
+            }
+
         }
 
         /// <summary>
