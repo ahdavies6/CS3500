@@ -69,6 +69,7 @@ namespace Dependencies
 
         /// <summary>
         /// Creates a copy of the passed dependecy graph. Modifying one does not modify the other
+        /// if the passed DependecyGraph is null, an ArgumentNullException is thrown
         /// </summary>
         public DependencyGraph(DependencyGraph dg) : this()
         {
