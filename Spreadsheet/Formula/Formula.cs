@@ -318,14 +318,14 @@ namespace Formulas
                     //Leading to infinity
                     if (double.IsInfinity(result))
                     {
-                        throw new FormulaEvaluationException("Divide by zero");
+                        throw new DivideByZeroException("Divide by zero");
                     }
 
                     values.Push(result);
                 }
                 catch (DivideByZeroException e)
                 {
-                    throw new FormulaFormatException("Divide by zero");
+                    throw new FormulaEvaluationException("Divide by zero");
                 }
 
                 //Divide operation was successful
