@@ -31,8 +31,7 @@ namespace Dependencies
     ///     dependees("c") = {"a"}
     ///     dependees("d") = {"b", "d"}
     ///     
-    /// All of the methods below require their string parameters to be non-null.  This means that 
-    /// the behavior of the method is undefined when a string parameter is null.  
+    /// All of the methods below throw an ArgumentNullException if their parameter(s) are null
     ///
     /// IMPORTANT IMPLEMENTATION NOTE
     /// 
@@ -95,14 +94,14 @@ namespace Dependencies
         }
 
         /// <summary>
-        /// Reports whether dependents(s) is non-empty.  Requires s != null.
+        /// Reports whether dependents(s) is non-empty.  If s is null, throws an ArgumentNullException
         /// </summary>
         public bool HasDependents(string s)
         {
             //Null check
             if (s is null)
             {
-                return false;
+                throw new ArgumentNullException();
             }
 
 
@@ -118,14 +117,14 @@ namespace Dependencies
         }
 
         /// <summary>
-        /// Reports whether dependees(s) is non-empty.  Requires s != null.
+        /// Reports whether dependees(s) is non-empty.  If s is null, throws an ArgumentNullException
         /// </summary>
         public bool HasDependees(string s)
         {
             //Null check 
             if (s is null)
             {
-                return false;
+                throw new ArgumentNullException();
             }
 
             //If key s exists and the associated linked list is longer than length 0, return true
@@ -140,15 +139,14 @@ namespace Dependencies
         }
 
         /// <summary>
-        /// Enumerates dependents(s).  Requires s != null.
+        /// Enumerates dependents(s).  If s is null, throws an ArgumentNullException
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-
             //null case
             if (s is null)
             {
-                yield break;
+                throw new ArgumentNullException();
             }
 
             //If s is a key, return each dependent
@@ -162,14 +160,14 @@ namespace Dependencies
         }
 
         /// <summary>
-        /// Enumerates dependees(s).  Requires s != null.
+        /// Enumerates dependees(s).  If s is null, throws an ArgumentNullException
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
             //Null case 
             if (s is null)
             {
-                yield break;
+                throw new ArgumentNullException();
             }
 
             //If s is a key, return each dependee
@@ -185,14 +183,14 @@ namespace Dependencies
         /// <summary>
         /// Adds the dependency (s,t) to this DependencyGraph.
         /// This has no effect if (s,t) already belongs to this DependencyGraph.
-        /// Requires s != null and t != null.
+        /// If s or t are null, throw an ArgumentNullException.
         /// </summary>
         public void AddDependency(string s, string t)
         {
             //Null case
             if (s is null || t is null)
             {
-                return;
+                throw new ArgumentNullException();
             }
 
             //Check to see if s is in the dependees
@@ -225,14 +223,14 @@ namespace Dependencies
         /// <summary>
         /// Removes the dependency (s,t) from this DependencyGraph.
         /// Does nothing if (s,t) doesn't belong to this DependencyGraph.
-        /// Requires s != null and t != null.
+        /// If s or t is null, throws an ArgumentNullException.
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
             //Null case
             if (s is null || t is null)
             {
-                return;
+                throw new ArgumentNullException();
             }
 
             //Removing from the dependee dict
@@ -252,14 +250,14 @@ namespace Dependencies
         /// <summary>
         /// Removes all existing dependencies of the form (s,r).  Then, for each
         /// t in newDependents, adds the dependency (s,t).
-        /// Requires s != null and t != null.
+        /// If s or t is null, throws an ArgumentNullException.
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
 
             if (s is null || newDependents is null)
             {
-                return;
+                throw new ArgumentNullException();
             }
 
             //Loops through all the dependents of s and deletes s from their linkedlist
@@ -284,6 +282,10 @@ namespace Dependencies
             //Add each one of the new dependents
             foreach (string t in newDependents)
             {
+                if (t is null)
+                {
+                    throw new ArgumentNullException();
+                }
                 AddDependency(s, t);
             }
         }
@@ -291,13 +293,13 @@ namespace Dependencies
         /// <summary>
         /// Removes all existing dependencies of the form (r,t).  Then, for each 
         /// s in newDependees, adds the dependency (s,t).
-        /// Requires s != null and t != null.
+        /// If s or t is null, throws an ArgumentNullException.
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
             if (t is null || newDependees is null)
             {
-                return;
+                throw new ArgumentNullException();
             }
 
             //Loops through all the dependees of t and deletes t from the linkedlist of those dependees
@@ -323,6 +325,11 @@ namespace Dependencies
             //Add each of the new dependees
             foreach (string s in newDependees)
             {
+                if (s is null)
+                {
+                    throw new ArgumentNullException();
+                }
+
                 AddDependency(s, t);
             }
         }
