@@ -461,9 +461,30 @@ namespace Formulas
             return false;
         }
 
+        /// <summary>
+        /// Returns a set of all the normalized variables in the formula
+        /// </summary>
         public ISet<string> GetVariables()
         {
             return variables;
+        }
+
+        /// <summary>
+        /// Returns a string object of the formula with the condition that
+        /// Formula f2 = new Formula(f1.ToString(), s => s, s => true) means f1 and f2 evaluate 
+        /// to the same values
+        /// </summary>
+        /// <returns></returns>
+        public string ToString()
+        {
+            string toReturn = "";
+
+            foreach (Object s in formulaTokens)
+            {
+                toReturn += (string)s;
+            }
+
+            return toReturn;
         }
 
         /// <summary>

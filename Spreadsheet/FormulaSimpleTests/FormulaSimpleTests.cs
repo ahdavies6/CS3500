@@ -377,7 +377,7 @@ namespace FormulaTestCases
             {
                 return 2;
             }
-            else if(s.Equals("Y"))
+            else if (s.Equals("Y"))
             {
                 return 3;
             }
@@ -390,7 +390,7 @@ namespace FormulaTestCases
         /// <summary>
         /// Tests the GetVariables method with both the 1 and 3 arg constructor
         /// </summary>
-        [TestMethod] 
+        [TestMethod]
         public void TestGetVariables()
         {
             Formula f = new Formula("x+y+z");
@@ -398,7 +398,7 @@ namespace FormulaTestCases
             vars.Add("x");
             vars.Add("y");
             vars.Add("z");
-            foreach(string s in f.GetVariables())
+            foreach (string s in f.GetVariables())
             {
                 Assert.IsTrue(vars.Contains(s));
             }
@@ -406,7 +406,7 @@ namespace FormulaTestCases
             Assert.AreEqual(3, f.GetVariables().Count);
 
             f = new Formula("X+Y+Z");
-             vars = new ArrayList();
+            vars = new ArrayList();
             vars.Add("X");
             vars.Add("Y");
             vars.Add("Z");
@@ -417,5 +417,19 @@ namespace FormulaTestCases
 
             Assert.AreEqual(3, f.GetVariables().Count);
         }
+
+        /// <summary>
+        /// Tests the toString method of Formula
+        /// </summary>
+        [TestMethod]
+        public void TestToString()
+        {
+            Formula f = new Formula("x+y", x => x.ToUpper(), x => true);
+            Formula f2 = new Formula(f.ToString(), x => x.ToUpper(), x => true);
+            Assert.AreEqual(f.Evaluate(x => 1), f2.Evaluate(x => 1));
+            Assert.AreEqual(f.Evaluate(Lookup3Arg), f2.Evaluate(Lookup3Arg));
+        }
+
+        ////////////////////////////////Null tests /////////////////////////
     }
 }
