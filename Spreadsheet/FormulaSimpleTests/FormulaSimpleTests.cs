@@ -3,6 +3,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Formulas;
+using System.Collections;
 
 namespace FormulaTestCases
 {
@@ -309,6 +310,112 @@ namespace FormulaTestCases
             Formula f = new Formula();
             Assert.AreEqual(0.0, f.Evaluate(null));
             Assert.AreEqual(0.0, f.Evaluate(Lookup4));
+        }
+
+        /// <summary>
+        /// Intentionally passes a normalizer that makes an invalid var
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void TestNormalizerError()
+        {
+            Formula f = new Formula("x+y", x => "--", x => true);
+        }
+
+        /// <summary>
+        /// Intentionally passes a validator that always fails
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void TestValidatorError()
+        {
+            Formula f = new Formula("x+y", x => x, x => false);
+        }
+
+        /// <summary>
+        /// Passes a valid normalizer and a validator that fails the format of the normalizer
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void TestValidNormalizerAndInvalidValidator()
+        {
+            Formula f = new Formula("x+y", x => x + "1", x => x.Length == 1);
+        }
+
+        /// <summary>
+        /// Creates a valid formula object with a normalizer that makes every varaible upper case
+        /// and a validator that requires uppercase characters
+        /// 
+        /// Making sure no exception is thrown
+        /// </summary>
+        [TestMethod]
+        public void TestValidNoralizerAndValidator()
+        {
+            Formula f = new Formula("x+y", x => x.ToUpper(), x => char.IsUpper(x.ToCharArray()[0]));
+        }
+
+
+        /// <summary>
+        /// Using the 3 arg constructor, creates a formula and tests various lookup delegates
+        /// </summary>
+        [TestMethod]
+        public void Test3ArgConstructor()
+        {
+            Formula f = new Formula("x+y", x => x.ToUpper(), x => char.IsUpper(x.ToCharArray()[0]));
+            Assert.AreEqual(2, f.Evaluate(x => 1));
+            Assert.AreEqual(5, f.Evaluate(Lookup3Arg));
+        }
+
+        /// <summary>
+        /// Helper to test the 3 arg constructor
+        /// </summary>
+        /// <param name="var"></param>
+        /// <returns></returns>
+        public double Lookup3Arg(String s)
+        {
+            if (s.Equals("X"))
+            {
+                return 2;
+            }
+            else if(s.Equals("Y"))
+            {
+                return 3;
+            }
+            else
+            {
+                throw new UndefinedVariableException(s);
+            }
+        }
+
+        /// <summary>
+        /// Tests the GetVariables method with both the 1 and 3 arg constructor
+        /// </summary>
+        [TestMethod] 
+        public void TestGetVariables()
+        {
+            Formula f = new Formula("x+y+z");
+            ArrayList vars = new ArrayList();
+            vars.Add("x");
+            vars.Add("y");
+            vars.Add("z");
+            foreach(string s in f.GetVariables())
+            {
+                Assert.IsTrue(vars.Contains(s));
+            }
+
+            Assert.AreEqual(3, f.GetVariables().Count);
+
+            f = new Formula("X+Y+Z");
+             vars = new ArrayList();
+            vars.Add("X");
+            vars.Add("Y");
+            vars.Add("Z");
+            foreach (string s in f.GetVariables())
+            {
+                Assert.IsTrue(vars.Contains(s));
+            }
+
+            Assert.AreEqual(3, f.GetVariables().Count);
         }
     }
 }
