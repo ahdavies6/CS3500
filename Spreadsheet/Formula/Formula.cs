@@ -90,7 +90,7 @@ namespace Formulas
                 //Integrating the use of the normalizer and validator
                 else if (IsVar(token) && IsVar(transformedVar = n(token)) && v(transformedVar))
                 {
-                    formulaTokens.Add(token);
+                    formulaTokens.Add(transformedVar);
                 }
                 else
                 {
