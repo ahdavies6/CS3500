@@ -83,6 +83,8 @@ namespace Dependencies
             {
                 if(deps[s] is null)
                 {
+                    //Given this implementation, should never run but put here 
+                    //as a failsafe
                     continue;
                 }
 
