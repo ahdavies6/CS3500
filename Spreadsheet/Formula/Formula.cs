@@ -209,7 +209,7 @@ namespace Formulas
         /// </summary>
         public double Evaluate(Lookup lookup)
         {
-            if(lookup is null)
+            if (lookup is null)
             {
                 throw new ArgumentNullException();
             }
