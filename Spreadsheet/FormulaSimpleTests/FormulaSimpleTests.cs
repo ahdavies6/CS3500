@@ -308,7 +308,7 @@ namespace FormulaTestCases
         public void TestDefaultStructConstructor()
         {
             Formula f = new Formula();
-            Assert.AreEqual(0.0, f.Evaluate(null));
+            Assert.AreEqual(0.0, f.Evaluate(x => 1));
             Assert.AreEqual(0.0, f.Evaluate(Lookup4));
         }
 
@@ -431,5 +431,56 @@ namespace FormulaTestCases
         }
 
         ////////////////////////////////Null tests /////////////////////////
+
+        /// <summary>
+        /// Test the null case in a one arg constructor
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullSingleArgConstructor()
+        {
+            Formula f = new Formula(null);
+        }
+
+        /// <summary>
+        /// Test the null case in the 3 arg constructor: formula string
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullFormulaParam()
+        {
+            Formula f = new Formula(null, x => x, x => true);
+        }
+
+        /// <summary>
+        /// Test the null case in the 3 arg constructor: normalizer method
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullNormalizerParam()
+        {
+            Formula f = new Formula("x+y", null, x => true);
+        }
+
+        /// <summary>
+        /// Test the null case in the 3 arg constructor: Validator method
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullValidatorParam()
+        {
+            Formula f = new Formula("x+y", x => x, null);
+        }
+
+        /// <summary>
+        /// Test the null case when lookup is null in evalute
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullLookupParam()
+        {
+            Formula f = new Formula("x+y", x => x, x => true);
+            f.Evaluate(null);
+        }
     }
 }

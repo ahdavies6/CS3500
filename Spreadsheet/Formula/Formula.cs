@@ -62,6 +62,11 @@ namespace Formulas
         /// </summary>
         public Formula(String formula, Normalizer n, Validator v)
         {
+            if (formula is null || n is null || v is null)
+            {
+                throw new ArgumentNullException();
+            }
+
             //Generate the ArrayList
             formulaTokens = new ArrayList();
 
@@ -204,6 +209,11 @@ namespace Formulas
         /// </summary>
         public double Evaluate(Lookup lookup)
         {
+            if(lookup is null)
+            {
+                throw new ArgumentNullException();
+            }
+
             //In the event that the zero arg constructor was used 
             if (formulaTokens is null || formulaTokens.Count == 0)
             {
@@ -475,7 +485,7 @@ namespace Formulas
         /// to the same values
         /// </summary>
         /// <returns></returns>
-        public string ToString()
+        public override string ToString()
         {
             string toReturn = "";
 
