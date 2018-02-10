@@ -24,6 +24,11 @@ namespace Formulas
         private ArrayList formulaTokens;
 
         /// <summary>
+        /// Hashset of all the variables in the formula
+        /// </summary>
+        private HashSet<string> variables;
+
+        /// <summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
         /// variable symbols (a letter followed by zero or more letters and/or digits), left and right
@@ -60,6 +65,9 @@ namespace Formulas
             //Generate the ArrayList
             formulaTokens = new ArrayList();
 
+            //Generate the hashset of variables 
+            variables = new HashSet<string>();
+
             //Go through the list of tokens 
             //We don't use a foreach loop in order to manually control enumeration
             var tokens = GetTokens(formula).GetEnumerator();
@@ -91,6 +99,7 @@ namespace Formulas
                 else if (IsVar(token) && IsVar(transformedVar = n(token)) && v(transformedVar))
                 {
                     formulaTokens.Add(transformedVar);
+                    variables.Add(transformedVar);
                 }
                 else
                 {
@@ -450,6 +459,11 @@ namespace Formulas
 
             //Case when the next op is not subtration
             return false;
+        }
+
+        public ISet<string> GetVariables()
+        {
+            return variables;
         }
 
         /// <summary>
