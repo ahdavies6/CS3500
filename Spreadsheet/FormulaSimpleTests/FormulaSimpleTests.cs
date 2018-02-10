@@ -139,7 +139,7 @@ namespace FormulaTestCases
             Formula f = new Formula("(x+y)(x+z)");
         }
 
-        [TestMethod] 
+        [TestMethod]
         [ExpectedException(typeof(FormulaFormatException))]
         public void OpenParenFollowedByClosingParen()
         {
@@ -296,6 +296,19 @@ namespace FormulaTestCases
                 case "z": return 8.0;
                 default: throw new UndefinedVariableException(v);
             }
+        }
+
+        ///////////////////////////////////////////PS4 Tests and Struct tests /////////////////////
+
+        /// <summary>
+        /// Tests that the zero arg constructor behaves as Formula("0");
+        /// </summary>
+        [TestMethod]
+        public void TestDefaultStructConstructor()
+        {
+            Formula f = new Formula();
+            Assert.AreEqual(0.0, f.Evaluate(null));
+            Assert.AreEqual(0.0, f.Evaluate(Lookup4));
         }
     }
 }
