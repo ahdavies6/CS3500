@@ -68,6 +68,31 @@ namespace Dependencies
         }
 
         /// <summary>
+        /// Creates a copy of the passed dependecy graph. Modifying one does not modify the other
+        /// </summary>
+        public DependencyGraph(DependencyGraph dg) : this()
+        {
+            if(dg is null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            var deps = dg.dependents;
+            foreach(string s in deps.Keys)
+            {
+                if(deps[s] is null)
+                {
+                    continue;
+                }
+
+                foreach(string t in deps[s])
+                {
+                    AddDependency(s, t);
+                }
+            }
+        }
+
+        /// <summary>
         /// The number of dependencies in the DependencyGraph.
         /// </summary>
         public int Size
