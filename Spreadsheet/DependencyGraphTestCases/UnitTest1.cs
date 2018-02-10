@@ -719,6 +719,68 @@ namespace DependencyGraphTestCases
         }
 
         /// <summary>
+        /// Tests the null case of the constructor that takes in a DG
+        /// </summary>
+        [TestMethod] 
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestConstructorWithDGNull()
+        {
+            DependencyGraph dg = new DependencyGraph(null);
+        }
+
+        /// <summary>
+        /// Creates two dependency graphs and compares them
+        /// </summary>
+        [TestMethod]
+        public void TestConstructorWithDG()
+        {
+            DependencyGraph dg1 = new DependencyGraph();
+            dg1.AddDependency("1", "2");
+            dg1.AddDependency("3", "4");
+            dg1.AddDependency("5", "6");
+            DependencyGraph dg2 = new DependencyGraph(dg1);
+
+            foreach(string elem1 in dg1.GetDependees("1"))
+            {
+                foreach (string elem2 in dg2.GetDependees("1"))
+                {
+                    Assert.AreEqual(elem1, elem2);
+                }
+
+            }
+
+            foreach (string elem1 in dg1.GetDependees("3"))
+            {
+                foreach (string elem2 in dg2.GetDependees("3"))
+                {
+                    Assert.AreEqual(elem1, elem2);
+                }
+
+            }
+
+            foreach (string elem1 in dg1.GetDependees("5"))
+            {
+                foreach (string elem2 in dg2.GetDependees("5"))
+                {
+                    Assert.AreEqual(elem1, elem2);
+                }
+
+            }
+
+            //Case where they are no longer the same graph
+            dg1.AddDependency("7", "8");
+            dg2.AddDependency("7", "9");
+            foreach (string elem1 in dg1.GetDependees("7"))
+            {
+                foreach (string elem2 in dg2.GetDependees("7"))
+                {
+                    Assert.AreNotEqual(elem1, elem2);
+                }
+
+            }
+        }
+
+        /// <summary>
         /// Method that tests the two ways that Size is calculated (by counting elements in 
         /// dependents or dependees).
         /// </summary>
@@ -742,6 +804,8 @@ namespace DependencyGraphTestCases
             Assert.AreEqual(9, dg.Size);
 
         }
+
+
 
 
         ////////////////////////////////////////STRESS TEST///////////////////////////////////////////////
