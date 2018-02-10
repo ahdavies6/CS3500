@@ -15,7 +15,7 @@ namespace Formulas
     /// the four binary operator symbols +, -, *, and /.  (The unary operators + and -
     /// are not allowed.)
     /// </summary>
-    public class Formula
+    public struct Formula
     {
 
         /// <summary>
@@ -175,6 +175,12 @@ namespace Formulas
         /// </summary>
         public double Evaluate(Lookup lookup)
         {
+            //In the event that the zero arg constructor was used 
+            if (formulaTokens is null || formulaTokens.Count == 0)
+            {
+                return 0.0;
+            }
+
             //Create the two stacks
             Stack<double> values = new Stack<double>();
             Stack<string> ops = new Stack<string>();
