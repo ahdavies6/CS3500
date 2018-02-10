@@ -43,9 +43,21 @@ namespace Formulas
         /// If the formula is syntacticaly invalid, throws a FormulaFormatException with an 
         /// explanatory Message.
         /// </summary>
-        public Formula(String formula)
+        public Formula(String formula) : this(formula, x => x, x => true)
         {
-            //Generate the linked list
+            //Same as the 3 param constructor but with a normalizer that returns the same var and 
+            // a validator that always returns true
+        }
+
+        /// <summary>
+        /// Creates a formula object with the normal rules as Formula(string Formula) but for each variable in 
+        /// the formula, normalizes it into canonical form and validates it. If the validator fails, then a
+        /// FormulaFormatException is throwm. If the normalized form is not a valid variable then a FormulaFormatException
+        /// is thrown. 
+        /// </summary>
+        public Formula(String formula, Normalizer n, Validator v)
+        {
+            //Generate the ArrayList
             formulaTokens = new ArrayList();
 
             //Go through the list of tokens 
@@ -65,10 +77,18 @@ namespace Formulas
             //valid operaters
             string operators = "+-/*";
 
+            //For Variables
+            string transformedVar = "";
+
             //Add all valid tokens to the linkedlist
             foreach (string token in GetTokens(formula))
             {
-                if (double.TryParse(token, out double dummy) || IsVar(token) || token.Equals(leftParen) || token.Equals(rightParen) || operators.Contains(token))
+                if (double.TryParse(token, out double dummy) || token.Equals(leftParen) || token.Equals(rightParen) || operators.Contains(token))
+                {
+                    formulaTokens.Add(token);
+                }
+                //Integrating the use of the normalizer and validator
+                else if (IsVar(token) && IsVar(transformedVar = n(token)) && v(transformedVar))
                 {
                     formulaTokens.Add(token);
                 }
@@ -104,7 +124,7 @@ namespace Formulas
                 }
 
                 //Var case and number and closing paren case  where the next token is not an operator or right paren
-                if ((IsVar(formulaTokens[i].ToString()) || double.TryParse(formulaTokens[i].ToString(), out double n) || formulaTokens[i].Equals(rightParen))
+                if ((IsVar(formulaTokens[i].ToString()) || double.TryParse(formulaTokens[i].ToString(), out double doub) || formulaTokens[i].Equals(rightParen))
                     && !(operators.Contains(formulaTokens[i + 1].ToString()) || formulaTokens[i + 1].Equals(rightParen)))
                 {
                     throw new FormulaFormatException("One of the tokens following a variable, double, or closing parenthsis, was not an operator or closing parenthesis.");
@@ -484,6 +504,18 @@ namespace Formulas
     /// don't is up to the implementation of the method.
     /// </summary>
     public delegate double Lookup(string var);
+
+    /// <summary>
+    /// Given a string (variable) s, returns the canonical form of the string (variable)
+    /// </summary>
+    public delegate string Normalizer(string s);
+
+    /// <summary>
+    /// Extra restrictions on what a valid variable is, beyond what is provided in the formula structure.
+    /// Returns true if the string s is a valid variable.
+    /// </summary>
+    public delegate bool Validator(string s);
+
 
     /// <summary>
     /// Used to report that a Lookup delegate is unable to determine the value
