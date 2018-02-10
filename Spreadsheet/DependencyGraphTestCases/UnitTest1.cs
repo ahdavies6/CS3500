@@ -577,67 +577,145 @@ namespace DependencyGraphTestCases
         /////////////////////////////////////BEGIN WHITE BOX TESTING////////////////////////////////////////
 
         /// <summary>
-        /// Mainly for code coverage purposes for the assignment. Assignment specs dont specificy null cases
-        /// but I still made checks. This means in order to get close to 100% coverage, they have to be tested.
-        /// 
-        /// All of the null cases don't throw an exception or anything, they merely return without changing the dependency graph
-        /// 
-        /// This test can be expanded on in the future, should null cases become relevant.
+        /// Tests the null case of AddDependency (s)
         /// </summary>
         [TestMethod]
-        public void TestNullCases()
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullAdd1()
         {
-            //AddDependency
             DependencyGraph dg = new DependencyGraph();
             dg.AddDependency(null, "test");
-            dg.AddDependency("test", null);
-            dg.AddDependency(null, null);
-            Assert.AreEqual(0, dg.Size);
+        }
 
-            //RemoveDependency
-            dg = new DependencyGraph();
-            dg.AddDependency("1", "2");
-            dg.RemoveDependency("1", null);
-            dg.RemoveDependency(null, "2");
-            Assert.AreEqual(1, dg.Size);
+        /// <summary>
+        /// Tests the null case of AddDependency (t)
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullAdd2()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.AddDependency( "test", null);
+        }
 
-            //HasDependents
-            dg = new DependencyGraph();
-            Assert.IsFalse(dg.HasDependents(null));
+        /// <summary>
+        /// Tests the null case of RemoveDependency (s)
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullRemove1()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.RemoveDependency(null, "test");
+        }
 
-            //HasDependees 
-            dg = new DependencyGraph();
-            Assert.IsFalse(dg.HasDependees(null));
+        /// <summary>
+        /// Tests the null case of RemoveDependency (t)
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullRemove2()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.RemoveDependency("test", null);
+        }
 
-            //GetDependents
-            dg = new DependencyGraph();
-            foreach (string t in dg.GetDependents(null))
+        /// <summary>
+        /// Tests the null case of HasDependents 
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullHasDependents()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.HasDependents(null);
+        }
+
+        /// <summary>
+        /// Tests the null case of HasDependees 
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullHasDependee()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.HasDependees(null);
+        }
+
+        /// <summary>
+        /// Tests the null case of GetDependents 
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullGetDependents()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            foreach(string elem in dg.GetDependents(null))
             {
-                Assert.Fail("There should be no Dependents in the null case.");
-            }
 
-            //GetDependees
-            dg = new DependencyGraph();
-            foreach (string s in dg.GetDependees(null))
+            }
+        }
+
+        /// <summary>
+        /// Tests the null case of GetDependees 
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullGetDependee()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            foreach(string elem in dg.GetDependees(null))
             {
-                Assert.Fail("There should be no dependees in the null case.");
-            }
 
-            //ReplaceDependees
-            dg = new DependencyGraph();
-            dg.ReplaceDependees("s", null);
+            }
+        }
+
+        /// <summary>
+        /// Tests the null case of ReplaceDependees (t) 
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullReplaceDependeesT()
+        {
+            DependencyGraph dg = new DependencyGraph();
             string[] toAdd = { "1" };
             dg.ReplaceDependees(null, toAdd);
-            dg.ReplaceDependees(null, null);
-            Assert.AreEqual(0, dg.Size);
+        }
 
-            //ReplaceDependents
-            dg = new DependencyGraph();
-            dg.ReplaceDependents("s", null);
+        /// <summary>
+        /// Tests the null case of ReplaceDependees (newDependees) 
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullReplaceDependeesNewDependees()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            string[] toAdd = { "1", null };
+            dg.ReplaceDependees("2", toAdd);
+        }
+
+        /// <summary>
+        /// Tests the null case of ReplaceDependents (s) 
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullReplaceDependentsS()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            string[] toAdd = { "1" };
             dg.ReplaceDependents(null, toAdd);
-            dg.ReplaceDependents(null, null);
-            Assert.AreEqual(0, dg.Size);
+        }
 
+        /// <summary>
+        /// Tests the null case of ReplaceDependents (newDependents) 
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNullReplaceDependentsNewDependents()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            string[] toAdd = { "1", null };
+            dg.ReplaceDependents("2", toAdd);
         }
 
         /// <summary>
