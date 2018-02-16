@@ -22,8 +22,6 @@ namespace SS
         /// </summary>
         private DependencyGraph dg;
 
-
-
         /// <summary>
         /// Zero argument constructor that make an empty spreadsheet object
         /// </summary>
@@ -85,7 +83,7 @@ namespace SS
         public override ISet<string> SetCellContents(string name, double number)
         {
             //Checking if name is null or invalid
-            if(name is null || !ValidCellName(name))
+            if (name is null || !ValidCellName(name))
             {
                 throw new InvalidNameException();
             }
@@ -95,41 +93,190 @@ namespace SS
             if (cells.ContainsKey(name))
             {
                 cells.Remove(name);
+
+                //Deleting all the old dependees since it is just a double now
+                //Doubles will never have an dependees
+                foreach (string s in dg.GetDependees(name))
+                {
+                    dg.RemoveDependency(s, name);
+                }
             }
 
             //Add the new cell value
             cells.Add(name, new Cell(number));
 
-            //Deleting all the old dependees since it is just a double now
-            //Doubles will never have an dependees
-            foreach(string s in dg.GetDependees(name))
-            {
-                dg.RemoveDependency(s, name);
-            }
-
             //Finds all the cells that are dependent on the cell that just changed
             HashSet<string> cellsToRecalculate = new HashSet<string>();
 
-            foreach (string recalc in GetCellsToRecalculate(name)) {
+            foreach (string recalc in GetCellsToRecalculate(name))
+            {
                 cellsToRecalculate.Add(recalc);
             }
 
             return cellsToRecalculate;
         }
 
+        /// <summary>
+        /// If text is null, throws an ArgumentNullException.
+        /// 
+        /// Otherwise, if name is null or invalid, throws an InvalidNameException.
+        /// 
+        /// Otherwise, the contents of the named cell becomes text.  The method returns a
+        /// set consisting of name plus the names of all other cells whose value depends, 
+        /// directly or indirectly, on the named cell.
+        /// 
+        /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
+        /// set {A1, B1, C1} is returned.
+        /// </summary>
         public override ISet<string> SetCellContents(string name, string text)
         {
-            throw new NotImplementedException();
+            //Null case or if name is invalid
+            if (name is null || !ValidCellName(name))
+            {
+                throw new InvalidNameException();
+            }
+
+            //Null case of text
+            if (text is null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            //Checking if the cell was nonempty before
+            if (cells.ContainsKey(name))
+            {
+                cells.Remove(name);
+
+                //Deleting all the references to dependees if there are any 
+                foreach (string s in dg.GetDependees(name))
+                {
+                    dg.RemoveDependency(s, name);
+                }
+            }
+
+            //Add the new cell
+            cells.Add(name, new Cell(text));
+
+            //Returning all the cells that depended on this cell
+            HashSet<string> cellsRecalc = new HashSet<string>();
+
+            foreach (string recalc in GetCellsToRecalculate(name))
+            {
+                cellsRecalc.Add(recalc);
+            }
+
+            return cellsRecalc;
+
         }
 
+        /// <summary>
+        /// Requires that all of the variables in formula are valid cell names.
+        /// 
+        /// If name is null or invalid, throws an InvalidNameException.
+        /// 
+        /// Otherwise, if changing the contents of the named cell to be the formula would cause a 
+        /// circular dependency, throws a CircularException.
+        /// 
+        /// Otherwise, the contents of the named cell becomes formula.  The method returns a
+        /// Set consisting of name plus the names of all other cells whose value depends,
+        /// directly or indirectly, on the named cell.
+        /// 
+        /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
+        /// set {A1, B1, C1} is returned.
+        /// </summary>
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
-            throw new NotImplementedException();
+            //Null and ivalid cases
+            if (name is null || !ValidCellName(name))
+            {
+                throw new InvalidNameException();
+            }
+
+            //Checking to see if all the variables in formula are valid cell names 
+            foreach (string v in formula.GetVariables())
+            {
+                if (!ValidCellName(v))
+                {
+                    throw new ArgumentException();
+                }
+            }
+
+
+            //Remove all the old dependees and old cell
+            if (cells.ContainsKey(name))
+            {
+                cells.Remove(name);
+
+                foreach (string s in dg.GetDependees(name))
+                {
+                    dg.RemoveDependency(s, name);
+                }
+            }
+            //Add the new cell 
+            cells.Add(name, new Cell(formula));
+
+            //Add all the new dependees
+            foreach (string dep in formula.GetVariables())
+            {
+                dg.AddDependency(dep, name);
+            }
+
+            //get a list of all the dependents to recalc
+            //If a cycle is detected, a circular exception is thrown from within GetCellsToRecaculate
+            HashSet<string> recalc = new HashSet<string>();
+
+            foreach (string calc in GetCellsToRecalculate(name))
+            {
+                recalc.Add(calc);
+            }
+
+            return recalc;
+
         }
 
+        /// <summary>
+        /// If name is null, throws an ArgumentNullException.
+        /// 
+        /// Otherwise, if name isn't a valid cell name, throws an InvalidNameException.
+        /// 
+        /// Otherwise, returns an enumeration, without duplicates, of the names of all cells whose
+        /// values depend directly on the value of the named cell.  In other words, returns
+        /// an enumeration, without duplicates, of the names of all cells that contain
+        /// formulas containing name.
+        /// 
+        /// For example, suppose that
+        /// A1 contains 3
+        /// B1 contains the formula A1 * A1
+        /// C1 contains the formula B1 + A1
+        /// D1 contains the formula B1 - C1
+        /// The direct dependents of A1 are B1 and C1
+        /// </summary>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
-            throw new NotImplementedException();
+            //Null case
+            if (name is null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            //Testing name validity
+            if (!ValidCellName(name))
+            {
+                throw new InvalidNameException();
+            }
+
+            //Make a hashset to make sure there are no duplicates of dependents
+            HashSet<string> deps = new HashSet<string>();
+
+            foreach (string dep in dg.GetDependents(name))
+            {
+                deps.Add(dep);
+            }
+
+            foreach (string s in deps)
+            {
+                yield return s;
+            }
         }
 
         private bool ValidCellName(string name)
