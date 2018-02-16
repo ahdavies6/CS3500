@@ -9,7 +9,7 @@ using Formulas;
 
 namespace SS
 {
-    class Spreadsheet : AbstractSpreadsheet
+    public class Spreadsheet : AbstractSpreadsheet
     {
 
         /// <summary>
@@ -96,10 +96,17 @@ namespace SS
 
                 //Deleting all the old dependees since it is just a double now
                 //Doubles will never have an dependees
+                HashSet<String> oldDependees = new HashSet<string>();
                 foreach (string s in dg.GetDependees(name))
+                {
+                    oldDependees.Add(s);
+                }
+
+                foreach (string s in oldDependees)
                 {
                     dg.RemoveDependency(s, name);
                 }
+
             }
 
             //Add the new cell value
@@ -148,10 +155,17 @@ namespace SS
                 cells.Remove(name);
 
                 //Deleting all the references to dependees if there are any 
+                HashSet<String> oldDependees = new HashSet<string>();
                 foreach (string s in dg.GetDependees(name))
+                {
+                    oldDependees.Add(s);
+                }
+
+                foreach (string s in oldDependees)
                 {
                     dg.RemoveDependency(s, name);
                 }
+
             }
 
             //Add the new cell
@@ -199,7 +213,15 @@ namespace SS
                 {
                     throw new ArgumentException();
                 }
+
+                //Checks the case where the passed formula is the same as the cell name
+                if (v.Equals(name))
+                {
+                    throw new CircularException();
+                }
+
             }
+
 
             //Keeping track of the old dependees 
             HashSet<string> oldDependees = new HashSet<string>();
@@ -216,6 +238,10 @@ namespace SS
                 foreach (string s in dg.GetDependees(name))
                 {
                     oldDependees.Add(s);
+                }
+
+                foreach (string s in oldDependees)
+                {
                     dg.RemoveDependency(s, name);
                 }
 
@@ -245,6 +271,10 @@ namespace SS
             }
             catch (CircularException e)
             {
+
+                //Remove the new cell, prep for reverting to the last val
+                cells.Remove(name);
+
                 // removing all the new dependecies added
                 foreach (string dep in formula.GetVariables())
                 {
@@ -336,7 +366,6 @@ namespace SS
         /// <summary>
         /// Constructor that takes in a single param, the contents of the cell
         /// </summary>
-        /// <param name="_content"></param>
         public Cell(object _content)
         {
             content = _content;
