@@ -1,4 +1,6 @@
-﻿using System;
+﻿//Nithin Chalapathi - u0847388 - Spring '18 - University of Utah
+
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SS;
 using Formulas;
@@ -179,7 +181,7 @@ namespace SpreadsheetTests
         /// <summary>
         /// Tests that an empty cell should return an empty string
         /// </summary>
-        [TestMethod] 
+        [TestMethod]
         public void TestGetCellContentEmpty()
         {
             //Empty ss
@@ -332,11 +334,11 @@ namespace SpreadsheetTests
                 //Should never reach this
                 Assert.Fail();
             }
-            catch(CircularException e)
+            catch (CircularException e)
             {
                 //Do Nothing
             }
-            
+
         }
 
         /// <summary>
@@ -362,7 +364,7 @@ namespace SpreadsheetTests
             correctDeps.Add("E1");
             correctDeps.Add("E2");
 
-            foreach(string s in deps)
+            foreach (string s in deps)
             {
                 Assert.IsTrue(correctDeps.Contains(s));
                 correctDeps.Remove(s);
@@ -374,7 +376,7 @@ namespace SpreadsheetTests
             //Case when the the original cell had dependees
             GenerateNewSS();
 
-             deps = ss.SetCellContents("C1", 2.0);
+            deps = ss.SetCellContents("C1", 2.0);
 
             correctDeps = new HashSet<string>();
             correctDeps.Add("C1");
