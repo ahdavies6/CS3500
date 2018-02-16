@@ -201,16 +201,25 @@ namespace SS
                 }
             }
 
+            //Keeping track of the old dependees 
+            HashSet<string> oldDependees = new HashSet<string>();
+
+            object oldVal = null;
 
             //Remove all the old dependees and old cell
             if (cells.ContainsKey(name))
             {
-                cells.Remove(name);
+                //Keep track of the old value of the cell in case a cycle is found 
+                oldVal = cells[name].content;
+
 
                 foreach (string s in dg.GetDependees(name))
                 {
+                    oldDependees.Add(s);
                     dg.RemoveDependency(s, name);
                 }
+
+                cells.Remove(name);
             }
             //Add the new cell 
             cells.Add(name, new Cell(formula));
@@ -221,17 +230,41 @@ namespace SS
                 dg.AddDependency(dep, name);
             }
 
-            //get a list of all the dependents to recalc
-            //If a cycle is detected, a circular exception is thrown from within GetCellsToRecaculate
-            HashSet<string> recalc = new HashSet<string>();
-
-            foreach (string calc in GetCellsToRecalculate(name))
+            try
             {
-                recalc.Add(calc);
+                //get a list of all the dependents to recalc
+                //If a cycle is detected, a circular exception is thrown from within GetCellsToRecaculate
+                HashSet<string> recalc = new HashSet<string>();
+
+                foreach (string calc in GetCellsToRecalculate(name))
+                {
+                    recalc.Add(calc);
+                }
+
+                return recalc;
             }
+            catch (CircularException e)
+            {
+                // removing all the new dependecies added
+                foreach (string dep in formula.GetVariables())
+                {
+                    dg.RemoveDependency(dep, name);
+                }
 
-            return recalc;
+                if (oldVal != null)
+                {
+                    //Adding in all the old dependencies
+                    foreach (string dep in oldDependees)
+                    {
+                        dg.AddDependency(dep, name);
+                    }
 
+                    //Add the old cell value back
+                    cells.Add(name, new Cell(oldVal));
+                }
+
+                throw e;
+            }
         }
 
         /// <summary>
