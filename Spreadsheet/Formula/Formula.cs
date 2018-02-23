@@ -491,6 +491,13 @@ namespace Formulas
         /// <returns></returns>
         public override string ToString()
         {
+
+            //Check the case where the formula is empty
+            if(this.formulaTokens is null)
+            {
+                return "0";
+            }
+
             string toReturn = "";
 
             foreach (Object s in formulaTokens)

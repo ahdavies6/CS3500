@@ -51,20 +51,21 @@ namespace Dependencies
         /// <summary>
         /// Contains a list of all the dependees in the graph and a linkedlist of all the dependants it links to 
         /// </summary>
-        private Dictionary<string, LinkedList<string>> dependees;
+        private Dictionary<string, HashSet<string>> dependees;
 
         /// <summary>
         /// Contains a list of all possible dependents and a linked list of all the dependees it links to
         /// </summary>
-        private Dictionary<string, LinkedList<string>> dependents;
+        private Dictionary<string, HashSet<string>> dependents;
 
         /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
         /// </summary>
         public DependencyGraph()
         {
-            dependents = new Dictionary<string, LinkedList<string>>();
-            dependees = new Dictionary<string, LinkedList<string>>();
+            dependents = new Dictionary<string, HashSet<string>>();
+            dependees = new Dictionary<string, HashSet<string>>();
+            Size = 0;
         }
 
         /// <summary>
@@ -73,53 +74,29 @@ namespace Dependencies
         /// </summary>
         public DependencyGraph(DependencyGraph dg) : this()
         {
-            if(dg is null)
+            if (dg is null)
             {
                 throw new ArgumentNullException();
             }
 
-            var deps = dg.dependents;
-            foreach(string s in deps.Keys)
-            {
-                if(deps[s] is null)
-                {
-                    //Given this implementation, should never run but put here 
-                    //as a failsafe
-                    continue;
-                }
 
-                foreach(string t in deps[s])
-                {
-                    AddDependency(s, t);
-                }
+            foreach (string key in dg.dependees.Keys)
+            {
+                this.dependees.Add(key, new HashSet<string>(dg.dependees[key]));
             }
+
+            foreach (string key in dg.dependents.Keys)
+            {
+                this.dependents.Add(key, new HashSet<string>(dg.dependents[key]));
+            }
+
+            this.Size = dg.Size;
         }
 
         /// <summary>
         /// The number of dependencies in the DependencyGraph.
         /// </summary>
-        public int Size
-        {
-            get
-            {
-                int sum = 0;
-                if (dependees.Count < dependents.Count)
-                {
-                    foreach (LinkedList<string> list in dependees.Values)
-                    {
-                        sum += list.Count;
-                    }
-                }
-                else
-                {
-                    foreach (LinkedList<string> list in dependents.Values)
-                    {
-                        sum += list.Count;
-                    }
-                }
-                return sum;
-            }
-        }
+        public int Size { get; private set; }
 
         /// <summary>
         /// Reports whether dependents(s) is non-empty.  If s is null, throws an ArgumentNullException
@@ -226,12 +203,12 @@ namespace Dependencies
             //Add t to the end of the linked list
             if (!dependees.ContainsKey(s))
             {
-                dependees.Add(s, new LinkedList<string>());
+                dependees.Add(s, new HashSet<string>());
             }
 
             if (!dependees[s].Contains(t))
             {
-                dependees[s].AddLast(t);
+                dependees[s].Add(t);
             }
 
             //Check to see if t is in the dependents
@@ -239,13 +216,17 @@ namespace Dependencies
             //Add s to the end of the linked list
             if (!dependents.ContainsKey(t))
             {
-                dependents.Add(t, new LinkedList<string>());
+                dependents.Add(t, new HashSet<string>());
             }
 
             if (!dependents[t].Contains(s))
             {
-                dependents[t].AddLast(s);
+                dependents[t].Add(s);
+
+                //If it made it here, then a new dependency was added successfully (no duplicates) 
+                this.Size++;
             }
+
         }
 
         /// <summary>
@@ -264,7 +245,16 @@ namespace Dependencies
             //Removing from the dependee dict
             if (dependees.ContainsKey(s))
             {
+                int oldCount = dependees[s].Count;
                 dependees[s].Remove(t);
+
+                //Checks that the element was actually removed 
+                //We only do this once since it is only once dependency we remove, that is why dependents doesnt have the same process 
+                if ((oldCount - 1) == dependees[s].Count)
+                {
+                    Size--;
+                }
+
             }
 
             //Removing from the dependent dict
@@ -295,7 +285,12 @@ namespace Dependencies
                 {
                     if (dependents.ContainsKey(t))
                     {
+                        int oldCount = dependents[t].Count;
                         dependents[t].Remove(s);
+                        if ((oldCount - 1) == dependents[t].Count)
+                        {
+                            Size--;
+                        }
                     }
                 }
 
@@ -304,7 +299,7 @@ namespace Dependencies
             }
 
             //Creates an entry for s
-            dependees.Add(s, new LinkedList<string>());
+            dependees.Add(s, new HashSet<string>());
 
 
             //Add each one of the new dependents
@@ -337,7 +332,15 @@ namespace Dependencies
                 {
                     if (dependees.ContainsKey(s))
                     {
+                        int oldCount = dependees[s].Count;
                         dependees[s].Remove(t);
+
+                        //Checks that the element was actually removed 
+                        //We only do this once since it is only once dependency we remove, that is why dependents doesnt have the same process 
+                        if ((oldCount - 1) == dependees[s].Count)
+                        {
+                            Size--;
+                        }
                     }
                 }
 
@@ -347,7 +350,7 @@ namespace Dependencies
 
 
             //Creates a new extry for t
-            dependents.Add(t, new LinkedList<string>());
+            dependents.Add(t, new HashSet<string>());
 
 
             //Add each of the new dependees
