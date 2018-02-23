@@ -6,6 +6,7 @@ using SS;
 using Formulas;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace SpreadsheetTests
 {
@@ -532,6 +533,173 @@ namespace SpreadsheetTests
         {
             GenerateNewSS();
             ss.GetCellValue("test");
+        }
+
+        /// <summary>
+        /// Tests getting the cell value for strings, doubles, and formulas
+        /// </summary>
+        [TestMethod]
+        public void TestGetCellValue()
+        {
+            GenerateNewSS();
+            Assert.AreEqual("CS3500", ss.GetCellValue("B2"));
+            Assert.AreEqual(1.0, ss.GetCellValue("A1"));
+            Assert.AreEqual(7.0, ss.GetCellValue("C1"));
+            Assert.AreEqual(10.0, ss.GetCellValue("E3"));
+        }
+
+        /// <summary>
+        /// Tests the constructor that takes a regex pattern as the parameter
+        /// </summary>
+        [TestMethod]
+        public void IsValidConstructorTest()
+        {
+            ss = new Spreadsheet(new Regex(@"A"));
+
+            try
+            {
+                ss.SetContentsOfCell("B1", "hello");
+                //If this was allowed, should fail
+                Assert.Fail();
+            }
+            catch (InvalidNameException e)
+            {
+                // do nothing
+            }
+
+            ss.SetContentsOfCell("A1", "hello");
+            Assert.AreEqual("hello", ss.GetCellValue("A1"));
+        }
+
+
+        /// <summary>
+        /// Tests the change boolean of the spreadsheet
+        /// </summary>
+        [TestMethod]
+        public void TestChanged()
+        {
+            GenerateNewSS();
+            Assert.IsTrue(ss.Changed);
+            ss.Save(new StreamWriter("TestChanged.xml"));
+            Assert.IsFalse(ss.Changed);
+            ss.SetContentsOfCell("A1", "23.0");
+            Assert.IsTrue(ss.Changed);
+        }
+
+        /// <summary>
+        /// Tests the constructor that takes in an xml file and regex expression
+        /// </summary>
+        [TestMethod]
+        public void TestConstructorWithXML()
+        {
+            GenerateNewSS();
+            StreamWriter writer = new StreamWriter("ConstructorXML.xml");
+            ss.Save(writer);
+            writer.Flush();
+            writer.Close();
+
+            StreamReader reader = new StreamReader("ConstructorXML.xml");
+            AbstractSpreadsheet ss2 = new Spreadsheet(reader, new Regex(".*"));
+            reader.Close();
+
+            foreach (string cellname in ss.GetNamesOfAllNonemptyCells())
+            {
+                Assert.AreEqual(ss.GetCellValue(cellname), ss2.GetCellValue(cellname));
+                Assert.AreEqual(ss.GetCellContents(cellname).ToString(), ss2.GetCellContents(cellname).ToString());
+            }
+        }
+
+        /// <summary>
+        /// Tests the variety of errors inside reading the xml file.
+        /// 
+        /// 1. invalid xml format
+        /// 2. bad name for cell in the xml
+        /// 3. bad formula
+        /// 4. bad old isvalid
+        /// 5. new isvalid prevents old cells
+        /// 6. circular dependency
+        /// </summary>
+        [TestMethod]
+        public void TestErrorsInXMLConstructor()
+        {
+            //Wrong format xml 
+            StreamReader sr = new StreamReader("wrongformatxml.xml");
+            try
+            {
+                ss = new Spreadsheet(sr, new Regex(".*"));
+                Assert.Fail();
+            }
+            catch (SpreadsheetReadException e)
+            {
+            }
+
+            sr.Close();
+            //Bad name
+            sr = new StreamReader("badname.xml");
+            try
+            {
+                ss = new Spreadsheet(sr, new Regex(".*"));
+                Assert.Fail();
+            }
+            catch (SpreadsheetReadException e)
+            {
+            }
+
+            sr.Close();
+
+            //Bad formula
+            sr = new StreamReader("badformula.xml");
+            try
+            {
+                ss = new Spreadsheet(sr, new Regex(".*"));
+                Assert.Fail();
+            }
+            catch (SpreadsheetReadException e)
+            {
+            }
+
+            sr.Close();
+
+
+            //bad old isvalid 
+            sr = new StreamReader("badisvalid.xml");
+            try
+            {
+                ss = new Spreadsheet(sr, new Regex(".*"));
+                Assert.Fail();
+            }
+            catch (SpreadsheetReadException e)
+            {
+            }
+
+            sr.Close();
+
+            //new isvalid  
+            sr = new StreamReader("valid.xml");
+            try
+            {
+                ss = new Spreadsheet(sr, new Regex("A"));
+                Assert.Fail();
+            }
+            catch (SpreadsheetVersionException e)
+            {
+            }
+
+            sr.Close();
+
+            //Circular dependency 
+            sr = new StreamReader("circular.xml");
+            try
+            {
+                ss = new Spreadsheet(sr, new Regex(".*"));
+                Assert.Fail();
+            }
+            catch (SpreadsheetReadException e)
+            {
+            }
+
+            sr.Close();
+
         }
 
     }

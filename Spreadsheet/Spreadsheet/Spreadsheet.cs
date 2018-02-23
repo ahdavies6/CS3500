@@ -83,6 +83,7 @@ namespace SS
             cells = new Dictionary<string, Cell>();
             dg = new DependencyGraph();
             IsValid = new Regex(".*");
+            Changed = true;
         }
 
         /// <summary>
@@ -91,6 +92,7 @@ namespace SS
         public Spreadsheet(Regex isValid) : this()
         {
             this.IsValid = isValid;
+            Changed = true;
         }
 
         /// <summary>
@@ -160,18 +162,22 @@ namespace SS
                                         throw new SpreadsheetReadException("Bad Cellname or repeat of cellname");
                                     }
 
-                                    Formula f = new Formula(reader["contents"], s => s.ToUpper(), ValidCellName);
+                                    //Test if it is a bad formula
+                                    if (reader["contents"][0] == '=')
+                                    {
+                                        Formula f = new Formula(reader["contents"].Substring(1), s => s.ToUpper(), ValidCellName);
+                                    }
 
                                     this.IsValid = newIsValid;
                                     try
                                     {
                                         this.SetContentsOfCell(cellName, reader["contents"]);
                                     }
-                                    catch(FormulaFormatException e)
+                                    catch (FormulaFormatException e)
                                     {
                                         throw new SpreadsheetVersionException("Formula Format");
                                     }
-                                    catch(InvalidNameException e)
+                                    catch (InvalidNameException e)
                                     {
                                         throw new SpreadsheetVersionException("Invalid name");
                                     }
@@ -197,7 +203,7 @@ namespace SS
                 this.IsValid = newIsValid;
             }
 
-
+            Changed = false;
         }
 
         // ADDED FOR PS6
