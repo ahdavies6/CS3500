@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Schema;
 using Dependencies;
 using Formulas;
 
@@ -122,11 +124,88 @@ namespace SS
         /// Else, create a Spreadsheet that is a duplicate of the one encoded in source except that
         /// the new Spreadsheet's IsValid regular expression should be newIsValid.
         /// </summary>
-        public Spreadsheet(TextReader source, Regex newIsValid)
+        public Spreadsheet(TextReader source, Regex newIsValid) : this()
         {
-            throw new NotImplementedException();
+            XmlSchemaSet sc = new XmlSchemaSet();
+            sc.Add(null, "Spreadsheet.xsd");
+
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.ValidationType = ValidationType.Schema;
+            settings.Schemas = sc;
+            settings.ValidationEventHandler += (object x, ValidationEventArgs y) => { throw new SpreadsheetReadException(y.Message); };
+
+            HashSet<string> cellNames = new HashSet<string>();
+
+            Regex oldIsValid = null;
+
+            using (XmlReader reader = XmlReader.Create(source, settings))
+            {
+                try
+                {
+                    while (reader.Read())
+                    {
+                        if (reader.IsStartElement())
+                        {
+                            switch (reader.Name)
+                            {
+                                case "spreadsheet":
+                                    oldIsValid = new Regex(reader["IsValid"]);
+                                    break;
+
+                                case "cell":
+                                    string cellName = reader["name"];
+                                    this.IsValid = oldIsValid;
+                                    if (!ValidCellName(ref cellName) || cellNames.Contains(cellName))
+                                    {
+                                        throw new SpreadsheetReadException("Bad Cellname or repeat of cellname");
+                                    }
+
+                                    Formula f = new Formula(reader["contents"], s => s.ToUpper(), ValidCellName);
+
+                                    this.IsValid = newIsValid;
+                                    try
+                                    {
+                                        this.SetContentsOfCell(cellName, reader["contents"]);
+                                    }
+                                    catch(FormulaFormatException e)
+                                    {
+                                        throw new SpreadsheetVersionException("Formula Format");
+                                    }
+                                    catch(InvalidNameException e)
+                                    {
+                                        throw new SpreadsheetVersionException("Invalid name");
+                                    }
+                                    catch (CircularException e)
+                                    {
+                                        throw new SpreadsheetReadException("Cycle Format");
+                                    }
+
+                                    cellNames.Add(cellName);
+                                    break;
+                            }
+                        }
+                    }
+                }
+                catch (ArgumentException e)
+                {
+                    throw new SpreadsheetReadException("Bad IsValid");
+                }
+                catch (FormulaFormatException e)
+                {
+                    throw new SpreadsheetReadException("Bad formula");
+                }
+                this.IsValid = newIsValid;
+            }
+
+
         }
-        public override bool Changed { get => throw new NotImplementedException(); protected set => throw new NotImplementedException(); }
+
+        // ADDED FOR PS6
+        /// <summary>
+        /// True if this spreadsheet has been modified since it was created or saved
+        /// (whichever happened most recently); false otherwise.
+        /// </summary>
+        public override bool Changed { get; protected set; }
 
         /// <summary>
         /// If name is null or invalid, throws an InvalidNameException.
@@ -191,9 +270,59 @@ namespace SS
             }
         }
 
+        // ADDED FOR PS6
+        /// <summary>
+        /// Writes the contents of this spreadsheet to dest using an XML format.
+        /// The XML elements should be structured as follows:
+        ///
+        /// <spreadsheet IsValid="IsValid regex goes here">
+        ///   <cell name="cell name goes here" contents="cell contents go here"></cell>
+        ///   <cell name="cell name goes here" contents="cell contents go here"></cell>
+        ///   <cell name="cell name goes here" contents="cell contents go here"></cell>
+        /// </spreadsheet>
+        ///
+        /// The value of the IsValid attribute should be IsValid.ToString()
+        /// 
+        /// There should be one cell element for each non-empty cell in the spreadsheet.
+        /// If the cell contains a string, the string (without surrounding double quotes) should be written as the contents.
+        /// If the cell contains a double d, d.ToString() should be written as the contents.
+        /// If the cell contains a Formula f, f.ToString() with "=" prepended should be written as the contents.
+        ///
+        /// If there are any problems writing to dest, the method should throw an IOException.
+        /// </summary>
         public override void Save(TextWriter dest)
         {
-            throw new NotImplementedException();
+            using (XmlWriter writer = XmlWriter.Create(dest))
+            {
+                //Write the top and start spreadsheet element
+                writer.WriteStartDocument();
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("IsValid", IsValid.ToString());
+
+                foreach (string s in GetNamesOfAllNonemptyCells())
+                {
+                    writer.WriteStartElement("cell");
+                    writer.WriteAttributeString("name", s);
+                    //Case when the cell is a formula 
+                    if (cells[s].content is Formula)
+                    {
+                        writer.WriteAttributeString("contents", "=" + cells[s].content.ToString());
+                    }
+                    //case when content is a double or string
+                    else
+                    {
+                        writer.WriteAttributeString("contents", cells[s].content.ToString());
+                    }
+
+                    writer.WriteFullEndElement();
+                }
+
+                writer.WriteFullEndElement();
+                writer.WriteEndDocument();
+
+                //Change the status of changed
+                Changed = false;
+            }
         }
 
 
@@ -247,6 +376,8 @@ namespace SS
                 cellsToRecalculate.Add(recalc);
             }
 
+            //If gotten this far, then the spreadsheet has been modified
+            Changed = true;
             return cellsToRecalculate;
         }
 
@@ -305,6 +436,9 @@ namespace SS
             {
                 cellsRecalc.Add(recalc);
             }
+
+            //If gotten this far, then the spreadsheet has been modified
+            Changed = true;
 
             return cellsRecalc;
 
@@ -393,6 +527,9 @@ namespace SS
                 {
                     recalc.Add(calc);
                 }
+
+                //If gotten this far, then the spreadsheet has been modified
+                Changed = true;
 
                 return recalc;
             }
