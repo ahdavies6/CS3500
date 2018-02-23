@@ -35,7 +35,7 @@ namespace SpreadsheetTests
         /// <summary>
         /// Generates the above spreadsheet and stores it into the static variable ss
         /// 
-        /// Implicitly tests to make sure SetCellContents works
+        /// Implicitly tests to make sure SetContentsOfCell works
         /// </summary>
         public static void GenerateNewSS()
         {
@@ -44,27 +44,27 @@ namespace SpreadsheetTests
             //Setting the first row
             for (int i = 1; i < 6; i++)
             {
-                ss.SetCellContents("A" + i, i);
+                ss.SetContentsOfCell("A" + i, i.ToString());
             }
 
             //Setting the second row
-            ss.SetCellContents("B1", 6);
-            ss.SetCellContents("B2", "CS3500");
-            ss.SetCellContents("B3", 7);
-            ss.SetCellContents("B5", 8);
+            ss.SetContentsOfCell("B1", "6");
+            ss.SetContentsOfCell("B2", "CS3500");
+            ss.SetContentsOfCell("B3", "7");
+            ss.SetContentsOfCell("B5", "8");
 
             //Set the third row
-            ss.SetCellContents("C1", new Formula("A1+B1"));
-            ss.SetCellContents("C2", new Formula("A1*2"));
+            ss.SetContentsOfCell("C1", "=A1+B1");
+            ss.SetContentsOfCell("C2", "=A1*2");
 
             //Set the fourth row 
-            ss.SetCellContents("D3", "CS4150");
-            ss.SetCellContents("D4", new Formula("A4"));
+            ss.SetContentsOfCell("D3", "CS4150");
+            ss.SetContentsOfCell("D4", "=A4");
 
             //Set the fifth row
-            ss.SetCellContents("E1", new Formula("C1+C2"));
-            ss.SetCellContents("E2", new Formula("C1*C2"));
-            ss.SetCellContents("E3", new Formula("A3+B3"));
+            ss.SetContentsOfCell("E1", "=C1+C2");
+            ss.SetContentsOfCell("E2", "=C1*C2");
+            ss.SetContentsOfCell("E3", "=A3+B3");
 
         }
 
@@ -152,17 +152,17 @@ namespace SpreadsheetTests
             correctVals.Add("B5", 8.0);
 
             //third row
-            correctVals.Add("C1", new Formula("A1+B1"));
-            correctVals.Add("C2", new Formula("A1*2"));
+            correctVals.Add("C1", "A1+B1");
+            correctVals.Add("C2", "A1*2");
 
             //fourth row 
             correctVals.Add("D3", "CS4150");
-            correctVals.Add("D4", new Formula("A4"));
+            correctVals.Add("D4", "A4");
 
             //fifth row
-            correctVals.Add("E1", new Formula("C1+C2"));
-            correctVals.Add("E2", new Formula("C1*C2"));
-            correctVals.Add("E3", new Formula("A3+B3"));
+            correctVals.Add("E1", "C1+C2");
+            correctVals.Add("E2", "C1*C2");
+            correctVals.Add("E3", "A3+B3");
 
             foreach (string cell in correctVals.Keys)
             {
@@ -217,95 +217,95 @@ namespace SpreadsheetTests
         }
 
         /// <summary>
-        /// Tests SetCellContents(str, double) when the name is null
+        /// Tests SetContentsOfCell(str, double) when the name is null
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetCellDoubleNull()
         {
             GenerateNewSS();
-            ss.SetCellContents(null, 1.0);
+            ss.SetContentsOfCell(null, "1.0");
         }
 
         /// <summary>
-        /// Tests SetCellCOntents(str, double) when name is invalid
+        /// Tests SetContentsOfCell(str, double) when name is invalid
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetCellDoubleInvalid()
         {
             GenerateNewSS();
-            ss.SetCellContents("A", 1.0);
+            ss.SetContentsOfCell("A", "1.0");
         }
 
         /// <summary>
-        /// Tests SetCellContents(str, str) when the name is null
+        /// Tests SetContentsOfCell(str, str) when the name is null
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetCellStringNullInput()
         {
             GenerateNewSS();
-            ss.SetCellContents(null, "test");
+            ss.SetContentsOfCell(null, "test");
         }
 
         /// <summary>
-        /// Tests SetCellContents(str, str) when name is invalid
+        /// Tests SetContentsOfCell(str, str) when name is invalid
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetCellStringInvalidInput()
         {
             GenerateNewSS();
-            ss.SetCellContents("A", "test");
+            ss.SetContentsOfCell("A", "test");
         }
 
         /// <summary>
-        /// Tests SetCellContents(str, str) when text is null
+        /// Tests SetContentsOfCell(str, str) when text is null
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void TestSetCellStringNullTextInput()
         {
             GenerateNewSS();
-            ss.SetCellContents("A1", null);
+            ss.SetContentsOfCell("A1", null);
         }
 
         /// <summary>
-        /// Tests SetCellContents(str, Formula) when name is null 
+        /// Tests SetContentsOfCell(str, Formula) when name is null 
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetCellFormulaNullName()
         {
             GenerateNewSS();
-            ss.SetCellContents(null, new Formula("A1"));
+            ss.SetContentsOfCell(null, "=A1");
         }
 
         /// <summary>
-        /// Tests SetCellContents(str, Formula) when name is invalid 
+        /// Tests SetContentsOfCell(str, Formula) when name is invalid 
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetCellFormulaInvalidName()
         {
             GenerateNewSS();
-            ss.SetCellContents("BC", new Formula("A1"));
+            ss.SetContentsOfCell("BC", "=A1");
         }
 
         /// <summary>
-        /// Tests SetCellContents(str, Formula) when formula has variables that are not valid cells
+        /// Tests SetContentsOfCell(str, Formula) when formula has variables that are not valid cells
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(FormulaFormatException))]
         public void TestSetCellFormulaInvalidFormulaVariables()
         {
             GenerateNewSS();
-            ss.SetCellContents("A1", new Formula("a+b"));
+            ss.SetContentsOfCell("A1", "=a+b");
         }
 
         /// <summary>
-        /// Tests SetCellContents(str, formula) when the new formula
+        /// Tests SetContentsOfCell(str, formula) when the new formula
         /// creates a circular dependency
         /// </summary>
         [TestMethod]
@@ -314,7 +314,7 @@ namespace SpreadsheetTests
             GenerateNewSS();
             try
             {
-                ss.SetCellContents("C1", new Formula("E2+1"));
+                ss.SetContentsOfCell("C1", "=E2+1");
 
                 //Should never reach this
                 Assert.Fail();
@@ -329,7 +329,7 @@ namespace SpreadsheetTests
 
             try
             {
-                ss.SetCellContents("A1", new Formula("A1+A1"));
+                ss.SetContentsOfCell("A1", "=A1+A1");
 
                 //Should never reach this
                 Assert.Fail();
@@ -355,7 +355,7 @@ namespace SpreadsheetTests
             //Case when the the original cell had no dependees
             GenerateNewSS();
 
-            ISet<string> deps = ss.SetCellContents("A1", 2.0);
+            ISet<string> deps = ss.SetContentsOfCell("A1", "2.0");
 
             HashSet<string> correctDeps = new HashSet<string>();
             correctDeps.Add("A1");
@@ -376,7 +376,7 @@ namespace SpreadsheetTests
             //Case when the the original cell had dependees
             GenerateNewSS();
 
-            deps = ss.SetCellContents("C1", 2.0);
+            deps = ss.SetContentsOfCell("C1", "2.0");
 
             correctDeps = new HashSet<string>();
             correctDeps.Add("C1");
@@ -407,7 +407,7 @@ namespace SpreadsheetTests
             //Case when the the original cell has no dependees
             GenerateNewSS();
 
-            ISet<string> deps = ss.SetCellContents("A1", "This Is a Test");
+            ISet<string> deps = ss.SetContentsOfCell("A1", "This Is a Test");
 
             HashSet<string> correctDeps = new HashSet<string>();
             correctDeps.Add("A1");
@@ -428,7 +428,7 @@ namespace SpreadsheetTests
             //Case when the the original cell had  dependees
             GenerateNewSS();
 
-            deps = ss.SetCellContents("C1", "test");
+            deps = ss.SetContentsOfCell("C1", "test");
 
             correctDeps = new HashSet<string>();
             correctDeps.Add("C1");
@@ -459,7 +459,7 @@ namespace SpreadsheetTests
 
             GenerateNewSS();
 
-            ISet<string> deps = ss.SetCellContents("A1", new Formula("A2+A3"));
+            ISet<string> deps = ss.SetContentsOfCell("A1", "=A2+A3");
 
             HashSet<string> correctDeps = new HashSet<string>();
             correctDeps.Add("A1");
@@ -480,7 +480,7 @@ namespace SpreadsheetTests
             //Case when the the original cell had dependees
             GenerateNewSS();
 
-            deps = ss.SetCellContents("C1", new Formula("A3+A2"));
+            deps = ss.SetContentsOfCell("C1", "=A3+A2");
 
             correctDeps = new HashSet<string>();
             correctDeps.Add("C1");
@@ -495,6 +495,42 @@ namespace SpreadsheetTests
 
             Assert.AreEqual(0, correctDeps.Count);
             Assert.AreEqual("A3+A2", ss.GetCellContents("C1").ToString());
+        }
+
+        /// <summary>
+        /// Tests an invalid formula to see if a formulaerror is stored as the value of the cell
+        /// Implicitly tests getcellvalue
+        /// </summary>
+        [TestMethod]
+        public void TestSetContentsOfCell()
+        {
+            GenerateNewSS();
+            ss.SetContentsOfCell("F9", "=b10+c39");
+
+            Assert.IsTrue(ss.GetCellValue("F9") is FormulaError);
+
+        }
+
+        /// <summary>
+        /// Tests GetCellValue if name is null
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestGetCellValueNullName()
+        {
+            GenerateNewSS();
+            ss.GetCellValue(null);
+        }
+
+        /// <summary>
+        /// Tests GetCellValue if name is not valid
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestGetCellValueInvalidName()
+        {
+            GenerateNewSS();
+            ss.GetCellValue("test");
         }
 
     }
