@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS4aGradingTests", "PS4aGra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spreadsheet", "Spreadsheet\Spreadsheet.csproj", "{9025A594-DF2A-4E6A-B8C2-F087ECC3E203}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetTests", "SpreadsheetTests\SpreadsheetTests.csproj", "{08237668-8F8B-44D6-8D27-B151BD53B759}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS6GradingTests", "PS6GradingTests\PS6GradingTests.csproj", "{2145911F-6669-4308-A0F2-63B4C2AAAE5E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
