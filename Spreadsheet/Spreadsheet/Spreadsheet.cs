@@ -14,7 +14,6 @@ using Formulas;
 
 namespace SS
 {
-
     /// <summary>
     /// An Spreadsheet object represents the state of a simple spreadsheet.  A 
     /// spreadsheet consists of an infinite number of named cells.
@@ -26,7 +25,7 @@ namespace SS
     /// "Z", "X07", and "hello" are not valid cell names.
     /// 
     /// A spreadsheet contains a unique cell corresponding to each possible cell name.  
-    /// In addition to a name, each cell has a contents and a value.  The distinction is
+    /// In addition to a name, each cell has a contents and a Value.  The distinction is
     /// important, and it is important that you understand the distinction and use
     /// the right term when writing code, writing comments, and asking questions.
     /// 
@@ -36,19 +35,19 @@ namespace SS
     /// 
     /// In an empty spreadsheet, the contents of every cell is the empty string.
     ///  
-    /// The value of a cell can be (1) a string, (2) a double, or (3) a FormulaError.  
-    /// (By analogy, the value of an Excel cell is what is displayed in that cell's position
+    /// The Value of a cell can be (1) a string, (2) a double, or (3) a FormulaError.  
+    /// (By analogy, the Value of an Excel cell is what is displayed in that cell's position
     /// in the grid.)
     /// 
-    /// If a cell's contents is a string, its value is that string.
+    /// If a cell's contents is a string, its Value is that string.
     /// 
-    /// If a cell's contents is a double, its value is that double.
+    /// If a cell's contents is a double, its Value is that double.
     /// 
-    /// If a cell's contents is a Formula, its value is either a double or a FormulaError.
-    /// The value of a Formula, of course, can depend on the values of variables.  The value 
-    /// of a Formula variable is the value of the spreadsheet cell it names (if that cell's 
-    /// value is a double) or is undefined (otherwise).  If a Formula depends on an undefined
-    /// variable or on a division by zero, its value is a FormulaError.  Otherwise, its value
+    /// If a cell's contents is a Formula, its Value is either a double or a FormulaError.
+    /// The Value of a Formula, of course, can depend on the values of variables.  The Value 
+    /// of a Formula variable is the Value of the spreadsheet cell it names (if that cell's 
+    /// Value is a double) or is undefined (otherwise).  If a Formula depends on an undefined
+    /// variable or on a division by zero, its Value is a FormulaError.  Otherwise, its Value
     /// is a double, as specified in Formula.Evaluate.
     /// 
     /// Spreadsheets are never allowed to contain a combination of Formulas that establish
@@ -59,7 +58,6 @@ namespace SS
     /// </summary>
     public class Spreadsheet : AbstractSpreadsheet
     {
-
         /// <summary>
         /// Dictionary containing the non-empty cells and associated cell structs
         /// </summary>
@@ -162,7 +160,6 @@ namespace SS
                                         throw new SpreadsheetReadException("Bad Cellname or repeat of cellname");
                                     }
 
-                                    //Test if it is a bad formula
                                     if (reader["contents"][0] == '=')
                                     {
                                         Formula f = new Formula(reader["contents"].Substring(1), s => s.ToUpper(), ValidCellName);
@@ -173,15 +170,15 @@ namespace SS
                                     {
                                         this.SetContentsOfCell(cellName, reader["contents"]);
                                     }
-                                    catch (FormulaFormatException e)
+                                    catch (FormulaFormatException)
                                     {
                                         throw new SpreadsheetVersionException("Formula Format");
                                     }
-                                    catch (InvalidNameException e)
+                                    catch (InvalidNameException)
                                     {
                                         throw new SpreadsheetVersionException("Invalid name");
                                     }
-                                    catch (CircularException e)
+                                    catch (CircularException)
                                     {
                                         throw new SpreadsheetReadException("Cycle Format");
                                     }
@@ -192,11 +189,11 @@ namespace SS
                         }
                     }
                 }
-                catch (ArgumentException e)
+                catch (ArgumentException)
                 {
                     throw new SpreadsheetReadException("Bad IsValid");
                 }
-                catch (FormulaFormatException e)
+                catch (FormulaFormatException)
                 {
                     throw new SpreadsheetReadException("Bad formula");
                 }
@@ -206,7 +203,6 @@ namespace SS
             Changed = false;
         }
 
-        // ADDED FOR PS6
         /// <summary>
         /// True if this spreadsheet has been modified since it was created or saved
         /// (whichever happened most recently); false otherwise.
@@ -216,35 +212,31 @@ namespace SS
         /// <summary>
         /// If name is null or invalid, throws an InvalidNameException.
         /// 
-        /// Otherwise, returns the contents (as opposed to the value) of the named cell.  The return
-        /// value should be either a string, a double, or a Formula.
+        /// Otherwise, returns the contents (as opposed to the Value) of the named cell.  The return
+        /// Value should be either a string, a double, or a Formula.
         /// </summary>
         public override object GetCellContents(string name)
         {
-            //Null case or if the name is invalid
             if (name is null || !ValidCellName(ref name))
             {
                 throw new InvalidNameException();
             }
 
-            //Checking to see if the name is in the nonempty list
             if (cells.ContainsKey(name))
             {
-                return cells[name].content;
+                return cells[name].Contents;
             }
-            //If there is not a cell that is full, just return an empty string
             else
             {
                 return "";
             }
         }
 
-        // ADDED FOR PS6
         /// <summary>
         /// If name is null or invalid, throws an InvalidNameException.
         ///
-        /// Otherwise, returns the value (as opposed to the contents) of the named cell.  The return
-        /// value should be either a string, a double, or a FormulaError.
+        /// Otherwise, returns the Value (as opposed to the contents) of the named cell.  The return
+        /// Value should be either a string, a double, or a FormulaError.
         /// </summary>
         public override object GetCellValue(string name)
         {
@@ -255,11 +247,10 @@ namespace SS
 
             if (cells.Keys.Contains(name))
             {
-                return cells[name].value;
+                return cells[name].Value;
             }
             else
             {
-                //Case when the cell doesn't exist but name is still valid
                 return "";
             }
         }
@@ -269,14 +260,12 @@ namespace SS
         /// </summary>
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
-            //If it is a key, then it is nonempty
             foreach (string key in cells.Keys)
             {
                 yield return key;
             }
         }
 
-        // ADDED FOR PS6
         /// <summary>
         /// Writes the contents of this spreadsheet to dest using an XML format.
         /// The XML elements should be structured as follows:
@@ -287,7 +276,7 @@ namespace SS
         ///   <cell name="cell name goes here" contents="cell contents go here"></cell>
         /// </spreadsheet>
         ///
-        /// The value of the IsValid attribute should be IsValid.ToString()
+        /// The Value of the IsValid attribute should be IsValid.ToString()
         /// 
         /// There should be one cell element for each non-empty cell in the spreadsheet.
         /// If the cell contains a string, the string (without surrounding double quotes) should be written as the contents.
@@ -300,7 +289,7 @@ namespace SS
         {
             using (XmlWriter writer = XmlWriter.Create(dest))
             {
-                //Write the top and start spreadsheet element
+                // Write boilerplate
                 writer.WriteStartDocument();
                 writer.WriteStartElement("spreadsheet");
                 writer.WriteAttributeString("IsValid", IsValid.ToString());
@@ -309,15 +298,15 @@ namespace SS
                 {
                     writer.WriteStartElement("cell");
                     writer.WriteAttributeString("name", s);
-                    //Case when the cell is a formula 
-                    if (cells[s].content is Formula)
+                    // Formula case
+                    if (cells[s].Contents is Formula)
                     {
-                        writer.WriteAttributeString("contents", "=" + cells[s].content.ToString());
+                        writer.WriteAttributeString("contents", "=" + cells[s].Contents.ToString());
                     }
-                    //case when content is a double or string
+                    // Double or string case
                     else
                     {
-                        writer.WriteAttributeString("contents", cells[s].content.ToString());
+                        writer.WriteAttributeString("contents", cells[s].Contents.ToString());
                     }
 
                     writer.WriteFullEndElement();
@@ -326,17 +315,16 @@ namespace SS
                 writer.WriteFullEndElement();
                 writer.WriteEndDocument();
 
-                //Change the status of changed
+                // Change the status of changed
                 Changed = false;
             }
         }
-
 
         /// <summary>
         /// If name is null or invalid, throws an InvalidNameException.
         /// 
         /// Otherwise, the contents of the named cell becomes number.  The method returns a
-        /// set consisting of name plus the names of all other cells whose value depends, 
+        /// set consisting of name plus the names of all other cells whose Value depends, 
         /// directly or indirectly, on the named cell.
         /// 
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
@@ -344,20 +332,15 @@ namespace SS
         /// </summary>
         protected override ISet<string> SetCellContents(string name, double number)
         {
-            //Checking if name is null or invalid
             if (name is null || !ValidCellName(ref name))
             {
                 throw new InvalidNameException();
             }
 
-            //Checking if the cells dictionary already contains the key of name
-            //If so we remove it to make a new entry
             if (cells.ContainsKey(name))
             {
                 cells.Remove(name);
 
-                //Deleting all the old dependees since it is just a double now
-                //Doubles will never have an dependees
                 HashSet<String> oldDependees = new HashSet<string>();
                 foreach (string s in dg.GetDependees(name))
                 {
@@ -368,13 +351,11 @@ namespace SS
                 {
                     dg.RemoveDependency(s, name);
                 }
-
             }
 
-            //Add the new cell value
             cells.Add(name, new Cell(number, GetCellValue));
 
-            //Finds all the cells that are dependent on the cell that just changed
+            // Finds all the cells that are dependent on the cell that just changed
             HashSet<string> cellsToRecalculate = new HashSet<string>();
 
             foreach (string recalc in GetCellsToRecalculate(name))
@@ -382,7 +363,6 @@ namespace SS
                 cellsToRecalculate.Add(recalc);
             }
 
-            //If gotten this far, then the spreadsheet has been modified
             Changed = true;
             return cellsToRecalculate;
         }
@@ -393,7 +373,7 @@ namespace SS
         /// Otherwise, if name is null or invalid, throws an InvalidNameException.
         /// 
         /// Otherwise, the contents of the named cell becomes text.  The method returns a
-        /// set consisting of name plus the names of all other cells whose value depends, 
+        /// set consisting of name plus the names of all other cells whose Value depends, 
         /// directly or indirectly, on the named cell.
         /// 
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
@@ -401,24 +381,20 @@ namespace SS
         /// </summary>
         protected override ISet<string> SetCellContents(string name, string text)
         {
-            //Null case or if name is invalid
             if (name is null || !ValidCellName(ref name))
             {
                 throw new InvalidNameException();
             }
 
-            //Null case of text
             if (text is null)
             {
                 throw new ArgumentNullException();
             }
 
-            //Checking if the cell was nonempty before
             if (cells.ContainsKey(name))
             {
                 cells.Remove(name);
 
-                //Deleting all the references to dependees if there are any 
                 HashSet<String> oldDependees = new HashSet<string>();
                 foreach (string s in dg.GetDependees(name))
                 {
@@ -429,13 +405,10 @@ namespace SS
                 {
                     dg.RemoveDependency(s, name);
                 }
-
             }
 
-            //Add the new cell
             cells.Add(name, new Cell(text, GetCellValue));
 
-            //Returning all the cells that depended on this cell
             HashSet<string> cellsRecalc = new HashSet<string>();
 
             foreach (string recalc in GetCellsToRecalculate(name))
@@ -443,11 +416,8 @@ namespace SS
                 cellsRecalc.Add(recalc);
             }
 
-            //If gotten this far, then the spreadsheet has been modified
             Changed = true;
-
             return cellsRecalc;
-
         }
 
         /// <summary>
@@ -459,7 +429,7 @@ namespace SS
         /// circular dependency, throws a CircularException.
         /// 
         /// Otherwise, the contents of the named cell becomes formula.  The method returns a
-        /// Set consisting of name plus the names of all other cells whose value depends,
+        /// Set consisting of name plus the names of all other cells whose Value depends,
         /// directly or indirectly, on the named cell.
         /// 
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
@@ -467,13 +437,11 @@ namespace SS
         /// </summary>
         protected override ISet<string> SetCellContents(string name, Formula formula)
         {
-            //Null and ivalid cases
             if (name is null || !ValidCellName(ref name))
             {
                 throw new InvalidNameException();
             }
 
-            //Checking to see if all the variables in formula are valid cell names 
             foreach (string v in formula.GetVariables())
             {
                 if (!ValidCellName(v))
@@ -481,26 +449,20 @@ namespace SS
                     throw new ArgumentException();
                 }
 
-                //Checks the case where the passed formula is the same as the cell name
                 if (v.Equals(name))
                 {
                     throw new CircularException();
                 }
-
             }
 
 
-            //Keeping track of the old dependees 
             HashSet<string> oldDependees = new HashSet<string>();
 
             object oldVal = null;
 
-            //Remove all the old dependees and old cell
             if (cells.ContainsKey(name))
             {
-                //Keep track of the old value of the cell in case a cycle is found 
-                oldVal = cells[name].content;
-
+                oldVal = cells[name].Contents;
 
                 foreach (string s in dg.GetDependees(name))
                 {
@@ -514,10 +476,8 @@ namespace SS
 
                 cells.Remove(name);
             }
-            //Add the new cell 
             cells.Add(name, new Cell(formula, GetCellValue));
 
-            //Add all the new dependees
             foreach (string dep in formula.GetVariables())
             {
                 dg.AddDependency(dep, name);
@@ -525,8 +485,6 @@ namespace SS
 
             try
             {
-                //get a list of all the dependents to recalc
-                //If a cycle is detected, a circular exception is thrown from within GetCellsToRecaculate
                 HashSet<string> recalc = new HashSet<string>();
 
                 foreach (string calc in GetCellsToRecalculate(name))
@@ -534,18 +492,14 @@ namespace SS
                     recalc.Add(calc);
                 }
 
-                //If gotten this far, then the spreadsheet has been modified
                 Changed = true;
 
                 return recalc;
             }
             catch (CircularException e)
             {
-
-                //Remove the new cell, prep for reverting to the last val
                 cells.Remove(name);
 
-                // removing all the new dependecies added
                 foreach (string dep in formula.GetVariables())
                 {
                     dg.RemoveDependency(dep, name);
@@ -553,13 +507,11 @@ namespace SS
 
                 if (oldVal != null)
                 {
-                    //Adding in all the old dependencies
                     foreach (string dep in oldDependees)
                     {
                         dg.AddDependency(dep, name);
                     }
 
-                    //Add the old cell value back
                     cells.Add(name, new Cell(oldVal, GetCellValue));
                 }
 
@@ -567,22 +519,21 @@ namespace SS
             }
         }
 
-        // ADDED FOR PS6
         /// <summary>
-        /// If content is null, throws an ArgumentNullException.
+        /// If Contents is null, throws an ArgumentNullException.
         ///
         /// Otherwise, if name is null or invalid, throws an InvalidNameException.
         ///
-        /// Otherwise, if content parses as a double, the contents of the named
+        /// Otherwise, if Contents parses as a double, the contents of the named
         /// cell becomes that double.
         ///
-        /// Otherwise, if content begins with the character '=', an attempt is made
-        /// to parse the remainder of content into a Formula f using the Formula
+        /// Otherwise, if Contents begins with the character '=', an attempt is made
+        /// to parse the remainder of Contents into a Formula f using the Formula
         /// constructor with s => s.ToUpper() as the normalizer and a validator that
         /// checks that s is a valid cell name as defined in the AbstractSpreadsheet
         /// class comment.  There are then three possibilities:
         ///
-        ///   (1) If the remainder of content cannot be parsed into a Formula, a
+        ///   (1) If the remainder of Contents cannot be parsed into a Formula, a
         ///       Formulas.FormulaFormatException is thrown.
         ///
         ///   (2) Otherwise, if changing the contents of the named cell to be f
@@ -590,10 +541,10 @@ namespace SS
         ///
         ///   (3) Otherwise, the contents of the named cell becomes f.
         ///
-        /// Otherwise, the contents of the named cell becomes content.
+        /// Otherwise, the contents of the named cell becomes Contents.
         ///
         /// If an exception is not thrown, the method returns a set consisting of
-        /// name plus the names of all other cells whose value depends, directly
+        /// name plus the names of all other cells whose Value depends, directly
         /// or indirectly, on the named cell.
         ///
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
@@ -610,7 +561,6 @@ namespace SS
                 throw new InvalidNameException();
             }
 
-            //Case when empty string is passed as content 
             if(content.Length == 0)
             {
                 this.cells.Remove(name);
@@ -621,18 +571,18 @@ namespace SS
 
             ISet<string> recalc;
 
-            //Double case
+            // Double case
             if (double.TryParse(content, out double d))
             {
                 recalc = this.SetCellContents(name, d);
             }
-            //Formula case
+            // Formula case
             else if (content[0] == '=')
             {
                 Formula f = new Formula(content.Substring(1), s => s.ToUpper(), ValidCellName);
                 recalc = this.SetCellContents(name, f);
             }
-            //String case
+            // String case
             else
             {
                 recalc = this.SetCellContents(name, content);
@@ -652,7 +602,7 @@ namespace SS
         /// Otherwise, if name isn't a valid cell name, throws an InvalidNameException.
         /// 
         /// Otherwise, returns an enumeration, without duplicates, of the names of all cells whose
-        /// values depend directly on the value of the named cell.  In other words, returns
+        /// values depend directly on the Value of the named cell.  In other words, returns
         /// an enumeration, without duplicates, of the names of all cells that contain
         /// formulas containing name.
         /// 
@@ -665,19 +615,16 @@ namespace SS
         /// </summary>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
-            //Null case
             if (name is null)
             {
                 throw new ArgumentNullException();
             }
 
-            //Testing name validity
             if (!ValidCellName(ref name))
             {
                 throw new InvalidNameException();
             }
 
-            //Make a hashset to make sure there are no duplicates of dependents
             HashSet<string> deps = new HashSet<string>();
 
             foreach (string dep in dg.GetDependents(name))
@@ -697,11 +644,10 @@ namespace SS
         /// </summary>
         private bool ValidCellName(ref string name)
         {
-            //Normalizes name
             name = name.ToUpper();
 
-            //Creates a regex that makes sure there is at least 
-            //one or more letter followed by a nonzero digit followed by 0 or more digits
+            // Creates a regex that makes sure there is at least 
+            // one or more letter followed by a nonzero digit followed by 0 or more digits
             Regex reg = new Regex(@"^[A-z]+[1-9]{1}[\d]*$");
             return reg.IsMatch(name) && IsValid.IsMatch(name);
         }
@@ -712,12 +658,11 @@ namespace SS
         private bool ValidCellName(string name)
         {
 
-            //Creates a regex that makes sure there is at least 
-            //one or more letter followed by a nonzero digit followed by 0 or more digits
+            // Creates a regex that makes sure there is at least 
+            // one or more letter followed by a nonzero digit followed by 0 or more digits
             Regex reg = new Regex(@"^[A-z]+[1-9]{1}[\d]*$");
             return reg.IsMatch(name) && IsValid.IsMatch(name.ToUpper());
         }
-
     }
 
     /// <summary>
@@ -726,14 +671,14 @@ namespace SS
     class Cell
     {
         /// <summary>
-        /// Content of the cell 
+        /// Contents of the cell 
         /// </summary>
-        public object content { get; }
+        public object Contents { get; }
 
         /// <summary>
-        /// The actual value of the cell
+        /// The actual Value of the cell
         /// </summary>
-        public object value { get; private set; }
+        public object Value { get; private set; }
 
         /// <summary>
         /// Stores the passed delegate for future use
@@ -748,34 +693,34 @@ namespace SS
         /// <summary>
         /// Constructor that takes in a single param, the contents of the cell
         /// </summary>
-        public Cell(object _content, LookupCellValue lookup)
+        public Cell(object contents, LookupCellValue lookup)
         {
-            content = _content;
-            value = null;
+            this.Contents = contents;
+            Value = null;
             this.lookup = lookup;
             ReCalculateValue();
         }
 
         /// <summary>
-        /// Recalculates the value for the cell
+        /// Recalculates the Value for the cell
         /// Requires contents to be non-null
         /// </summary>
         public void ReCalculateValue()
         {
-            if (content is string)
+            if (Contents is string)
             {
-                value = content;
+                Value = Contents;
             }
-            else if (content is double)
+            else if (Contents is double)
             {
-                value = content;
+                Value = Contents;
             }
-            else if (content is Formula)
+            else if (Contents is Formula)
             {
                 try
                 {
                     LookupCellValue lookup = this.lookup;
-                    var result = ((Formula)content).Evaluate(delegate (string x)
+                    var result = ((Formula)Contents).Evaluate(delegate (string x)
                    {
                        object val = lookup(x);
                        if (val is double)
@@ -788,14 +733,13 @@ namespace SS
                        }
                    });
 
-                    value = result;
+                    Value = result;
                 }
                 catch (FormulaEvaluationException e)
                 {
-                    value = new FormulaError(e.Message);
+                    Value = new FormulaError(e.Message);
                 }
             }
         }
-
     }
 }

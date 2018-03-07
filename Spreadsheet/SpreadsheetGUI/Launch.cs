@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace SpreadsheetGUI
 {
-    static class Program
+    static class Launch
     {
         /// <summary>
         /// The main entry point for the application.

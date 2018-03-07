@@ -65,7 +65,7 @@ namespace SS
     }
 
     /// <summary>
-    /// A possible value of a cell.
+    /// A possible Value of a cell.
     /// </summary>
     public struct FormulaError
     {
@@ -106,7 +106,7 @@ namespace SS
     /// be normalized.
     /// 
     /// A spreadsheet contains a unique cell corresponding to every possible cell name.  
-    /// In addition to a name, each cell has a contents and a value.  The distinction is
+    /// In addition to a name, each cell has a contents and a Value.  The distinction is
     /// important, and it is important that you understand the distinction and use
     /// the right term when writing code, writing comments, and asking questions.
     /// 
@@ -116,19 +116,19 @@ namespace SS
     /// 
     /// In an empty spreadsheet, the contents of every cell is the empty string.
     ///  
-    /// The value of a cell can be (1) a string, (2) a double, or (3) a FormulaError.  
-    /// (By analogy, the value of an Excel cell is what is displayed in that cell's position
+    /// The Value of a cell can be (1) a string, (2) a double, or (3) a FormulaError.  
+    /// (By analogy, the Value of an Excel cell is what is displayed in that cell's position
     /// in the grid.)
     /// 
-    /// If a cell's contents is a string, its value is that string.
+    /// If a cell's contents is a string, its Value is that string.
     /// 
-    /// If a cell's contents is a double, its value is that double.
+    /// If a cell's contents is a double, its Value is that double.
     /// 
-    /// If a cell's contents is a Formula, its value is either a double or a FormulaError.
-    /// The value of a Formula, of course, can depend on the values of variables.  The value 
-    /// of a Formula variable is the value of the spreadsheet cell it names (if that cell's 
-    /// value is a double) or is undefined (otherwise).  If a Formula depends on an undefined
-    /// variable or on a division by zero, its value is a FormulaError.  Otherwise, its value
+    /// If a cell's contents is a Formula, its Value is either a double or a FormulaError.
+    /// The Value of a Formula, of course, can depend on the values of variables.  The Value 
+    /// of a Formula variable is the Value of the spreadsheet cell it names (if that cell's 
+    /// Value is a double) or is undefined (otherwise).  If a Formula depends on an undefined
+    /// variable or on a division by zero, its Value is a FormulaError.  Otherwise, its Value
     /// is a double, as specified in Formula.Evaluate.
     /// 
     /// Spreadsheets are never allowed to contain a combination of Formulas that establish
@@ -157,7 +157,7 @@ namespace SS
         ///   <cell name="cell name goes here" contents="cell contents go here"></cell>
         /// </spreadsheet>
         ///
-        /// The value of the IsValid attribute should be IsValid.ToString()
+        /// The Value of the IsValid attribute should be IsValid.ToString()
         /// 
         /// There should be one cell element for each non-empty cell in the spreadsheet.
         /// If the cell contains a string, the string (without surrounding double quotes) should be written as the contents.
@@ -172,8 +172,8 @@ namespace SS
         /// <summary>
         /// If name is null or invalid, throws an InvalidNameException.
         ///
-        /// Otherwise, returns the value (as opposed to the contents) of the named cell.  The return
-        /// value should be either a string, a double, or a FormulaError.
+        /// Otherwise, returns the Value (as opposed to the contents) of the named cell.  The return
+        /// Value should be either a string, a double, or a FormulaError.
         /// </summary>
         public abstract object GetCellValue(String name);
 
@@ -185,27 +185,27 @@ namespace SS
         /// <summary>
         /// If name is null or invalid, throws an InvalidNameException.
         /// 
-        /// Otherwise, returns the contents (as opposed to the value) of the named cell.  The return
-        /// value should be either a string, a double, or a Formula.
+        /// Otherwise, returns the contents (as opposed to the Value) of the named cell.  The return
+        /// Value should be either a string, a double, or a Formula.
         /// </summary>
         public abstract object GetCellContents(String name);
 
         // ADDED FOR PS6
         /// <summary>
-        /// If content is null, throws an ArgumentNullException.
+        /// If Contents is null, throws an ArgumentNullException.
         ///
         /// Otherwise, if name is null or invalid, throws an InvalidNameException.
         ///
-        /// Otherwise, if content parses as a double, the contents of the named
+        /// Otherwise, if Contents parses as a double, the contents of the named
         /// cell becomes that double.
         ///
-        /// Otherwise, if content begins with the character '=', an attempt is made
-        /// to parse the remainder of content into a Formula f using the Formula
+        /// Otherwise, if Contents begins with the character '=', an attempt is made
+        /// to parse the remainder of Contents into a Formula f using the Formula
         /// constructor with s => s.ToUpper() as the normalizer and a validator that
         /// checks that s is a valid cell name as defined in the AbstractSpreadsheet
         /// class comment.  There are then three possibilities:
         ///
-        ///   (1) If the remainder of content cannot be parsed into a Formula, a
+        ///   (1) If the remainder of Contents cannot be parsed into a Formula, a
         ///       Formulas.FormulaFormatException is thrown.
         ///
         ///   (2) Otherwise, if changing the contents of the named cell to be f
@@ -213,10 +213,10 @@ namespace SS
         ///
         ///   (3) Otherwise, the contents of the named cell becomes f.
         ///
-        /// Otherwise, the contents of the named cell becomes content.
+        /// Otherwise, the contents of the named cell becomes Contents.
         ///
         /// If an exception is not thrown, the method returns a set consisting of
-        /// name plus the names of all other cells whose value depends, directly
+        /// name plus the names of all other cells whose Value depends, directly
         /// or indirectly, on the named cell.
         ///
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
@@ -229,7 +229,7 @@ namespace SS
         /// If name is null or invalid, throws an InvalidNameException.
         /// 
         /// Otherwise, the contents of the named cell becomes number.  The method returns a
-        /// set consisting of name plus the names of all other cells whose value depends, 
+        /// set consisting of name plus the names of all other cells whose Value depends, 
         /// directly or indirectly, on the named cell.
         /// 
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
@@ -244,7 +244,7 @@ namespace SS
         /// Otherwise, if name is null or invalid, throws an InvalidNameException.
         /// 
         /// Otherwise, the contents of the named cell becomes text.  The method returns a
-        /// set consisting of name plus the names of all other cells whose value depends, 
+        /// set consisting of name plus the names of all other cells whose Value depends, 
         /// directly or indirectly, on the named cell.
         /// 
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
@@ -262,7 +262,7 @@ namespace SS
         /// circular dependency, throws a CircularException.
         /// 
         /// Otherwise, the contents of the named cell becomes formula.  The method returns a
-        /// Set consisting of name plus the names of all other cells whose value depends,
+        /// Set consisting of name plus the names of all other cells whose Value depends,
         /// directly or indirectly, on the named cell.
         /// 
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
@@ -276,7 +276,7 @@ namespace SS
         /// Otherwise, if name isn't a valid cell name, throws an InvalidNameException.
         /// 
         /// Otherwise, returns an enumeration, without duplicates, of the names of all cells whose
-        /// values depend directly on the value of the named cell.  In other words, returns
+        /// values depend directly on the Value of the named cell.  In other words, returns
         /// an enumeration, without duplicates, of the names of all cells that contain
         /// formulas containing name.
         /// 
