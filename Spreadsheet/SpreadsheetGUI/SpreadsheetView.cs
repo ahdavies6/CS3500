@@ -3,55 +3,34 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SpreadsheetGUI;
 
-namespace ControllerTester
+namespace SpreadsheetGUI
 {
-    public class SimpleView : IView
+    class SpreadsheetView : IView
     {
         /// <summary>
         /// Called when the user creates a new Spreadsheet.
         /// </summary>
-        public event FileOperation NewFile;
-        public void OnNewFile()
-        {
-
-        }
+        event EventHandler NewFile;
 
         /// <summary>
         /// Called when the user opens a Spreadsheet.
         /// </summary>
-        public event FileOperation OpenFile;
-        public void OnOpenFile()
-        {
-
-        }
+        event EventHandler OpenFile;
 
         /// <summary>
         /// Called when the user saves a Spreadsheet.
         /// </summary>
-        public event FileOperation SaveFile;
-        public void OnSaveFile()
-        {
-
-        }
+        event EventHandler SaveFile;
 
         /// <summary>
         /// Called when the user closes a Spreadsheet.
         /// </summary>
-        public event Close CloseFile;
-        public void OnCloseFile()
-        {
-
-        }
+        event EventHandler CloseFile;
 
         /// <summary>
         /// Called when the user modifies the contents of a cell in a Spreadsheet.
         /// </summary>
-        public event ChangeContent SetContents;
-        public void OnSetContents()
-        {
-
-        }
+        event EventHandler SetContents;
     }
 }
