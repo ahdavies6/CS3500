@@ -14,30 +14,43 @@ namespace SpreadsheetController
 
         private HashSet<Window> windows;
         private IView firstWindow;
+        private delegate IView CreateView();
 
         // todo: rename
         private const string DEFAULTFILENAME = "new.ss";
 
-        public Controller(IView firstWindow)
+        public Controller(string filename, IView firstWindow)
         {
-            windows = new HashSet<Window>();
-            this.firstWindow = firstWindow;
+            Spreadsheet ss = CreateOrLoadFile(filename);
+            Window window = new Window(filename, firstWindow, ss);
+
+            // todo: how do? once do, use everywhere.
+            HEREHEREHERE
+            CreateView = firstWindow.CreateView();
+
+            windows = new HashSet<Window>() { window };
         }
 
         // todo: rename
         #region Window/File Operations
 
-        public void OpenNewWindow(string filename)
+        private Window OpenNewWindow(string filename)
         {
-            // todo: edit so we know whether to CreateFile or LoadFile
-            Spreadsheet ss = CreateFile(filename);
-            Window window = new Window(filename, firstWindow.CreateView(), ss);
+            Spreadsheet ss = CreateOrLoadFile(filename);
+            Window window = new Window(filename, windows.First().GetNewView(), ss);
             windows.Add(window);
+            return window;
         }
 
-        public void OpenNewWindow()
+        private void OpenNewWindow()
         {
             OpenNewWindow(DEFAULTFILENAME);
+        }
+
+        private Spreadsheet CreateOrLoadFile(string filename)
+        {
+            // todo: figure out how to detect whether there's something to load or not
+            return CreateFile(filename);
         }
 
         // File > New
@@ -79,15 +92,20 @@ namespace SpreadsheetController
 
     internal class Window
     {
-        public string Filename { get; private set; }
-        public IView View { get; private set; }
-        public Spreadsheet Spreadsheet { get; private set; }
+        private string filename;
+        private IView view;
+        private Spreadsheet model;
 
-        public Window(string filename, IView view, Spreadsheet spreadsheet)
+        public Window(string filename, IView view, Spreadsheet model)
         {
-            this.Filename = filename;
-            this.View = view;
-            this.Spreadsheet = spreadsheet;
+            this.filename = filename;
+            this.view = view;
+            this.model = model;
+        }
+
+        public IView GetNewView()
+        {
+            return view.CreateView();
         }
     }
 }
