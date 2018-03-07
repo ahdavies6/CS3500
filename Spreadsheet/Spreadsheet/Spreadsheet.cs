@@ -83,7 +83,7 @@ namespace SS
             cells = new Dictionary<string, Cell>();
             dg = new DependencyGraph();
             IsValid = new Regex(".*");
-            Changed = true;
+            Changed = false;
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace SS
         public Spreadsheet(Regex isValid) : this()
         {
             this.IsValid = isValid;
-            Changed = true;
+            Changed = false;
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace SS
             else
             {
                 //Case when the cell doesn't exist but name is still valid
-                return null;
+                return "";
             }
         }
 
@@ -610,22 +610,40 @@ namespace SS
                 throw new InvalidNameException();
             }
 
+            //Case when empty string is passed as content 
+            if(content.Length == 0)
+            {
+                this.cells.Remove(name);
+                dg.ReplaceDependees(name, new HashSet<string> { });
+                dg.ReplaceDependents(name, new HashSet<string> { });
+                return new HashSet<string> { };
+            }
+
+            ISet<string> recalc;
+
             //Double case
             if (double.TryParse(content, out double d))
             {
-                return this.SetCellContents(name, d);
+                recalc = this.SetCellContents(name, d);
             }
             //Formula case
             else if (content[0] == '=')
             {
                 Formula f = new Formula(content.Substring(1), s => s.ToUpper(), ValidCellName);
-                return this.SetCellContents(name, f);
+                recalc = this.SetCellContents(name, f);
             }
             //String case
             else
             {
-                return this.SetCellContents(name, content);
+                recalc = this.SetCellContents(name, content);
             }
+
+            foreach(string recalculate in this.GetCellsToRecalculate(name))
+            {
+                this.cells[recalculate].ReCalculateValue();
+            }
+
+            return recalc;
         }
 
         /// <summary>
@@ -705,7 +723,7 @@ namespace SS
     /// <summary>
     /// Helper struct that keeps track of the properties of cells
     /// </summary>
-    struct Cell
+    class Cell
     {
         /// <summary>
         /// Content of the cell 
