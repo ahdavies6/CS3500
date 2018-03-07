@@ -11,26 +11,26 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Called when the user creates a new Spreadsheet.
         /// </summary>
-        event EventHandler NewFile;
+        public event FileOperation NewFile;
 
         /// <summary>
         /// Called when the user opens a Spreadsheet.
         /// </summary>
-        event EventHandler OpenFile;
+        public event FileOperation OpenFile;
 
         /// <summary>
         /// Called when the user saves a Spreadsheet.
         /// </summary>
-        event EventHandler SaveFile;
+        public event FileOperation SaveFile;
 
         /// <summary>
         /// Called when the user closes a Spreadsheet.
         /// </summary>
-        event EventHandler CloseFile;
+        public event Close CloseFile;
 
         /// <summary>
         /// Called when the user modifies the contents of a cell in a Spreadsheet.
         /// </summary>
-        event EventHandler SetContents;
+        public event ChangeContent SetContents;
     }
 }

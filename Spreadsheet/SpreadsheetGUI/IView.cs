@@ -21,36 +21,34 @@ namespace SpreadsheetGUI
     /// </summary>
     public delegate void ChangeContent(string cellName, string contents);
 
+    /// <summary>
+    /// Interface for a View object (which will be implemented by a GUI).
+    /// </summary>
     public interface IView
     {
         /// <summary>
         /// Called when the user creates a new Spreadsheet.
         /// </summary>
         event FileOperation NewFile;
-        void OnNewFile();
 
         /// <summary>
         /// Called when the user opens a Spreadsheet.
         /// </summary>
         event FileOperation OpenFile;
-        void OnOpenFile();
 
         /// <summary>
         /// Called when the user saves a Spreadsheet.
         /// </summary>
         event FileOperation SaveFile;
-        void OnSaveFile();
 
         /// <summary>
         /// Called when the user closes a Spreadsheet.
         /// </summary>
         event Close CloseFile;
-        void OnCloseFile();
 
         /// <summary>
         /// Called when the user modifies the contents of a cell in a Spreadsheet.
         /// </summary>
         event ChangeContent SetContents;
-        void OnSetContents();
     }
 }
