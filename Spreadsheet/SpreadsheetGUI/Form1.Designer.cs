@@ -33,16 +33,15 @@
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.CurrentCellName = new System.Windows.Forms.Label();
             this.ContentChangeBox = new System.Windows.Forms.TextBox();
-            this.CurrentCellContent = new System.Windows.Forms.Label();
             this.CurrentCellValue = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.enterHelpTextTODOToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.enterHelpTextTODOToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -70,12 +69,13 @@
             this.spreadsheetPanel1.Name = "spreadsheetPanel1";
             this.spreadsheetPanel1.Size = new System.Drawing.Size(794, 366);
             this.spreadsheetPanel1.TabIndex = 0;
+            this.spreadsheetPanel1.SelectionChanged += new SSGui.SelectionChangedHandler(this.SelectCell);
+            this.spreadsheetPanel1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.KeyboardInput);
             // 
             // flowLayoutPanel1
             // 
             this.flowLayoutPanel1.Controls.Add(this.CurrentCellName);
             this.flowLayoutPanel1.Controls.Add(this.ContentChangeBox);
-            this.flowLayoutPanel1.Controls.Add(this.CurrentCellContent);
             this.flowLayoutPanel1.Controls.Add(this.CurrentCellValue);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
@@ -99,19 +99,10 @@
             this.ContentChangeBox.Size = new System.Drawing.Size(282, 29);
             this.ContentChangeBox.TabIndex = 1;
             // 
-            // CurrentCellContent
-            // 
-            this.CurrentCellContent.AutoSize = true;
-            this.CurrentCellContent.Location = new System.Drawing.Point(361, 0);
-            this.CurrentCellContent.Name = "CurrentCellContent";
-            this.CurrentCellContent.Size = new System.Drawing.Size(180, 25);
-            this.CurrentCellContent.TabIndex = 2;
-            this.CurrentCellContent.Text = "CurrentCellContent";
-            // 
             // CurrentCellValue
             // 
             this.CurrentCellValue.AutoSize = true;
-            this.CurrentCellValue.Location = new System.Drawing.Point(547, 0);
+            this.CurrentCellValue.Location = new System.Drawing.Point(361, 0);
             this.CurrentCellValue.Name = "CurrentCellValue";
             this.CurrentCellValue.Size = new System.Drawing.Size(162, 25);
             this.CurrentCellValue.TabIndex = 3;
@@ -140,6 +131,30 @@
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(56, 34);
             this.fileToolStripMenuItem.Text = "File";
             // 
+            // openToolStripMenuItem
+            // 
+            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(191, 34);
+            this.openToolStripMenuItem.Text = "Open";
+            // 
+            // saveToolStripMenuItem
+            // 
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(191, 34);
+            this.saveToolStripMenuItem.Text = "Save";
+            // 
+            // saveAsToolStripMenuItem
+            // 
+            this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(191, 34);
+            this.saveAsToolStripMenuItem.Text = "Save As...";
+            // 
+            // newToolStripMenuItem
+            // 
+            this.newToolStripMenuItem.Name = "newToolStripMenuItem";
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(191, 34);
+            this.newToolStripMenuItem.Text = "New";
+            // 
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -153,30 +168,6 @@
             this.enterHelpTextTODOToolStripMenuItem.Name = "enterHelpTextTODOToolStripMenuItem";
             this.enterHelpTextTODOToolStripMenuItem.Size = new System.Drawing.Size(329, 34);
             this.enterHelpTextTODOToolStripMenuItem.Text = "Enter Help Text -- TODO";
-            // 
-            // openToolStripMenuItem
-            // 
-            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(239, 34);
-            this.openToolStripMenuItem.Text = "Open";
-            // 
-            // saveToolStripMenuItem
-            // 
-            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(239, 34);
-            this.saveToolStripMenuItem.Text = "Save";
-            // 
-            // saveAsToolStripMenuItem
-            // 
-            this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(239, 34);
-            this.saveAsToolStripMenuItem.Text = "Save As...";
-            // 
-            // newToolStripMenuItem
-            // 
-            this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(239, 34);
-            this.newToolStripMenuItem.Text = "New";
             // 
             // Form1
             // 
@@ -205,7 +196,6 @@
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.Label CurrentCellName;
         private System.Windows.Forms.TextBox ContentChangeBox;
-        private System.Windows.Forms.Label CurrentCellContent;
         private System.Windows.Forms.Label CurrentCellValue;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
