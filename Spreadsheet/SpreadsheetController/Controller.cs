@@ -148,14 +148,41 @@ namespace SpreadsheetController
             GetWindow(filename).Model.Save(new StreamWriter(filename));
         }
 
-        // todo: get GUI to do this. Controller can only get GUI to do it anyway, so why bother having an event?
+        ///// <summary>
+        ///// Closes whichever window is editing file (filename).
+        ///// Accessed in the GUI via File > Close.
+        ///// </summary>
+        //private void CloseFile(string filename)
+        //{
+        //    Window window = GetWindow(filename);
+        //}
+
         /// <summary>
-        /// Closes whichever window is editing file (filename).
-        /// Accessed in the GUI via File > Close.
+        /// Sets the contents of a cell (cellName) in model Spreadsheet to contents (cellContents).
         /// </summary>
-        private void CloseFile(string filename)
+        private void SetCellContents(Window window, string cellName, string cellContents)
         {
-            
+            HashSet<string> cells = (HashSet<string>)window.Model.SetContentsOfCell(cellName, cellContents);
+
+            foreach (string cell in cells)
+            {
+                object value = window.Model.GetCellValue(cell);
+
+                if (value is string)
+                {
+                    window.View.DisplayContents(cell, (string)value);
+                }
+                else if (value is double)
+                {
+                    value = (double)value;
+                    window.View.DisplayContents(cell, value.ToString());
+                }
+                else if (value is FormulaError)
+                {
+                    value = (FormulaError)value;
+                    window.View.DisplayContents(cell, value.ToString());
+                }
+            }
         }
 
         #endregion
@@ -186,21 +213,20 @@ namespace SpreadsheetController
             SaveFile(GetWindow((IView)sender).Filename);
         }
 
-        // todo: get GUI to do this. Controller can only get GUI to do it anyway, so why bother having an event?
-        /// <summary>
-        /// Handles a view's CloseFile event.
-        /// </summary>
-        private void HandleClose(object sender, EventArgs e)
-        {
-            CloseFile(GetWindow((IView)sender).Filename);
-        }
+        ///// <summary>
+        ///// Handles a view's CloseFile event.
+        ///// </summary>
+        //private void HandleClose(object sender, EventArgs e)
+        //{
+        //    CloseFile(GetWindow((IView)sender).Filename);
+        //}
 
         /// <summary>
         /// Handles a view's SetContents event.
         /// </summary>
         private void HandleChange(object sender, SetContentsEventArgs e)
         {
-            GetWindow((IView)sender).Model.SetContentsOfCell(e.CellName, e.CellContents);
+            SetCellContents(GetWindow((IView)sender), e.CellName, e.CellContents);
         }
 
         #endregion
