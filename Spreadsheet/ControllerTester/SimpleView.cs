@@ -12,7 +12,7 @@ namespace ControllerTester
         /// <summary>
         /// Returns a new instance of SimpleView as an IView.
         /// </summary>
-        public IView CreateView()
+        public IView GetNew()
         {
             return new SimpleView();
         }
@@ -25,7 +25,7 @@ namespace ControllerTester
         /// <summary>
         /// Called when the user opens a Spreadsheet.
         /// </summary>
-        public event EventHandler OpenFile;
+        public event OpenFileEventHandler OpenFile;
 
         /// <summary>
         /// Called when the user saves a Spreadsheet.
@@ -40,6 +40,6 @@ namespace ControllerTester
         /// <summary>
         /// Called when the user modifies the contents of a cell in a Spreadsheet.
         /// </summary>
-        public event EventHandler SetContents;
+        public event SetContentsEventHandler SetContents;
     }
 }

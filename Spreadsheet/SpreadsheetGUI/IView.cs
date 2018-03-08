@@ -53,6 +53,9 @@ namespace SpreadsheetGUI
     //    event ChangeContent SetContents;
     //}
 
+    public delegate void SetContentsEventHandler(object sender, SetContentsEventArgs e);
+    public delegate void OpenFileEventHandler(object sender, OpenFileEventArgs e);
+
     /// <summary>
     /// Interface for a View object (which will be implemented by a GUI).
     /// </summary>
@@ -61,7 +64,7 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Returns a new instance of an IView.
         /// </summary>
-        IView CreateView();
+        IView GetNew();
 
         /// <summary>
         /// Called when the user creates a new Spreadsheet.
@@ -71,7 +74,7 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Called when the user opens a Spreadsheet.
         /// </summary>
-        event EventHandler OpenFile;
+        event OpenFileEventHandler OpenFile;
 
         /// <summary>
         /// Called when the user saves a Spreadsheet.
@@ -86,6 +89,57 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Called when the user modifies the contents of a cell in a Spreadsheet.
         /// </summary>
-        event EventHandler SetContents;
+        event SetContentsEventHandler SetContents;
+    }
+
+    public class SetContentsEventArgs : EventArgs
+    {
+        /// <summary>
+        /// The cell whose contents are being set.
+        /// </summary>
+        public string CellName
+        {
+            get;
+            private set;
+        }
+        
+        /// <summary>
+        /// The contents the cell is being changed to.
+        /// </summary>
+        public string CellContents
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Creates a new SetContentsEventArgs regarding the cell whose contents are being set (cellName)
+        /// and its new contents (cellContents).
+        /// </summary>
+        public SetContentsEventArgs(string cellName, string cellContents)
+        {
+            this.CellName = cellName;
+            this.CellContents = cellContents;
+        }
+    }
+
+    public class OpenFileEventArgs : EventArgs
+    {
+        /// <summary>
+        /// The filename of the file to open.
+        /// </summary>
+        public string Filename
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Creates a new OpenFileEventArgs regarding the filename of the file to open.
+        /// </summary>
+        public OpenFileEventArgs(string filename)
+        {
+            this.Filename = filename;
+        }
     }
 }
