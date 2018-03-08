@@ -11,7 +11,8 @@ namespace ControllerTester
         [TestMethod]
         public void NewTest1()
         {
-            
+            IView view = new SimpleView();
+            Controller controller = new Controller("tem", )
         }
 
         [TestMethod]

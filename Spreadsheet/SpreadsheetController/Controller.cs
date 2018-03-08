@@ -31,37 +31,37 @@ namespace SpreadsheetController
 
         /// <summary>
         /// Creates a new Controller controlling IView (GUI) firstView which is editing a model (Spreadsheet)
-        /// in file (filename).
+        /// at source (input).
         /// </summary>
-        public Controller(string filename, IView firstView)
+        public Controller(TextReader input, IView firstView)
         {
-            Spreadsheet ss = CreateOrLoadFile(filename);
-            Window window = new Window(filename, firstView, ss);
+            Spreadsheet ss = CreateOrLoadFile(input);
+            Window window = new Window(input, firstView, ss);
             getNewView = firstView.GetNew;
 
             windows = new HashSet<Window> { window };
         }
 
         /// <summary>
-        /// Returns the window which is editing file (filename).
-        /// If no such file is open, throws a KeyNotFoundException.
+        /// Returns the window which is editing source (input).
+        /// If no such source is open, throws a KeyNotFoundException.
         /// </summary>
-        private Window GetWindow(string filename)
+        private Window GetWindow(TextReader input)
         {
             foreach (Window window in windows)
             {
-                if (window.Filename == filename)
+                if (window.Input == input)
                 {
                     return window;
                 }
             }
 
-            throw new KeyNotFoundException("There is no file with that filename being edited.");
+            throw new KeyNotFoundException("There is no source with that signature being edited.");
         }
 
         /// <summary>
-        /// Returns the window which is editing file (filename).
-        /// If no such file is open, throws a KeyNotFoundException.
+        /// Returns the window which is editing source contained in (view).
+        /// If no such source is open, throws a KeyNotFoundException.
         /// </summary>
         private Window GetWindow(IView view)
         {
@@ -79,9 +79,9 @@ namespace SpreadsheetController
         #region Window Operations
 
         /// <summary>
-        /// Opens a new window editing file (filename).
+        /// Opens a new window editing source (input).
         /// </summary>
-        private void OpenNewWindow(string filename)
+        private void OpenNewWindow(TextReader input)
         {
             IView view = getNewView();
             view.NewFile += HandleNew;
@@ -89,63 +89,63 @@ namespace SpreadsheetController
             view.SaveFile += HandleSave;
             view.SetContents += HandleChange;
 
-            Spreadsheet ss = CreateOrLoadFile(filename);
+            Spreadsheet ss = CreateOrLoadFile(input);
 
-            Window window = new Window(filename, view, ss);
+            Window window = new Window(input, view, ss);
             windows.Add(window);
         }
 
         /// <summary>
-        /// Opens a new window editing file DEFAULTFILENAME ("new.ss").
+        /// Opens a new window editing source at DEFAULTFILENAME ("new.ss").
         /// </summary>
         private void OpenNewWindow()
         {
-            OpenNewWindow(DEFAULTFILENAME);
+            OpenNewWindow(new StreamReader(DEFAULTFILENAME));
         }
 
         /// <summary>
-        /// If the file (filename) exists, reads that file into a Spreadsheet and returns it.
-        /// Otherwise, creates a new file (filename) and returns it as a Spreadsheet.
+        /// If the source file at (input) exists, reads that source into a Spreadsheet and returns it.
+        /// Otherwise, creates a new source (input) and returns it as a Spreadsheet.
         /// </summary>
-        private Spreadsheet CreateOrLoadFile(string filename)
+        private Spreadsheet CreateOrLoadFile(TextReader input)
         {
-            if (File.Exists(filename))
+            if (File.Exists(input.ToString()))
             {
-                return LoadFile(filename);
+                return LoadFile(input);
             }
             else
             {
-                return CreateFile(filename);
+                return CreateFile(input);
             }
         }
 
         /// <summary>
-        /// Creates a new file (filename) and returns it as a Spreadsheet.
+        /// Creates a new file at the filename in source input and returns it as a Spreadsheet.
         /// Accessed in the GUI via File > New.
         /// </summary>
-        private Spreadsheet CreateFile(string filename)
+        private Spreadsheet CreateFile(TextReader input)
         {
             Spreadsheet ss = new Spreadsheet();
-            ss.Save(new StreamWriter(filename));
+            ss.Save(new StreamWriter(input.ToString()));
             return ss;
         }
 
         /// <summary>
-        /// Loads a file (filename), reads that file into a Spreadsheet, and returns it.
+        /// Loads a source (input), reads that source into a Spreadsheet, and returns it.
         /// Accessed in the GUI via File > Open.
         /// </summary>
-        private Spreadsheet LoadFile(string filename)
+        private Spreadsheet LoadFile(TextReader input)
         {
-            return new Spreadsheet(new StreamReader(filename), new Regex("^[A-Z][1-99]$"));
+            return new Spreadsheet(new StreamReader(input.ToString()), new Regex("^[A-Z][1-99]$"));
         }
 
         /// <summary>
-        /// Saves an open file at destination (filename).
+        /// Saves an open source at destination source's filename.
         /// Accessed in the GUI via File > Save or File > Save To.
         /// </summary>
-        private void SaveFile(string filename)
+        private void SaveFile(TextWriter output)
         {
-            GetWindow(filename).Model.Save(new StreamWriter(filename));
+            GetWindow(new StreamReader(output.ToString())).Model.Save(new StreamWriter(output.ToString()));
         }
 
         ///// <summary>
@@ -202,7 +202,7 @@ namespace SpreadsheetController
         /// </summary>
         private void HandleOpen(object sender, OpenFileEventArgs e)
         {
-            OpenNewWindow(e.Filename);
+            OpenNewWindow(e.Input);
         }
 
         /// <summary>
@@ -210,7 +210,7 @@ namespace SpreadsheetController
         /// </summary>
         private void HandleSave(object sender, EventArgs e)
         {
-            SaveFile(GetWindow((IView)sender).Filename);
+            SaveFile(new StreamWriter(GetWindow((IView)sender).Input.ToString()));
         }
 
         ///// <summary>
@@ -234,21 +234,21 @@ namespace SpreadsheetController
 
     /// <summary>
     /// A window that is open in the program.
-    /// Each window is editing file Filename in view View containing model Model.
+    /// Each window is editing source Input in view View containing model Model.
     /// </summary>
     internal class Window
     {
         /// <summary>
-        /// The filename of the open file.
+        /// The source of the open Spreadsheet.
         /// </summary>
-        public string Filename
+        public TextReader Input
         {
             get;
             private set;
         }
         
         /// <summary>
-        /// The view (GUI) that the user is editing the model through.
+        /// The view (GUI) that the user is editing the model (Spreadsheet) through.
         /// </summary>
         public IView View
         {
@@ -266,11 +266,11 @@ namespace SpreadsheetController
         }
 
         /// <summary>
-        /// Creates a new Window editing file (filename) in view (view) containing model (model).
+        /// Creates a new Window editing source (input) in view (view) containing model (model).
         /// </summary>
-        public Window(string filename, IView view, Spreadsheet model)
+        public Window(TextReader input, IView view, Spreadsheet model)
         {
-            this.Filename = filename;
+            this.Input = input;
             this.View = view;
             this.Model = model;
         }

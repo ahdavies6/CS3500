@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace SpreadsheetGUI
 {
@@ -55,7 +56,7 @@ namespace SpreadsheetGUI
 
     /// <summary>
     /// Handles the OpenFile event, provided the object that sent the event, and OpenFileEventArgs that contain
-    /// the filename of the file to open.
+    /// the read destination for the view.
     /// </summary>
     public delegate void OpenFileEventHandler(object sender, OpenFileEventArgs e);
 
@@ -121,25 +122,25 @@ namespace SpreadsheetGUI
 
     /// <summary>
     /// Derived from EventArgs; to be used in a method that instantiates OpenFileEventHandler.
-    /// Contains the string Filename, which is the name of the file to open.
+    /// Contains a TextReader Input, which is the source from which to read.
     /// </summary>
     public class OpenFileEventArgs : EventArgs
     {
         /// <summary>
-        /// The filename of the file to open.
+        /// The input source to read the Spreadsheetfrom.
         /// </summary>
-        public string Filename
+        public TextReader Input
         {
             get;
             private set;
         }
 
         /// <summary>
-        /// Creates a new OpenFileEventArgs regarding the filename of the file to open.
+        /// Creates a new OpenFileEventArgs regarding the source of input being read from.
         /// </summary>
-        public OpenFileEventArgs(string filename)
+        public OpenFileEventArgs(TextReader input)
         {
-            this.Filename = filename;
+            this.Input = input;
         }
     }
 
