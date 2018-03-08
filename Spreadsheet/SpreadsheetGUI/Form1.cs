@@ -31,6 +31,24 @@ namespace SpreadsheetGUI
             throw new NotImplementedException();
         }
 
+
+        public void DisplayContents(string CellName, string CellValue)
+        {
+            int col = ConvertColToInt(CellName[0]);
+            int row = int.Parse(CellName.Substring(1));
+            this.spreadsheetPanel1.SetValue(col, row, CellValue);
+        }
+
+        /// <summary>
+        /// Helper method that converts the given char col into an int representing the column
+        /// </summary>
+        /// <param name="col"></param>
+        /// <returns></returns>
+        private int ConvertColToInt(char col)
+        {
+            return ((int)col) - 65;
+        }
+
         /// <summary>
         /// Grabs the current cell name, value, and content. When the user clicks a cell this is updated
         /// </summary>
@@ -115,6 +133,6 @@ namespace SpreadsheetGUI
 
             this.SelectCell(this.spreadsheetPanel1);
         }
-        
+
     }
 }
