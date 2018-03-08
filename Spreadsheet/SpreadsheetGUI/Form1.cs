@@ -28,7 +28,8 @@ namespace SpreadsheetGUI
 
         public IView GetNew()
         {
-            throw new NotImplementedException();
+            return new Form1();
+
         }
 
 
