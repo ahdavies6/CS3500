@@ -8,29 +8,76 @@ namespace SpreadsheetGUI
 {
     class SpreadsheetView : IView
     {
-        /// <summary>
-        /// Called when the user creates a new Spreadsheet.
-        /// </summary>
-        public event FileOperation NewFile;
 
-        /// <summary>
-        /// Called when the user opens a Spreadsheet.
-        /// </summary>
-        public event FileOperation OpenFile;
 
-        /// <summary>
-        /// Called when the user saves a Spreadsheet.
-        /// </summary>
-        public event FileOperation SaveFile;
+        event EventHandler IView.NewFile
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
 
-        /// <summary>
-        /// Called when the user closes a Spreadsheet.
-        /// </summary>
-        public event Close CloseFile;
+            remove
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-        /// <summary>
-        /// Called when the user modifies the contents of a cell in a Spreadsheet.
-        /// </summary>
-        public event ChangeContent SetContents;
+        event OpenFileEventHandler IView.OpenFile
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        event EventHandler IView.SaveFile
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        event EventHandler IView.CloseFile
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        event SetContentsEventHandler IView.SetContents
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public IView GetNew()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
