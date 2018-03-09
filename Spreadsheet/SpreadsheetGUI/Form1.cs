@@ -20,16 +20,30 @@ namespace SpreadsheetGUI
 
         }
 
+        event SaveFileEventHandler IView.SaveFile
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public event SaveFileEventHandler SaveFileAs;
         public event EventHandler NewFile;
         public event OpenFileEventHandler OpenFile;
-        public event EventHandler SaveFile;
         public event EventHandler CloseFile;
         public event SetContentsEventHandler SetContents;
+        public event EventHandler SaveFile;
 
         public IView GetNew()
         {
-            return new Form1();
-
+            Form1 newss = new Form1();
+            return newss;
         }
 
 
@@ -38,6 +52,26 @@ namespace SpreadsheetGUI
             int col = ConvertColToInt(CellName[0]);
             int row = int.Parse(CellName.Substring(1));
             this.spreadsheetPanel1.SetValue(col, row, CellValue);
+        }
+
+
+        public bool WarningPrompt()
+        {
+            DialogResult result = MessageBox.Show("There are unsaved changes! Do you want to save or cancel?", "Warning!", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+            if(result == DialogResult.Yes)
+            {
+                this.SaveFile(this, new EventArgs());
+                return true;
+            }
+            else if (result == DialogResult.No)
+            {
+                return true;
+            }
+            else
+            {
+                return false; 
+            }
         }
 
         /// <summary>
@@ -148,9 +182,16 @@ namespace SpreadsheetGUI
 
             if (open.ShowDialog() == DialogResult.OK)
             {
-                if (OpenFile != null)
+                try
                 {
-                    OpenFile(this, new OpenFileEventArgs(open.FileName));
+                    if (OpenFile != null)
+                    {
+                        OpenFile(this, new OpenFileEventArgs(open.FileName));
+                    }
+                }
+                catch(Exception ex) //CorruptedFileException e)
+                {
+                    MessageBox.Show("The file " + open.FileName + "Could not be opened.");
                 }
             }
         }
@@ -184,6 +225,65 @@ namespace SpreadsheetGUI
                     string cellName = ConvertColIntoLetter(col) + row;
                     SetContents(this, new SetContentsEventArgs(cellName, this.ContentChangeBox.Text));
                 }
+            }
+        }
+
+        /// <summary>
+        /// Saves the spreadsheet using the current file path. If it does not exist, prompts to user to select a place to save.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SaveSpreadSheet(object sender, EventArgs e)
+        {
+            if (this.SaveFile != null)
+            {
+                SaveFile(this, e);
+            }
+        }
+
+        /// <summary>
+        /// Opens a file dialog prompt for the user to choose a location and file name for the spreadsheet
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SaveAsSpreadSheet(object sender, EventArgs e)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.Filter = "Spreadsheet files (*.SS) |*.SS| All files (*.*)|*.*";
+            save.InitialDirectory = "c:\\";
+            save.FilterIndex = 1;
+
+            if (save.ShowDialog() == DialogResult.OK)
+            {
+                MessageBox.Show(save.FileName);
+                if (SaveFileAs != null)
+                {
+                    SaveFileAs(this, new SaveFileEventArgs(save.FileName));
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// Closes the window and notifies the close file event handler that the file needs to be closed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CloseWindow(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        /// <summary>
+        /// When the window in question is x'ed out of. It triggers the close window prompt
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void XOutOfWindow(object sender, FormClosingEventArgs e)
+        {
+            if (CloseFile != null)
+            {
+                CloseFile(this, e);
             }
         }
     }
