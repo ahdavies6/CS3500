@@ -94,7 +94,7 @@ namespace ControllerTester
             view.FireSetContents("A4", "=A2+A3");
             view.FireSetContents("A5", "=A2+A3+A1");
 
-            //unsaved changes with a true quit value
+            // Unsaved changes, but user decides to quit anyway.
             view.Close = true;
             view.FireCloseFile();
 
@@ -106,7 +106,7 @@ namespace ControllerTester
             view.FireSetContents("A4", "=A2+A3");
             view.FireSetContents("A5", "=A2+A3+A1");
 
-            //unsaved changes with a false quit value
+            // Unsaved changes, and user decides to stay in view.
             view.Close = false;
             view.FireCloseFile();
 
@@ -118,7 +118,6 @@ namespace ControllerTester
             view.FireSetContents("A4", "=A2+A3");
             view.FireSetContents("A5", "=A2+A3+A1");
 
-            //unsaved changes with a false quit value
             view.FireSaveFile("testhandle.ss");
             view.Close = true;
             view.FireCloseFile();
@@ -170,6 +169,5 @@ namespace ControllerTester
             view.FireSetContents("A6", "=A2+A3+A/");
 
         }
-
     }
 }

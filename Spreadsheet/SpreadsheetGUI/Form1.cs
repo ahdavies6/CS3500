@@ -19,7 +19,7 @@ namespace SpreadsheetGUI
         /// <summary>
         /// File path of the spreadsheet
         /// </summary>
-        public string path
+        public string Path
         {
             get;
             private set;
@@ -32,7 +32,7 @@ namespace SpreadsheetGUI
         public Form1(string path)
         {
             InitializeComponent();
-            this.path = path;
+            this.Path = path;
 
         }
 
@@ -108,7 +108,7 @@ namespace SpreadsheetGUI
         /// </summary>
         public bool ClosePrompt()
         {
-            DialogResult result = MessageBox.Show("There are unsaved changes! Do you want to save or cancel?", "Warning!", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            DialogResult result = MessageBox.Show("There are unsaved changes! Do you want to save before closing?", "Warning!", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
             {
@@ -260,7 +260,6 @@ namespace SpreadsheetGUI
                 {
                     OpenFile(this, new FileEventArgs(open.FileName));
                 }
-
             }
         }
 
@@ -269,7 +268,7 @@ namespace SpreadsheetGUI
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void NewSpreadhSheetButtonClick(object sender, EventArgs e)
+        private void NewSpreadsheetButtonClick(object sender, EventArgs e)
         {
             if (NewFile != null)
             {
@@ -315,9 +314,9 @@ namespace SpreadsheetGUI
         /// <param name="e"></param>
         private void SaveSpreadSheet(object sender, EventArgs e)
         {
-            if (!path.Equals(""))
+            if (!Path.Equals(""))
             {
-                this.SaveFile(this, new FileEventArgs(path));
+                this.SaveFile(this, new FileEventArgs(Path));
             }
             else
             {
@@ -369,6 +368,17 @@ namespace SpreadsheetGUI
             {
                 CloseFile(this, e);
             }
+        }
+
+        /// <summary>
+        /// Opens AboutBox1 as Help.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ClickHelp(object sender, EventArgs e)
+        {
+            AboutBox1 help = new AboutBox1();
+            help.Show();
         }
     }
 }

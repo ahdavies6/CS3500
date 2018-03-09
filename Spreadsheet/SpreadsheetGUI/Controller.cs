@@ -11,56 +11,59 @@ using Formulas;
 
 namespace SpreadsheetGUI
 {
-
     /// <summary>
-    /// Controller class the does the communication between the model and the view for the GUI. 
+    /// A controller manipulates its model (Spreadsheet) according to user actions in its view (IView, which will
+    /// be the GUI). Allows interaction between the model and the view without any direct references.
     /// </summary>
     public class Controller
     {
-
         /// <summary>
-        /// Context of the application
+        /// Context of the application (open models/views).
         /// </summary>
         public SpreadsheetApplicationContext Context;
 
         /// <summary>
-        /// The gui of the spreadsheet
+        /// View (GUI) for the model (Spreadsheet).
         /// </summary>
         private IView view;
 
         /// <summary>
-        /// The model of the spreadsheet
+        /// Model (Spreadsheet) for the view (GUI).
         /// </summary>
         private AbstractSpreadsheet ss;
 
         /// <summary>
         /// Creates a new Controller controlling IView (GUI) _view which is editing a model (Spreadsheet)
         /// </summary>
-        public Controller(IView _view)
+        public Controller(IView view)
         {
-            view = _view;
-            if (!view.path.Equals(""))
+            this.view = view;
+
+            if (!this.view.Path.Equals(""))
             {
-                ss = CreateOrLoadFile(view.path);
+                ss = CreateOrLoadFile(this.view.Path);
+
                 foreach (string cell in ss.GetNamesOfAllNonemptyCells())
                 {
-                    view.DisplayContents(cell, ss.GetCellValue(cell).ToString());
+                    this.view.DisplayContents(cell, ss.GetCellValue(cell).ToString());
                 }
             }
             else
             {
                 ss = new Spreadsheet(new Regex("^[A-Z]*[1-99]*$"));
             }
-            view.NewFile += HandleNew;
-            view.OpenFile += HandleOpen;
-            view.SaveFile += HandleSave;
-            view.SetContents += HandleChange;
-            view.CloseFile += HandleClose;
-        }
 
+            this.view.NewFile += HandleNew;
+            this.view.OpenFile += HandleOpen;
+            this.view.SaveFile += HandleSave;
+            this.view.SetContents += HandleChange;
+            this.view.CloseFile += HandleClose;
+        }
 
         /// <summary>
         /// If the source file at path exists, reads that source into a Spreadsheet and returns it.
+        /// Else, calls view.UnableToLoad, which will inform the user that the Spreadsheet could not
+        /// be opened, and opens a new Spreadsheet instead.
         /// </summary>
         private Spreadsheet CreateOrLoadFile(string path)
         {
@@ -78,7 +81,6 @@ namespace SpreadsheetGUI
             }
         }
 
-
         /// <summary>
         /// Handles a view's NewFile event.
         /// </summary>
@@ -92,7 +94,7 @@ namespace SpreadsheetGUI
         /// </summary>
         private void HandleOpen(object sender, FileEventArgs e)
         {
-            this.Context.RunNew(e.path);
+            this.Context.RunNew(e.Path);
         }
 
         /// <summary>
@@ -100,7 +102,7 @@ namespace SpreadsheetGUI
         /// </summary>
         private void HandleSave(object sender, FileEventArgs e)
         {
-            using (TextWriter t = new StreamWriter(e.path))
+            using (TextWriter t = new StreamWriter(e.Path))
             {
                 ss.Save(t);
             }
@@ -136,7 +138,8 @@ namespace SpreadsheetGUI
                 return;
             }
 
-            //If adding the new value was succesful without a circular dependency
+            // Only reaches this point if adding the new value was succesful, and did not cause
+            // a circular dependency
             foreach (string cell in cells)
             {
                 object value = ss.GetCellValue(cell);
@@ -159,7 +162,7 @@ namespace SpreadsheetGUI
         }
 
         /// <summary>
-        /// Handles the closing of the spreadsheet
+        /// Handles the closing of the spreadsheet.
         /// </summary>
         private void HandleClose(object sender, EventArgs e)
         {
@@ -172,5 +175,4 @@ namespace SpreadsheetGUI
             }
         }
     }
-
 }

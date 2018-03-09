@@ -7,7 +7,6 @@ using System.IO;
 
 namespace SpreadsheetGUI
 {
-
     /// <summary>
     /// Handles the OpenFile event, provided the object that sent the event, and FileEventArgs that contain
     /// the read path for the view.
@@ -31,11 +30,10 @@ namespace SpreadsheetGUI
     /// </summary>
     public interface IView
     {
-
         /// <summary>
         /// File path of the spreadsheet
         /// </summary>
-        string path { get; }
+        string Path { get; }
 
         /// <summary>
         /// Returns a new instance of an IView.
@@ -45,8 +43,6 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Overload of GetNew() but this time passes a path that the model will be loaded from
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
         IView GetNew(string path);
 
         /// <summary>
@@ -58,7 +54,6 @@ namespace SpreadsheetGUI
         /// Called when the user opens a Spreadsheet.
         /// </summary>
         event OpenFileEventHandler OpenFile;
-
 
         /// <summary>
         /// Called when the user saves a Spreadsheet
@@ -76,7 +71,6 @@ namespace SpreadsheetGUI
         /// Only called if the model has been changed since the last save.
         /// </summary>
         bool ClosePrompt();
-
 
         /// <summary>
         /// Called when the user modifies the contents of a cell in a Spreadsheet.
@@ -97,29 +91,25 @@ namespace SpreadsheetGUI
         void UnableToLoad(string p);
     }
 
-
-
     /// <summary>
     /// EventArgs used for FileEvents. Contains the path of the file
     /// </summary>
     public class FileEventArgs : EventArgs
     {
-        public string path
+        public string Path
         {
             get;
             private set;
         }
-
 
         /// <summary>
         /// Creates a new FileEventArgs with the filename stored.
         /// </summary>
         public FileEventArgs(string filename)
         {
-            path = filename;
+            Path = filename;
         }
     }
-
 
     /// <summary>
     /// Derived from EventArgs; to be used in a method that instantiates SetContentsEventHandler.
