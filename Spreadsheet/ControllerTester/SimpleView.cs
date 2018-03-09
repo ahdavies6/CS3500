@@ -33,7 +33,7 @@ namespace ControllerTester
         /// <summary>
         /// Called when the user saves a Spreadsheet.
         /// </summary>
-        public event EventHandler SaveFile;
+        public event SaveFileAsEventHandler SaveFileAs;
 
         ///// <summary>
         ///// Called when the user closes a Spreadsheet.

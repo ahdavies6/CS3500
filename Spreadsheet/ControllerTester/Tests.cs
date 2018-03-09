@@ -12,6 +12,8 @@ namespace ControllerTester
         [TestMethod]
         public void NewTest1()
         {
+            // expected exception: unknown, but it's whatever trying to make a Spreadsheet from an
+            // empty file throws
             using (StringReader sr = new StringReader(""))
             {
                 IView view = new SimpleView();
@@ -22,6 +24,8 @@ namespace ControllerTester
         [TestMethod]
         public void NewTest2()
         {
+            // expected exception: unknown, but it's whatever trying to make a Spreadsheet from an
+            // invalid file throws
             using (StringReader sr = new StringReader(""))
             {
                 IView view = new SimpleView();

@@ -41,7 +41,7 @@ namespace SpreadsheetGUI
     //    /// <summary>
     //    /// Called when the user saves a Spreadsheet.
     //    /// </summary>
-    //    event FileOperation SaveFile;
+    //    event FileOperation SaveFileAs;
 
     //    /// <summary>
     //    /// Called when the user closes a Spreadsheet.
@@ -64,7 +64,7 @@ namespace SpreadsheetGUI
     /// Handles the OpenFile event, provided the object that sent the event, and OpenFileEventArgs that contain
     /// the write destination for the view.
     /// </summary>
-    public delegate void SaveFileEventHandler(object sender, SaveFileEventArgs e);
+    public delegate void SaveFileAsEventHandler(object sender, SaveFileAsEventArgs e);
 
     /// <summary>
     /// Handles the SetContents event, provided the object that sent the event, and SetContentsEventArgs that
@@ -93,27 +93,31 @@ namespace SpreadsheetGUI
         event OpenFileEventHandler OpenFile;
 
         /// <summary>
-        /// Called when the user saves a Spreadsheet.
+        /// Called when the user saves a Spreadsheet to its current working filepath.
         /// </summary>
-        event SaveFileEventHandler SaveFile;
+        event EventHandler SaveFile;
 
-        // todo: decide whether to keep this?
-        ///// <summary>
-        ///// Called when the user attempts to close a Spreadsheet.
-        ///// </summary>
-        //event EventHandler CloseFile;
-        
-        ///// <summary>
-        ///// Asks the user whether they'd like to close the view, as it hasn't been saved to the model file
-        ///// since it was last edited.
-        ///// Only called if the model has been changed since the last save.
-        ///// </summary>
-        //bool ClosePrompt();
+        /// <summary>
+        /// Called when the user saves a Spreadsheet to a new filepath.
+        /// </summary>
+        event SaveFileAsEventHandler SaveFileAs;
 
-        ///// <summary>
-        ///// Actually closes the view.
-        ///// </summary>
-        //void CloseView();
+        /// <summary>
+        /// Called when the user attempts to close a Spreadsheet.
+        /// </summary>
+        event EventHandler CloseFile;
+
+        /// <summary>
+        /// Asks the user whether they'd like to close the view, as it hasn't been saved to the model file
+        /// since it was last edited.
+        /// Only called if the model has been changed since the last save.
+        /// </summary>
+        bool ClosePrompt();
+
+        /// <summary>
+        /// Actually closes the view.
+        /// </summary>
+        void CloseView();
 
         /// <summary>
         /// Called when the user modifies the contents of a cell in a Spreadsheet.
@@ -172,10 +176,10 @@ namespace SpreadsheetGUI
     }
 
     /// <summary>
-    /// Derived from EventArgs; to be used in a method that instantiates SaveFileEventHandler.
+    /// Derived from EventArgs; to be used in a method that instantiates SaveFileAsEventHandler.
     /// Contains a TextWriter Output, which is the source being written to.
     /// </summary>
-    public class SaveFileEventArgs : EventArgs
+    public class SaveFileAsEventArgs : EventArgs
     {
         /// <summary>
         /// The output source being written to.
@@ -189,7 +193,7 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Creates a new SaveFileEventArgs regarding the output source being written to.
         /// </summary>
-        public SaveFileEventArgs(TextWriter output)
+        public SaveFileAsEventArgs(TextWriter output)
         {
             this.Output = output;
         }
@@ -197,7 +201,7 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Creates a new SaveFileEventArgs regarding the output source being written to (file (filename)).
         /// </summary>
-        public SaveFileEventArgs(string filename) : this(new StreamWriter(filename))
+        public SaveFileAsEventArgs(string filename) : this(new StreamWriter(filename))
         {
             // simply calls the previous constructor, with output as the file (filename)
         }

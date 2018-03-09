@@ -103,8 +103,6 @@ namespace SpreadsheetController
             throw new KeyNotFoundException("There is no window with that view being edited.");
         }
 
-        #region Window Operations
-
         /// <summary>
         /// Opens a new window editing source (input).
         /// </summary>
@@ -113,7 +111,7 @@ namespace SpreadsheetController
             IView view = getNewView();
             view.NewFile += HandleNew;
             view.OpenFile += HandleOpen;
-            view.SaveFile += HandleSave;
+            view.SaveFileAs += HandleSave;
             view.SetContents += HandleChange;
 
             Spreadsheet ss = CreateOrLoadFile(input);
@@ -145,20 +143,22 @@ namespace SpreadsheetController
             {
                 return LoadFile(input);
             }
-            catch //whichever exception this throws
+            // todo: figure out 2 exceptions: one where the input doesn't exist, and one where the input is bs
+            catch
             {
-                return CreateFile(input);
+                return new Spreadsheet();
             }
         }
 
-        /// <summary>
-        /// Creates a new file at the filename in source input and returns it as a Spreadsheet.
-        /// Accessed in the GUI via File > New.
-        /// </summary>
-        private Spreadsheet CreateFile(TextReader input)
-        {
-            return new Spreadsheet();
-        }
+        // todo: remove deprecated
+        ///// <summary>
+        ///// Creates a new file at the filename in source input and returns it as a Spreadsheet.
+        ///// Accessed in the GUI via File > New.
+        ///// </summary>
+        //private Spreadsheet CreateFile(TextReader input)
+        //{
+        //    return new Spreadsheet();
+        //}
 
         /// <summary>
         /// Loads a source (input), reads that source into a Spreadsheet, and returns it.
@@ -215,10 +215,6 @@ namespace SpreadsheetController
             }
         }
 
-        #endregion
-
-        #region IView EventHandlers
-
         /// <summary>
         /// Handles a view's NewFile event.
         /// </summary>
@@ -232,13 +228,13 @@ namespace SpreadsheetController
         /// </summary>
         private void HandleOpen(object sender, OpenFileEventArgs e)
         {
-            OpenNewWindow(e.Input);
+            OpenNewWindow(e.Input, e.Output);
         }
 
         /// <summary>
-        /// Handles a view's SaveFile event.
+        /// Handles a view's SaveFileAs event.
         /// </summary>
-        private void HandleSave(object sender, SaveFileEventArgs e)
+        private void HandleSave(object sender, SaveFileAsEventArgs e)
         {
             SaveFile(e.Output);
         }
@@ -258,8 +254,6 @@ namespace SpreadsheetController
         {
             SetCellContents(GetWindow((IView)sender), e.CellName, e.CellContents);
         }
-
-        #endregion
     }
 
     /// <summary>
@@ -305,7 +299,8 @@ namespace SpreadsheetController
         }
 
         /// <summary>
-        /// Creates a new Window editing source (input) in view (view) containing model (model).
+        /// Creates a new Window reading from source (input), writing to destination (output),
+        /// in view (view), containing model (model).
         /// </summary>
         public Window(TextReader input, TextWriter output, IView view, Spreadsheet model)
         {
@@ -313,6 +308,15 @@ namespace SpreadsheetController
             this.Output = output;
             this.View = view;
             this.Model = model;
+        }
+
+        /// <summary>
+        /// Creates a new Window reading from and writing to filename in view (view) containing model (model).
+        /// </summary>
+        public Window(string filename, IView view, Spreadsheet model) :
+            this(new StreamReader(filename), new StreamWriter(filename), view, model)
+        {
+            // simply calls the other constructor, but with filename as input and output
         }
     }
 }
