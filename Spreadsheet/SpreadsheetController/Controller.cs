@@ -31,15 +31,25 @@ namespace SpreadsheetController
 
         /// <summary>
         /// Creates a new Controller controlling IView (GUI) firstView which is editing a model (Spreadsheet)
-        /// at source (input).
+        /// reading from source (input) and writing to destination (output).
         /// </summary>
-        public Controller(TextReader input, IView firstView)
+        public Controller(TextReader input, TextWriter output, IView firstView)
         {
             Spreadsheet ss = CreateOrLoadFile(input);
-            Window window = new Window(input, firstView, ss);
+            Window window = new Window(input, output, firstView, ss);
             getNewView = firstView.GetNew;
 
             windows = new HashSet<Window> { window };
+        }
+
+        /// <summary>
+        /// Creates a new Controller controlling IView (GUI) firstView which is editing a model (Spreadsheet)
+        /// stored in file (filename).
+        /// </summary>
+        public Controller(string filename, IView firstView) :
+            this(new StreamReader(filename), new StreamWriter(filename), firstView)
+        {
+            // simply calls the other constructor, but with filename as input and output
         }
 
         /// <summary>
@@ -51,6 +61,23 @@ namespace SpreadsheetController
             foreach (Window window in windows)
             {
                 if (window.Input == input)
+                {
+                    return window;
+                }
+            }
+
+            throw new KeyNotFoundException("There is no source with that signature being edited.");
+        }
+
+        /// <summary>
+        /// Returns the window which is writing to source (output).
+        /// If no such source is open, throws a KeyNotFoundException.
+        /// </summary>
+        private Window GetWindow(TextWriter output)
+        {
+            foreach (Window window in windows)
+            {
+                if (window.Output == output)
                 {
                     return window;
                 }
@@ -81,7 +108,7 @@ namespace SpreadsheetController
         /// <summary>
         /// Opens a new window editing source (input).
         /// </summary>
-        private void OpenNewWindow(TextReader input)
+        private void OpenNewWindow(TextReader input, TextWriter output)
         {
             IView view = getNewView();
             view.NewFile += HandleNew;
@@ -91,16 +118,16 @@ namespace SpreadsheetController
 
             Spreadsheet ss = CreateOrLoadFile(input);
 
-            Window window = new Window(input, view, ss);
+            Window window = new Window(input, output, view, ss);
             windows.Add(window);
         }
 
         /// <summary>
-        /// Opens a new window editing source at DEFAULTFILENAME ("new.ss").
+        /// Wrapper method opens a new window editing source at DEFAULTFILENAME ("new.ss").
         /// </summary>
         private void OpenNewWindow()
         {
-            OpenNewWindow(new StreamReader(DEFAULTFILENAME));
+            OpenNewWindow(new StreamReader(DEFAULTFILENAME), new StreamWriter(DEFAULTFILENAME));
         }
 
         /// <summary>
@@ -130,9 +157,7 @@ namespace SpreadsheetController
         /// </summary>
         private Spreadsheet CreateFile(TextReader input)
         {
-            Spreadsheet ss = new Spreadsheet();
-            ss.Save(new StreamWriter(input.ToString()));
-            return ss;
+            return new Spreadsheet();
         }
 
         /// <summary>
@@ -244,9 +269,18 @@ namespace SpreadsheetController
     internal class Window
     {
         /// <summary>
-        /// The source of the open Spreadsheet.
+        /// The input source of the open Spreadsheet.
         /// </summary>
         public TextReader Input
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// The output destination of the open Spreadsheet.
+        /// </summary>
+        public TextWriter Output
         {
             get;
             private set;
@@ -273,9 +307,10 @@ namespace SpreadsheetController
         /// <summary>
         /// Creates a new Window editing source (input) in view (view) containing model (model).
         /// </summary>
-        public Window(TextReader input, IView view, Spreadsheet model)
+        public Window(TextReader input, TextWriter output, IView view, Spreadsheet model)
         {
             this.Input = input;
+            this.Output = output;
             this.View = view;
             this.Model = model;
         }

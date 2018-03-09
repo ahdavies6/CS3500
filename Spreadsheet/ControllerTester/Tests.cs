@@ -26,8 +26,6 @@ namespace ControllerTester
             {
                 IView view = new SimpleView();
                 Controller controller = new Controller(sr, view);
-
-                string temp = sr.ToString();
             }
         }
 
