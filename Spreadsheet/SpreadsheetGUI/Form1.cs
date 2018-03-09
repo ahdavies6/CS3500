@@ -10,6 +10,10 @@ using System.Windows.Forms;
 
 namespace SpreadsheetGUI
 {
+    /// <summary>
+    /// Gui view class partially implemented by visual studio and the rest written by humans. 
+    /// Draws a spreadsheet of size 26x99 (A1-Z99).
+    /// </summary>
     public partial class Form1 : Form, IView
     {
         /// <summary>
@@ -35,7 +39,7 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Zero arg constructor that does the same thing as the one arg but passes an emptry string instead
         /// </summary>
-        public Form1(): this("")
+        public Form1() : this("")
         {
 
         }
@@ -290,7 +294,7 @@ namespace SpreadsheetGUI
                     string cellName = ConvertColIntoLetter(col) + row;
                     this.ActiveControl = this.spreadsheetPanel1;
                     string NewContent;
-                    if(this.ContentChangeBox.Text[0] == '=')
+                    if (this.ContentChangeBox.Text[0] == '=')
                     {
                         NewContent = this.ContentChangeBox.Text.ToUpper();
                     }

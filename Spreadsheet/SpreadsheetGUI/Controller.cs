@@ -7,11 +7,14 @@ using SS;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using Formulas;
 
 namespace SpreadsheetGUI
 {
-    public delegate IView GetNewView();
 
+    /// <summary>
+    /// Controller class the does the communication between the model and the view for the GUI. 
+    /// </summary>
     public class Controller
     {
 
@@ -125,6 +128,11 @@ namespace SpreadsheetGUI
             catch (SS.CircularException)
             {
                 view.DisplayContents(cellName, "Circular Formula");
+                return;
+            }
+            catch (FormulaFormatException)
+            {
+                view.DisplayContents(cellName, "Bad Formula");
                 return;
             }
 
