@@ -40,9 +40,10 @@
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.enterHelpTextTODOToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.CurrentCellContent = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -77,6 +78,7 @@
             // 
             this.flowLayoutPanel1.Controls.Add(this.CurrentCellName);
             this.flowLayoutPanel1.Controls.Add(this.ContentChangeBox);
+            this.flowLayoutPanel1.Controls.Add(this.CurrentCellContent);
             this.flowLayoutPanel1.Controls.Add(this.CurrentCellValue);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
@@ -89,13 +91,13 @@
             this.CurrentCellName.AutoSize = true;
             this.CurrentCellName.Location = new System.Drawing.Point(3, 0);
             this.CurrentCellName.Name = "CurrentCellName";
-            this.CurrentCellName.Size = new System.Drawing.Size(64, 25);
+            this.CurrentCellName.Size = new System.Drawing.Size(116, 25);
             this.CurrentCellName.TabIndex = 0;
-            this.CurrentCellName.Text = "label1";
+            this.CurrentCellName.Text = "Current Cell";
             // 
             // ContentChangeBox
             // 
-            this.ContentChangeBox.Location = new System.Drawing.Point(73, 3);
+            this.ContentChangeBox.Location = new System.Drawing.Point(125, 3);
             this.ContentChangeBox.Name = "ContentChangeBox";
             this.ContentChangeBox.Size = new System.Drawing.Size(282, 29);
             this.ContentChangeBox.TabIndex = 1;
@@ -104,9 +106,9 @@
             // CurrentCellValue
             // 
             this.CurrentCellValue.AutoSize = true;
-            this.CurrentCellValue.Location = new System.Drawing.Point(361, 0);
+            this.CurrentCellValue.Location = new System.Drawing.Point(609, 0);
             this.CurrentCellValue.Name = "CurrentCellValue";
-            this.CurrentCellValue.Size = new System.Drawing.Size(162, 25);
+            this.CurrentCellValue.Size = new System.Drawing.Size(172, 25);
             this.CurrentCellValue.TabIndex = 3;
             this.CurrentCellValue.Text = global::SpreadsheetGUI.Properties.Settings.Default.CurrentCellValue;
             // 
@@ -137,30 +139,37 @@
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(239, 34);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(191, 34);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenFilePicker);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(239, 34);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(191, 34);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveSpreadSheet);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(239, 34);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(191, 34);
             this.saveAsToolStripMenuItem.Text = "Save As...";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.SaveAsSpreadSheet);
             // 
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(239, 34);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(191, 34);
             this.newToolStripMenuItem.Text = "New";
             this.newToolStripMenuItem.Click += new System.EventHandler(this.NewSpreadhSheetButtonClick);
+            // 
+            // closeToolStripMenuItem
+            // 
+            this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(191, 34);
+            this.closeToolStripMenuItem.Text = "Close";
+            this.closeToolStripMenuItem.Click += new System.EventHandler(this.CloseWindow);
             // 
             // helpToolStripMenuItem
             // 
@@ -176,12 +185,14 @@
             this.enterHelpTextTODOToolStripMenuItem.Size = new System.Drawing.Size(329, 34);
             this.enterHelpTextTODOToolStripMenuItem.Text = "Enter Help Text -- TODO";
             // 
-            // closeToolStripMenuItem
+            // CurrentCellContent
             // 
-            this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(239, 34);
-            this.closeToolStripMenuItem.Text = "Close";
-            this.closeToolStripMenuItem.Click += new System.EventHandler(this.CloseWindow);
+            this.CurrentCellContent.AutoSize = true;
+            this.CurrentCellContent.Location = new System.Drawing.Point(413, 0);
+            this.CurrentCellContent.Name = "CurrentCellContent";
+            this.CurrentCellContent.Size = new System.Drawing.Size(190, 25);
+            this.CurrentCellContent.TabIndex = 4;
+            this.CurrentCellContent.Text = "Current Cell Content";
             // 
             // Form1
             // 
@@ -221,6 +232,7 @@
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem enterHelpTextTODOToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
+        private System.Windows.Forms.Label CurrentCellContent;
     }
 }
 

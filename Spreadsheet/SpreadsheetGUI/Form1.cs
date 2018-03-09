@@ -127,7 +127,7 @@ namespace SpreadsheetGUI
         /// </summary>
         public void UnableToLoad(string p)
         {
-            MessageBox.Show("The file " + p + "Could not be opened.");
+            MessageBox.Show("The file \'" + p + "\' Could not be opened.");
         }
 
         /// <summary>
@@ -149,16 +149,25 @@ namespace SpreadsheetGUI
             int col;
             int row;
             string val;
+            string content;
 
             ss.GetSelection(out col, out row);
             ss.GetValue(col, row, out val);
+            ss.GetContents(col, row, out content);
 
             if (val.Equals(""))
             {
                 val = "Currently Empty";
             }
+
+            this.ContentChangeBox.Text = content;
+            if (content.Equals(""))
+            {
+                content = "Currently Empty";
+            }
             this.CurrentCellValue.Text = "Current Value: " + val;
             this.CurrentCellName.Text = "Current Cell: " + ConvertColIntoLetter(col) + row.ToString();
+            this.CurrentCellContent.Text = "Current Content: " + content;
         }
 
         /// <summary>
@@ -220,6 +229,10 @@ namespace SpreadsheetGUI
                 }
                 this.spreadsheetPanel1.SetSelection(col, row);
             }
+            else if (e.KeyCode == Keys.Return)
+            {
+                this.ActiveControl = this.ContentChangeBox;
+            }
 
 
             this.SelectCell(this.spreadsheetPanel1);
@@ -275,7 +288,18 @@ namespace SpreadsheetGUI
                     this.spreadsheetPanel1.GetSelection(out col, out row);
                     row++;
                     string cellName = ConvertColIntoLetter(col) + row;
-                    SetContents(this, new SetContentsEventArgs(cellName, this.ContentChangeBox.Text));
+                    this.ActiveControl = this.spreadsheetPanel1;
+                    string NewContent;
+                    if(this.ContentChangeBox.Text[0] == '=')
+                    {
+                        NewContent = this.ContentChangeBox.Text.ToUpper();
+                    }
+                    else
+                    {
+                        NewContent = this.ContentChangeBox.Text;
+                    }
+                    this.spreadsheetPanel1.SetContent(col, --row, NewContent);
+                    SetContents(this, new SetContentsEventArgs(cellName, NewContent));
                 }
             }
         }

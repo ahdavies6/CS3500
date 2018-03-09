@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="CurrentCellValue" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">CurrentCellValue</Value>
+      <Value Profile="(Default)">Current Cell Value</Value>
     </Setting>
   </Settings>
 </SettingsFile>

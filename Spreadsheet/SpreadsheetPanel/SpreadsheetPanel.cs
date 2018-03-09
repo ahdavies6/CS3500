@@ -104,6 +104,25 @@ namespace SSGui
         }
 
         /// <summary>
+        /// If the zero-based column and row are in range, sets the content of that
+        /// cell and returns true.  Otherwise, returns false.
+        /// </summary>
+        public bool SetContent(int col, int row, string content)
+        {
+            return drawingPanel.SetContents(col, row, content);
+        }
+
+        /// <summary>
+        /// If the zero-based column and row are in range, assigns the contents
+        /// of that cell to the out parameter and returns true.  Otherwise,
+        /// returns false.
+        /// </summary>     
+        public bool GetContents(int col, int row, out string content)
+        {
+            return drawingPanel.GetContents(col, row, out content);
+        }
+
+        /// <summary>
         /// If the zero-based column and row are in range, uses them to set
         /// the current selection and returns true.  Otherwise, returns false.
         /// </summary>     
@@ -152,7 +171,7 @@ namespace SSGui
                 hScroll.LargeChange = (change < 0) ? 0 : change;
             }
         }
-             
+
         /// <summary>
         /// The event used to send notifications of a selection change
         /// </summary>
@@ -180,7 +199,8 @@ namespace SSGui
 
             public override bool Equals(object obj)
             {
- 	            if ((obj == null) || !(obj is Address)) {
+                if ((obj == null) || !(obj is Address))
+                {
                     return false;
                 }
                 Address a = (Address)obj;
@@ -202,9 +222,11 @@ namespace SSGui
             // Coordinate of cell in upper-left corner of display
             private int _firstColumn = 0;
             private int _firstRow = 0;
-            
+
             // The strings contained by the spreadsheet
-            private Dictionary<Address,String> _values;
+            private Dictionary<Address, String> _values;
+
+            private Dictionary<Address, String> _contents;
 
             // The containing panel
             private SpreadsheetPanel _ssp;
@@ -213,6 +235,7 @@ namespace SSGui
             {
                 DoubleBuffered = true;
                 _values = new Dictionary<Address, String>();
+                _contents = new Dictionary<Address, string>();
                 _ssp = ss;
             }
 
@@ -224,6 +247,7 @@ namespace SSGui
             public void Clear()
             {
                 _values.Clear();
+                _contents.Clear();
                 Invalidate();
             }
 
@@ -247,6 +271,26 @@ namespace SSGui
                 return true;
             }
 
+            public bool SetContents(int col, int row, string c)
+            {
+                if (InvalidAddress(col, row))
+                {
+                    return false;
+                }
+
+                Address a = new Address(col, row);
+                if (c == null || c == "")
+                {
+                    _contents.Remove(a);
+                }
+                else
+                {
+                    _contents[a] = c;
+                }
+                Invalidate();
+                return true;
+            }
+
             public bool GetValue(int col, int row, out string c)
             {
                 if (InvalidAddress(col, row))
@@ -255,6 +299,20 @@ namespace SSGui
                     return false;
                 }
                 if (!_values.TryGetValue(new Address(col, row), out c))
+                {
+                    c = "";
+                }
+                return true;
+            }
+
+            public bool GetContents(int col, int row, out string c)
+            {
+                if (InvalidAddress(col, row))
+                {
+                    c = null;
+                    return false;
+                }
+                if (!_contents.TryGetValue(new Address(col, row), out c))
                 {
                     c = "";
                 }
@@ -357,7 +415,7 @@ namespace SSGui
                                       DATA_COL_WIDTH - 2,
                                       DATA_ROW_HEIGHT - 2));
                 }
-                
+
                 // Draw the text
                 foreach (KeyValuePair<Address, String> address in _values)
                 {
@@ -370,7 +428,7 @@ namespace SSGui
                     {
                         Region cellClip = new Region(new Rectangle(LABEL_COL_WIDTH + x * DATA_COL_WIDTH + PADDING,
                                                                    LABEL_ROW_HEIGHT + y * DATA_ROW_HEIGHT,
-                                                                   DATA_COL_WIDTH - 2*PADDING,
+                                                                   DATA_COL_WIDTH - 2 * PADDING,
                                                                    DATA_ROW_HEIGHT));
                         cellClip.Intersect(clip);
                         e.Graphics.Clip = cellClip;
@@ -396,8 +454,8 @@ namespace SSGui
                       label,
                       f,
                       new SolidBrush(Color.Black),
-                      LABEL_COL_WIDTH + x*DATA_COL_WIDTH + (DATA_COL_WIDTH - width)/2,
-                      (LABEL_ROW_HEIGHT - height)/2);
+                      LABEL_COL_WIDTH + x * DATA_COL_WIDTH + (DATA_COL_WIDTH - width) / 2,
+                      (LABEL_ROW_HEIGHT - height) / 2);
             }
 
             /// <summary>
@@ -412,8 +470,8 @@ namespace SSGui
                     label,
                     f,
                     new SolidBrush(Color.Black),
-                    LABEL_COL_WIDTH - width- PADDING,
-                    LABEL_ROW_HEIGHT + y * DATA_ROW_HEIGHT + (DATA_ROW_HEIGHT-height)/2);
+                    LABEL_COL_WIDTH - width - PADDING,
+                    LABEL_ROW_HEIGHT + y * DATA_ROW_HEIGHT + (DATA_ROW_HEIGHT - height) / 2);
             }
 
             /// <summary>
@@ -423,8 +481,8 @@ namespace SSGui
             protected override void OnMouseClick(MouseEventArgs e)
             {
                 base.OnClick(e);
-                int x = (e.X-LABEL_COL_WIDTH) / DATA_COL_WIDTH;
-                int y = (e.Y-LABEL_ROW_HEIGHT) / DATA_ROW_HEIGHT;
+                int x = (e.X - LABEL_COL_WIDTH) / DATA_COL_WIDTH;
+                int y = (e.Y - LABEL_ROW_HEIGHT) / DATA_ROW_HEIGHT;
                 if (e.X > LABEL_COL_WIDTH && e.Y > LABEL_ROW_HEIGHT && (x + _firstColumn < COL_COUNT) && (y + _firstRow < ROW_COUNT))
                 {
                     _selectedCol = x + _firstColumn;

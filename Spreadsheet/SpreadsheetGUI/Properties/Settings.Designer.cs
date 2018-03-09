@@ -25,7 +25,7 @@ namespace SpreadsheetGUI.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("CurrentCellValue")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Current Cell Value")]
         public string CurrentCellValue {
             get {
                 return ((string)(this["CurrentCellValue"]));
