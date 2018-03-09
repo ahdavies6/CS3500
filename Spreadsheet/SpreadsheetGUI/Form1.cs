@@ -92,7 +92,6 @@ namespace SpreadsheetGUI
         {
             int col = ConvertColToInt(cellName[0]);
             int row = int.Parse(cellName.Substring(1));
-            MessageBox.Show(col + " " + row + " " + cellValue);
             row--;
             this.spreadsheetPanel1.SetValue(col, row, cellValue);
         }
