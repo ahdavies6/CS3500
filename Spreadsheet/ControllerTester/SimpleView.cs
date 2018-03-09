@@ -7,44 +7,74 @@ using SpreadsheetGUI;
 
 namespace ControllerTester
 {
+    /// <summary>
+    /// Simulated implementation of IView, which the controller will treat the same as an actual GUI view.
+    /// </summary>
     public class SimpleView : IView
     {
         /// <summary>
-        /// The name of the file being accessed in events.
+        /// Returns a new instance of SimpleView as an IView.
         /// </summary>
-        readonly string filename;
-
-        /// <summary>
-        /// Initializes SimpleView by storing filename (for later use in events).
-        /// </summary>
-        public SimpleView(string filename)
+        public IView GetNew()
         {
-            this.filename = filename;
+            return new SimpleView();
         }
 
         /// <summary>
         /// Called when the user creates a new Spreadsheet.
         /// </summary>
-        public event FileOperation NewFile;
+        public event EventHandler NewFile;
 
         /// <summary>
         /// Called when the user opens a Spreadsheet.
         /// </summary>
-        public event FileOperation OpenFile;
+        public event OpenFileEventHandler OpenFile;
 
         /// <summary>
-        /// Called when the user saves a Spreadsheet.
+        /// Called when the user saves a Spreadsheet to its current working filepath.
         /// </summary>
-        public event FileOperation SaveFile;
+        public event EventHandler SaveFile;
 
         /// <summary>
-        /// Called when the user closes a Spreadsheet.
+        /// Called when the user saves a Spreadsheet to a new filepath.
         /// </summary>
-        public event Close CloseFile;
+        public event SaveFileAsEventHandler SaveFileAs;
+
+        /// <summary>
+        /// Called when the user attempts to close a Spreadsheet.
+        /// </summary>
+        public event EventHandler CloseFile;
+
+        /// <summary>
+        /// Asks the user whether they'd like to close the view, as it hasn't been saved to the model file
+        /// since it was last edited.
+        /// Only called if the model has been changed since the last save.
+        /// </summary>
+        public bool ClosePrompt()
+        {
+            // todo: change this for future test
+            return true;
+        }
+
+        /// <summary>
+        /// Actually closes the view.
+        /// </summary>
+        public void CloseView()
+        {
+            // todo: change this for future test
+        }
 
         /// <summary>
         /// Called when the user modifies the contents of a cell in a Spreadsheet.
         /// </summary>
-        public event ChangeContent SetContents;
+        public event SetContentsEventHandler SetContents;
+
+        /// <summary>
+        /// Displays the contents of cell (cellName) as value (cellValue).
+        /// </summary>
+        public void DisplayContents(string cellName, string cellValue)
+        {
+
+        }
     }
 }

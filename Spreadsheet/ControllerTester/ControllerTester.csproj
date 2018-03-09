@@ -64,6 +64,10 @@
       <Project>{29a0a8cf-371b-4252-8588-74c06d1eea81}</Project>
       <Name>SpreadsheetGUI</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Spreadsheet\Spreadsheet.csproj">
+      <Project>{9025a594-df2a-4e6a-b8c2-f087ecc3e203}</Project>
+      <Name>Spreadsheet</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
