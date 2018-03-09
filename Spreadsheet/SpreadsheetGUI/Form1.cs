@@ -135,5 +135,56 @@ namespace SpreadsheetGUI
             this.SelectCell(this.spreadsheetPanel1);
         }
 
+        /// <summary>
+        /// Opens a dialog and calls the OpenFile dialog prompt using the file name choosen
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OpenFilePicker(object sender, EventArgs e)
+        {
+            FileDialog open = new OpenFileDialog();
+            open.InitialDirectory = "c:\\";
+            open.Filter = "Spreadsheet files (*.SS) |*.SS| All files (*.*)|*.*";
+
+            if (open.ShowDialog() == DialogResult.OK)
+            {
+                if (OpenFile != null)
+                {
+                    OpenFile(this, new OpenFileEventArgs(open.FileName));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates a new spreadsheet by firing the NewFile event handler
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NewSpreadhSheetButtonClick(object sender, EventArgs e)
+        {
+            if (NewFile != null)
+            {
+                NewFile(this, e);
+            }
+        }
+
+        /// <summary>
+        /// When pressed enter, the cells content and corresponding value are updated
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CellContentUpdate(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Return)
+            {
+                if (SetContents != null)
+                {
+                    int row, col;
+                    this.spreadsheetPanel1.GetSelection(out col, out row);
+                    string cellName = ConvertColIntoLetter(col) + row;
+                    SetContents(this, new SetContentsEventArgs(cellName, this.ContentChangeBox.Text));
+                }
+            }
+        }
     }
 }

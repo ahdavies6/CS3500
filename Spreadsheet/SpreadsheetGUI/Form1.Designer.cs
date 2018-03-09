@@ -98,6 +98,7 @@
             this.ContentChangeBox.Name = "ContentChangeBox";
             this.ContentChangeBox.Size = new System.Drawing.Size(282, 29);
             this.ContentChangeBox.TabIndex = 1;
+            this.ContentChangeBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.CellContentUpdate);
             // 
             // CurrentCellValue
             // 
@@ -136,6 +137,7 @@
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.Size = new System.Drawing.Size(191, 34);
             this.openToolStripMenuItem.Text = "Open";
+            this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenFilePicker);
             // 
             // saveToolStripMenuItem
             // 
@@ -154,6 +156,7 @@
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
             this.newToolStripMenuItem.Size = new System.Drawing.Size(191, 34);
             this.newToolStripMenuItem.Text = "New";
+            this.newToolStripMenuItem.Click += new System.EventHandler(this.NewSpreadhSheetButtonClick);
             // 
             // helpToolStripMenuItem
             // 
