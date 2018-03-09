@@ -9,28 +9,57 @@ namespace SpreadsheetGUI
     class SpreadsheetView : IView
     {
         /// <summary>
+        /// Returns a new instance of an IView.
+        /// </summary>
+        public IView GetNew()
+        {
+            return new SpreadsheetView();
+        }
+
+        /// <summary>
         /// Called when the user creates a new Spreadsheet.
         /// </summary>
-        public event FileOperation NewFile;
+        public event EventHandler NewFile;
 
         /// <summary>
         /// Called when the user opens a Spreadsheet.
         /// </summary>
-        public event FileOperation OpenFile;
+        public event OpenFileEventHandler OpenFile;
 
         /// <summary>
         /// Called when the user saves a Spreadsheet.
         /// </summary>
-        public event FileOperation SaveFile;
+        public event EventHandler SaveFile;
 
-        /// <summary>
-        /// Called when the user closes a Spreadsheet.
-        /// </summary>
-        public event Close CloseFile;
+        // todo: decide whether to keep this?
+        ///// <summary>
+        ///// Called when the user attempts to close a Spreadsheet.
+        ///// </summary>
+        //event EventHandler CloseFile;
+
+        ///// <summary>
+        ///// Asks the user whether they'd like to close the view, as it hasn't been saved to the model file
+        ///// since it was last edited.
+        ///// Only called if the model has been changed since the last save.
+        ///// </summary>
+        //bool ClosePrompt();
+
+        ///// <summary>
+        ///// Actually closes the view.
+        ///// </summary>
+        //void CloseView();
 
         /// <summary>
         /// Called when the user modifies the contents of a cell in a Spreadsheet.
         /// </summary>
-        public event ChangeContent SetContents;
+        public event SetContentsEventHandler SetContents;
+
+        /// <summary>
+        /// Displays the contents of cell (cellName) as value (cellValue).
+        /// </summary>
+        public void DisplayContents(string cellName, string cellValue)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -61,6 +61,12 @@ namespace SpreadsheetGUI
     public delegate void OpenFileEventHandler(object sender, OpenFileEventArgs e);
 
     /// <summary>
+    /// Handles the OpenFile event, provided the object that sent the event, and OpenFileEventArgs that contain
+    /// the write destination for the view.
+    /// </summary>
+    public delegate void SaveFileEventHandler(object sender, SaveFileEventArgs e);
+
+    /// <summary>
     /// Handles the SetContents event, provided the object that sent the event, and SetContentsEventArgs that
     /// contain the name of the cell whose contents are being set, and the contents to which it is being set.
     /// </summary>
@@ -89,7 +95,7 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Called when the user saves a Spreadsheet.
         /// </summary>
-        event EventHandler SaveFile;
+        event SaveFileEventHandler SaveFile;
 
         // todo: decide whether to keep this?
         ///// <summary>
@@ -141,6 +147,30 @@ namespace SpreadsheetGUI
         public OpenFileEventArgs(TextReader input)
         {
             this.Input = input;
+        }
+    }
+
+    /// <summary>
+    /// Derived from EventArgs; to be used in a method that instantiates SaveFileEventHandler.
+    /// Contains a TextWriter Output, which is the source being written to.
+    /// </summary>
+    public class SaveFileEventArgs : EventArgs
+    {
+        /// <summary>
+        /// The output source being written to.
+        /// </summary>
+        public TextWriter Output
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Creates a new OpenFileEventArgs regarding the output source being written to.
+        /// </summary>
+        public SaveFileEventArgs(TextWriter output)
+        {
+            this.Output = output;
         }
     }
 

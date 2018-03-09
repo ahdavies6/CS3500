@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SpreadsheetGUI;
 using SpreadsheetController;
+using System.IO;
 
 namespace ControllerTester
 {
@@ -11,14 +12,23 @@ namespace ControllerTester
         [TestMethod]
         public void NewTest1()
         {
-            IView view = new SimpleView();
-            Controller controller = new Controller("tem", )
+            using (StringReader sr = new StringReader(""))
+            {
+                IView view = new SimpleView();
+                Controller controller = new Controller(sr, view);
+            }
         }
 
         [TestMethod]
         public void NewTest2()
         {
+            using (StringReader sr = new StringReader(""))
+            {
+                IView view = new SimpleView();
+                Controller controller = new Controller(sr, view);
 
+                string temp = sr.ToString();
+            }
         }
 
         [TestMethod]

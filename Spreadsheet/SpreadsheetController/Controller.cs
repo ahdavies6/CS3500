@@ -109,11 +109,16 @@ namespace SpreadsheetController
         /// </summary>
         private Spreadsheet CreateOrLoadFile(TextReader input)
         {
-            if (File.Exists(input.ToString()))
+            // todo: remove deprecated
+            //if (File.Exists(input.ToString()))
+            //{
+            //    return LoadFile(input);
+            //}
+            try
             {
                 return LoadFile(input);
             }
-            else
+            catch //whichever exception this throws
             {
                 return CreateFile(input);
             }
@@ -136,7 +141,7 @@ namespace SpreadsheetController
         /// </summary>
         private Spreadsheet LoadFile(TextReader input)
         {
-            return new Spreadsheet(new StreamReader(input.ToString()), new Regex("^[A-Z][1-99]$"));
+            return new Spreadsheet(input, new Regex("^[A-Z][1-99]$"));
         }
 
         /// <summary>
@@ -208,9 +213,9 @@ namespace SpreadsheetController
         /// <summary>
         /// Handles a view's SaveFile event.
         /// </summary>
-        private void HandleSave(object sender, EventArgs e)
+        private void HandleSave(object sender, SaveFileEventArgs e)
         {
-            SaveFile(new StreamWriter(GetWindow((IView)sender).Input.ToString()));
+            SaveFile(e.Output);
         }
 
         ///// <summary>
