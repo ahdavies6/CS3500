@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using SpreadsheetGUI;
 
 namespace ControllerTester
@@ -12,69 +13,92 @@ namespace ControllerTester
     /// </summary>
     public class SimpleView : IView
     {
-        /// <summary>
-        /// Returns a new instance of SimpleView as an IView.
-        /// </summary>
-        public IView GetNew()
+        public string path
         {
-            return new SimpleView();
+            get; set;
         }
 
         /// <summary>
-        /// Called when the user creates a new Spreadsheet.
+        /// Helper property that determines what CLosePrompt returns
         /// </summary>
+        public bool Close
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// Property that determines whether UnableToLoad throws an exception
+        /// </summary>
+        public bool ThrowException
+        {
+            get; set;
+        }
+
+        //Each of the events followed by a method to fire the event
         public event EventHandler NewFile;
+        public void FireNewFile()
+        {
+            NewFile?.Invoke(this, new EventArgs());
+        }
 
-        /// <summary>
-        /// Called when the user opens a Spreadsheet.
-        /// </summary>
         public event OpenFileEventHandler OpenFile;
+        public void FireOpenFile(string p)
+        {
+            OpenFile?.Invoke(this, new FileEventArgs(p));
+        }
 
-        /// <summary>
-        /// Called when the user saves a Spreadsheet to its current working filepath.
-        /// </summary>
-        public event EventHandler SaveFile;
+        public event SaveFileEventHandler SaveFile;
+        public void FireSaveFile(string p)
+        {
+            SaveFile?.Invoke(this, new FileEventArgs(p));
+        }
 
-        /// <summary>
-        /// Called when the user saves a Spreadsheet to a new filepath.
-        /// </summary>
-        public event SaveFileEventHandler SaveFileAs;
-
-        /// <summary>
-        /// Called when the user attempts to close a Spreadsheet.
-        /// </summary>
         public event EventHandler CloseFile;
+        public void FireCloseFile()
+        {
+            CloseFile?.Invoke(this, new FormClosingEventArgs(CloseReason.ApplicationExitCall, false));
+        }
 
-        /// <summary>
-        /// Asks the user whether they'd like to close the view, as it hasn't been saved to the model file
-        /// since it was last edited.
-        /// Only called if the model has been changed since the last save.
-        /// </summary>
+        public event SetContentsEventHandler SetContents;
+        public void FireSetContents(string cellName, string cellContents)
+        {
+            SetContents?.Invoke(this, new SetContentsEventArgs(cellName, cellContents));
+        }
+
+        public SimpleView(string p)
+        {
+            path = p;
+        }
+
         public bool ClosePrompt()
         {
-            // todo: change this for future test
-            return true;
+            return Close;
         }
 
-        /// <summary>
-        /// Actually closes the view.
-        /// </summary>
-        public void CloseView()
-        {
-            // todo: change this for future test
-        }
 
-        /// <summary>
-        /// Called when the user modifies the contents of a cell in a Spreadsheet.
-        /// </summary>
-        public event SetContentsEventHandler SetContents;
-
-        /// <summary>
-        /// Displays the contents of cell (cellName) as value (cellValue).
-        /// </summary>
         public void DisplayContents(string cellName, string cellValue)
         {
-
+            //Do nothing
         }
+
+        public IView GetNew()
+        {
+            return new SimpleView(path);
+        }
+
+        public IView GetNew(string path)
+        {
+            return new SimpleView(path);
+        }
+
+        public void UnableToLoad(string p)
+        {
+            if (ThrowException)
+            {
+                throw new ExceptionForTesting();
+            }
+        }
+
+        public class ExceptionForTesting : Exception { }
     }
 }
