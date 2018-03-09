@@ -31,14 +31,38 @@ namespace ControllerTester
         public event OpenFileEventHandler OpenFile;
 
         /// <summary>
-        /// Called when the user saves a Spreadsheet.
+        /// Called when the user saves a Spreadsheet to its current working filepath.
+        /// </summary>
+        public event EventHandler SaveFile;
+
+        /// <summary>
+        /// Called when the user saves a Spreadsheet to a new filepath.
         /// </summary>
         public event SaveFileAsEventHandler SaveFileAs;
 
-        ///// <summary>
-        ///// Called when the user closes a Spreadsheet.
-        ///// </summary>
-        //public event EventHandler CloseFile;
+        /// <summary>
+        /// Called when the user attempts to close a Spreadsheet.
+        /// </summary>
+        public event EventHandler CloseFile;
+
+        /// <summary>
+        /// Asks the user whether they'd like to close the view, as it hasn't been saved to the model file
+        /// since it was last edited.
+        /// Only called if the model has been changed since the last save.
+        /// </summary>
+        public bool ClosePrompt()
+        {
+            // todo: change this for future test
+            return true;
+        }
+
+        /// <summary>
+        /// Actually closes the view.
+        /// </summary>
+        public void CloseView()
+        {
+            // todo: change this for future test
+        }
 
         /// <summary>
         /// Called when the user modifies the contents of a cell in a Spreadsheet.

@@ -3,21 +3,38 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SpreadsheetGUI;
 using SpreadsheetController;
 using System.IO;
+using SS;
 
 namespace ControllerTester
 {
     [TestClass]
     public class Tests
     {
+        // todo: delete this
+        // holy grail:
+        //using (StringWriter sw = new StringWriter())
+        //using (StringReader sr = new StringReader(sw.ToString()))
+        //{
+        //    IView view = new SimpleView();
+        //    Controller controller = new Controller(sr, sw, view);
+        //}
+
+        [TestMethod]
+        public void DeleteMe()
+        {
+            Spreadsheet ss = new Spreadsheet(new StringReader(""), new System.Text.RegularExpressions.Regex(".*"));
+        }
+
         [TestMethod]
         public void NewTest1()
         {
             // expected exception: unknown, but it's whatever trying to make a Spreadsheet from an
             // empty file throws
-            using (StringReader sr = new StringReader(""))
+            using (StringWriter sw = new StringWriter())
+            using (StringReader sr = new StringReader("")) // todo: MAKE SURE THIS WORKS LATER
             {
                 IView view = new SimpleView();
-                Controller controller = new Controller(sr, view);
+                Controller controller = new Controller(sr, sw, view);
             }
         }
 
@@ -29,7 +46,7 @@ namespace ControllerTester
             using (StringReader sr = new StringReader(""))
             {
                 IView view = new SimpleView();
-                Controller controller = new Controller(sr, view);
+                //Controller controller = new Controller(sr, view);
             }
         }
 

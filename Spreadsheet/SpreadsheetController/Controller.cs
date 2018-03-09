@@ -144,9 +144,9 @@ namespace SpreadsheetController
                 return LoadFile(input);
             }
             // todo: figure out 2 exceptions: one where the input doesn't exist, and one where the input is bs
-            catch
+            catch (System.Xml.XmlException)
             {
-                return new Spreadsheet();
+                throw new CorruptedFileException();
             }
         }
 

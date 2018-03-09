@@ -131,6 +131,12 @@ namespace SpreadsheetGUI
     }
 
     /// <summary>
+    /// Thrown when a file, passed through event OpenFile's OpenFileEventHandler's OpenFileEventArgs.Input,
+    /// cannot be read.
+    /// </summary>
+    public class CorruptedFileException : Exception { }
+
+    /// <summary>
     /// Derived from EventArgs; to be used in a method that instantiates OpenFileEventHandler.
     /// Contains a TextReader Input, which is the source from which to read, and a TextWriter
     /// Output, which is the source being written to.
