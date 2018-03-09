@@ -38,7 +38,7 @@ namespace ControllerTester
         /// <summary>
         /// Called when the user saves a Spreadsheet to a new filepath.
         /// </summary>
-        public event SaveFileAsEventHandler SaveFileAs;
+        public event SaveFileEventHandler SaveFileAs;
 
         /// <summary>
         /// Called when the user attempts to close a Spreadsheet.

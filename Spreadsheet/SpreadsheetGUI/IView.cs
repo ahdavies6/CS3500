@@ -7,64 +7,18 @@ using System.IO;
 
 namespace SpreadsheetGUI
 {
-    // old:
-    ///// <summary>
-    ///// Handler delegate used for handling Spreadsheet file creation, opening, and saving.
-    ///// </summary>
-    //public delegate void FileOperation(string filename);
-
-    ///// <summary>
-    ///// Handler delegate used for closing a Spreadsheet.
-    ///// </summary>
-    //public delegate void Close();
-
-    ///// <summary>
-    ///// Handler delegate used for changes to Spreadsheet cell contents.
-    ///// </summary>
-    //public delegate void ChangeContent(string cellName, string contents);
-
-    ///// <summary>
-    ///// Interface for a View object (which will be implemented by a GUI).
-    ///// </summary>
-    //public interface IView
-    //{
-    //    /// <summary>
-    //    /// Called when the user creates a new Spreadsheet.
-    //    /// </summary>
-    //    event FileOperation NewFile;
-
-    //    /// <summary>
-    //    /// Called when the user opens a Spreadsheet.
-    //    /// </summary>
-    //    event FileOperation OpenFile;
-
-    //    /// <summary>
-    //    /// Called when the user saves a Spreadsheet.
-    //    /// </summary>
-    //    event FileOperation SaveFileAs;
-
-    //    /// <summary>
-    //    /// Called when the user closes a Spreadsheet.
-    //    /// </summary>
-    //    event Close CloseFile;
-
-    //    /// <summary>
-    //    /// Called when the user modifies the contents of a cell in a Spreadsheet.
-    //    /// </summary>
-    //    event ChangeContent SetContents;
-    //}
 
     /// <summary>
-    /// Handles the OpenFile event, provided the object that sent the event, and OpenFileEventArgs that contain
-    /// the read destination for the view.
+    /// Handles the OpenFile event, provided the object that sent the event, and FileEventArgs that contain
+    /// the read path for the view.
     /// </summary>
-    public delegate void OpenFileEventHandler(object sender, OpenFileEventArgs e);
+    public delegate void OpenFileEventHandler(object sender, FileEventArgs e);
 
     /// <summary>
-    /// Handles the OpenFile event, provided the object that sent the event, and OpenFileEventArgs that contain
-    /// the write destination for the view.
+    /// Handles the SaveFile event, provided the object that sent the event, and FileEventArgs that contain
+    /// the write path for the view.
     /// </summary>
-    public delegate void SaveFileAsEventHandler(object sender, SaveFileAsEventArgs e);
+    public delegate void SaveFileEventHandler(object sender, FileEventArgs e);
 
     /// <summary>
     /// Handles the SetContents event, provided the object that sent the event, and SetContentsEventArgs that
@@ -77,10 +31,23 @@ namespace SpreadsheetGUI
     /// </summary>
     public interface IView
     {
+
+        /// <summary>
+        /// File path of the spreadsheet
+        /// </summary>
+        string path { get; }
+
         /// <summary>
         /// Returns a new instance of an IView.
         /// </summary>
         IView GetNew();
+
+        /// <summary>
+        /// Overload of GetNew() but this time passes a path that the model will be loaded from
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        IView GetNew(string path);
 
         /// <summary>
         /// Called when the user creates a new Spreadsheet.
@@ -92,15 +59,11 @@ namespace SpreadsheetGUI
         /// </summary>
         event OpenFileEventHandler OpenFile;
 
-        /// <summary>
-        /// Called when the user saves a Spreadsheet to its current working filepath.
-        /// </summary>
-        event EventHandler SaveFile;
 
         /// <summary>
-        /// Called when the user saves a Spreadsheet to a new filepath.
+        /// Called when the user saves a Spreadsheet
         /// </summary>
-        event SaveFileAsEventHandler SaveFileAs;
+        event SaveFileEventHandler SaveFile;
 
         /// <summary>
         /// Called when the user attempts to close a Spreadsheet.
@@ -114,10 +77,6 @@ namespace SpreadsheetGUI
         /// </summary>
         bool ClosePrompt();
 
-        /// <summary>
-        /// Actually closes the view.
-        /// </summary>
-        void CloseView();
 
         /// <summary>
         /// Called when the user modifies the contents of a cell in a Spreadsheet.
@@ -128,90 +87,39 @@ namespace SpreadsheetGUI
         /// Displays the contents of cell (cellName) as value (cellValue).
         /// </summary>
         void DisplayContents(string cellName, string cellValue);
+
+        /// <summary>
+        /// Creates a message dialog saying how it was not possible to open the specified file.
+        /// The message will say what file could not be opened.
+        /// An empty file will still be created.
+        /// Returns true if the file should close otherwise false means the file should not close
+        /// </summary>
+        void UnableToLoad(string p);
     }
 
-    /// <summary>
-    /// Thrown when a file, passed through event OpenFile's OpenFileEventHandler's OpenFileEventArgs.Input,
-    /// cannot be read.
-    /// </summary>
-    public class CorruptedFileException : Exception { }
+
 
     /// <summary>
-    /// Derived from EventArgs; to be used in a method that instantiates OpenFileEventHandler.
-    /// Contains a TextReader Input, which is the source from which to read, and a TextWriter
-    /// Output, which is the source being written to.
+    /// EventArgs used for FileEvents. Contains the path of the file
     /// </summary>
-    public class OpenFileEventArgs : EventArgs
+    public class FileEventArgs : EventArgs
     {
-        /// <summary>
-        /// The input source to read the Spreadsheet from.
-        /// </summary>
-        public TextReader Input
+        public string path
         {
             get;
             private set;
         }
 
-        /// <summary>
-        /// The output source being written to.
-        /// </summary>
-        public TextWriter Output
-        {
-            get;
-            private set;
-        }
 
         /// <summary>
-        /// Creates a new OpenFileEventArgs regarding the source of input being read from and
-        /// the destination being written to.
+        /// Creates a new FileEventArgs with the filename stored.
         /// </summary>
-        public OpenFileEventArgs(TextReader input, TextWriter output)
+        public FileEventArgs(string filename)
         {
-            this.Input = input;
-            this.Output = output;
-        }
-
-        /// <summary>
-        /// Creates a new OpenFileEventArgs reading from and writing to file (filename).
-        /// </summary>
-        public OpenFileEventArgs(string filename) :
-            this(new StreamReader(filename), new StreamWriter(filename))
-        {
-            // simply calls the previous constructor, with input and output as the file (filename)
+            path = filename;
         }
     }
 
-    /// <summary>
-    /// Derived from EventArgs; to be used in a method that instantiates SaveFileAsEventHandler.
-    /// Contains a TextWriter Output, which is the source being written to.
-    /// </summary>
-    public class SaveFileAsEventArgs : EventArgs
-    {
-        /// <summary>
-        /// The output source being written to.
-        /// </summary>
-        public TextWriter Output
-        {
-            get;
-            private set;
-        }
-
-        /// <summary>
-        /// Creates a new SaveFileEventArgs regarding the output source being written to.
-        /// </summary>
-        public SaveFileAsEventArgs(TextWriter output)
-        {
-            this.Output = output;
-        }
-
-        /// <summary>
-        /// Creates a new SaveFileEventArgs regarding the output source being written to (file (filename)).
-        /// </summary>
-        public SaveFileAsEventArgs(string filename) : this(new StreamWriter(filename))
-        {
-            // simply calls the previous constructor, with output as the file (filename)
-        }
-    }
 
     /// <summary>
     /// Derived from EventArgs; to be used in a method that instantiates SetContentsEventHandler.
@@ -228,7 +136,7 @@ namespace SpreadsheetGUI
             get;
             private set;
         }
-        
+
         /// <summary>
         /// The contents the cell is being changed to.
         /// </summary>

@@ -12,56 +12,104 @@ namespace SpreadsheetGUI
 {
     public partial class Form1 : Form, IView
     {
+        /// <summary>
+        /// File path of the spreadsheet
+        /// </summary>
+        public string path
+        {
+            get;
+            private set;
+        }
 
-
-        public Form1()
+        /// <summary>
+        /// Single Arg constructor that makes the form and sets the path to the passed path
+        /// </summary>
+        /// <param name="path"></param>
+        public Form1(string path)
         {
             InitializeComponent();
+            this.path = path;
 
         }
 
-        event SaveFileEventHandler IView.SaveFile
+        /// <summary>
+        /// Zero arg constructor that does the same thing as the one arg but passes an emptry string instead
+        /// </summary>
+        public Form1(): this("")
         {
-            add
-            {
-                throw new NotImplementedException();
-            }
 
-            remove
-            {
-                throw new NotImplementedException();
-            }
         }
 
-        public event SaveFileEventHandler SaveFileAs;
+        /// <summary>
+        /// Called when the user creates a new Spreadsheet.
+        /// </summary>
         public event EventHandler NewFile;
-        public event OpenFileEventHandler OpenFile;
-        public event EventHandler CloseFile;
-        public event SetContentsEventHandler SetContents;
-        public event EventHandler SaveFile;
 
+        /// <summary>
+        /// Called when the user opens a Spreadsheet.
+        /// </summary>
+        public event OpenFileEventHandler OpenFile;
+
+        /// <summary>
+        /// Called when the user saves a Spreadsheet to its current working filepath.
+        /// </summary>
+        public event SaveFileEventHandler SaveFile;
+
+        /// <summary>
+        /// Called when the user attempts to close a Spreadsheet.
+        /// </summary>
+        public event EventHandler CloseFile;
+
+        /// <summary>
+        /// Called when the user modifies the contents of a cell in a Spreadsheet.
+        /// </summary>
+        public event SetContentsEventHandler SetContents;
+
+        /// <summary>
+        /// Returns a new instance of an IView.
+        /// </summary>
         public IView GetNew()
         {
-            Form1 newss = new Form1();
+            Form1 newss = new Form1("");
             return newss;
         }
 
-
-        public void DisplayContents(string CellName, string CellValue)
+        /// <summary>
+        /// Overload of GetNew() but this time passes a path that the model will be loaded from
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public IView GetNew(string p)
         {
-            int col = ConvertColToInt(CellName[0]);
-            int row = int.Parse(CellName.Substring(1));
-            this.spreadsheetPanel1.SetValue(col, row, CellValue);
+            Form1 newss = new Form1(p);
+            return newss;
         }
 
+        /// <summary>
+        /// Displays the contents of cell (cellName) as value (cellValue).
+        /// </summary>
+        public void DisplayContents(string cellName, string cellValue)
+        {
+            int col = ConvertColToInt(cellName[0]);
+            int row = int.Parse(cellName.Substring(1));
+            MessageBox.Show(col + " " + row + " " + cellValue);
+            row--;
+            this.spreadsheetPanel1.SetValue(col, row, cellValue);
+        }
 
-        public bool WarningPrompt()
+        /// <summary>
+        /// Creates a message dialog saying how it was not possible to open the specified file.
+        /// The message will say what file could not be opened.
+        /// An empty file will still be created.
+        /// Returns true if the file should close otherwise false means the file should not close
+        /// </summary>
+        public bool ClosePrompt()
         {
             DialogResult result = MessageBox.Show("There are unsaved changes! Do you want to save or cancel?", "Warning!", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
 
-            if(result == DialogResult.Yes)
+            if (result == DialogResult.Yes)
             {
-                this.SaveFile(this, new EventArgs());
+                this.SaveSpreadSheet(this, new EventArgs());
                 return true;
             }
             else if (result == DialogResult.No)
@@ -70,8 +118,17 @@ namespace SpreadsheetGUI
             }
             else
             {
-                return false; 
+                return false;
             }
+        }
+        /// <summary>
+        /// Creates a message dialog saying how it was not possible to open the specified file.
+        /// The message will say what file could not be opened.
+        /// An empty file will still be created.
+        /// </summary>
+        public void UnableToLoad(string p)
+        {
+            MessageBox.Show("The file " + p + "Could not be opened.");
         }
 
         /// <summary>
@@ -182,17 +239,12 @@ namespace SpreadsheetGUI
 
             if (open.ShowDialog() == DialogResult.OK)
             {
-                try
+
+                if (OpenFile != null)
                 {
-                    if (OpenFile != null)
-                    {
-                        OpenFile(this, new OpenFileEventArgs(open.FileName));
-                    }
+                    OpenFile(this, new FileEventArgs(open.FileName));
                 }
-                catch(Exception ex) //CorruptedFileException e)
-                {
-                    MessageBox.Show("The file " + open.FileName + "Could not be opened.");
-                }
+
             }
         }
 
@@ -222,6 +274,7 @@ namespace SpreadsheetGUI
                 {
                     int row, col;
                     this.spreadsheetPanel1.GetSelection(out col, out row);
+                    row++;
                     string cellName = ConvertColIntoLetter(col) + row;
                     SetContents(this, new SetContentsEventArgs(cellName, this.ContentChangeBox.Text));
                 }
@@ -235,9 +288,13 @@ namespace SpreadsheetGUI
         /// <param name="e"></param>
         private void SaveSpreadSheet(object sender, EventArgs e)
         {
-            if (this.SaveFile != null)
+            if (!path.Equals(""))
             {
-                SaveFile(this, e);
+                this.SaveFile(this, new FileEventArgs(path));
+            }
+            else
+            {
+                this.SaveAsSpreadSheet(this, e);
             }
         }
 
@@ -256,9 +313,9 @@ namespace SpreadsheetGUI
             if (save.ShowDialog() == DialogResult.OK)
             {
                 MessageBox.Show(save.FileName);
-                if (SaveFileAs != null)
+                if (SaveFile != null)
                 {
-                    SaveFileAs(this, new SaveFileEventArgs(save.FileName));
+                    SaveFile(this, new FileEventArgs(save.FileName));
                 }
             }
 

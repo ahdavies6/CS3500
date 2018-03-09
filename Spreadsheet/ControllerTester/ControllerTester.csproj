@@ -56,10 +56,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SpreadsheetController\SpreadsheetController.csproj">
-      <Project>{26bbfb76-dd1c-4245-beb0-7e098cd0f359}</Project>
-      <Name>SpreadsheetController</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SpreadsheetGUI\SpreadsheetGUI.csproj">
       <Project>{29a0a8cf-371b-4252-8588-74c06d1eea81}</Project>
       <Name>SpreadsheetGUI</Name>

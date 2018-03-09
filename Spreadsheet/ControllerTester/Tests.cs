@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SpreadsheetGUI;
-using SpreadsheetController;
 using System.IO;
 using SS;
 
@@ -34,7 +33,7 @@ namespace ControllerTester
             using (StringReader sr = new StringReader("")) // todo: MAKE SURE THIS WORKS LATER
             {
                 IView view = new SimpleView();
-                Controller controller = new Controller(sr, sw, view);
+               // Controller controller = new Controller(sr, sw, view);
             }
         }
 
