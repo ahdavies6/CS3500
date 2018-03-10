@@ -47,7 +47,7 @@ namespace SpreadsheetGUI
         {
             // Create the window and the controller
             Form1 window = new Form1(path);
-            (new Controller(window)).Context = context;
+            (new Controller(window)).Context = SpreadsheetApplicationContext.GetContext();
 
             // One more form is running
             windowCount++;
