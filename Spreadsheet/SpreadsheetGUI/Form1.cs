@@ -98,6 +98,7 @@ namespace SpreadsheetGUI
             int row = int.Parse(cellName.Substring(1));
             row--;
             this.spreadsheetPanel1.SetValue(col, row, cellValue);
+            this.SelectCell(this.spreadsheetPanel1);
         }
 
         /// <summary>
