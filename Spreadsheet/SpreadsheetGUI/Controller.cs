@@ -138,6 +138,12 @@ namespace SpreadsheetGUI
                 return;
             }
 
+            //Case that the celLContents is just an emptry string. In which case, ISet cells will be empty and 
+            // the cell value needs to be manually updated in the gui
+            //If ISet is not empty, then it must contain cellName since it is one of the cells that must get updated
+            //Thus it will override this operation anyway - this means theres no need for an if statement
+            view.DisplayContents(cellName, cellContents);
+
             // Only reaches this point if adding the new value was succesful, and did not cause
             // a circular dependency
             foreach (string cell in cells)

@@ -293,7 +293,7 @@ namespace SpreadsheetGUI
                     string cellName = ConvertColIntoLetter(col) + row;
                     this.ActiveControl = this.spreadsheetPanel1;
                     string NewContent;
-                    if (this.ContentChangeBox.Text[0] == '=')
+                    if (this.ContentChangeBox.Text.Length > 0 && this.ContentChangeBox.Text[0] == '=')
                     {
                         NewContent = this.ContentChangeBox.Text.ToUpper();
                     }
