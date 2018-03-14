@@ -1,4 +1,4 @@
-﻿namespace BoggleClient
+﻿namespace BoggleClient.Open
 {
     partial class OpenView
     {

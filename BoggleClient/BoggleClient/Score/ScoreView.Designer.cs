@@ -1,4 +1,4 @@
-﻿namespace BoggleClient
+﻿namespace BoggleClient.Score
 {
     partial class ScoreView
     {

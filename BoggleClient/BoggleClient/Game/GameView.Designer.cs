@@ -1,4 +1,4 @@
-﻿namespace BoggleClient
+﻿namespace BoggleClient.Game
 {
     partial class GameView
     {

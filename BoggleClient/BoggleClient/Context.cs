@@ -33,7 +33,7 @@ namespace BoggleClient
         // todo: this
         private void StartOpen()
         {
-            OpenView view = new OpenView();
+            Open.IOpenView view = new OpenView();
             // pass OpenController the openView
             OpenController controller = new OpenController();
 

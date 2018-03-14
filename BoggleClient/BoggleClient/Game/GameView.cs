@@ -8,9 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace BoggleClient
+namespace BoggleClient.Game
 {
-    public partial class GameView : Form, Game.IGameView
+    public partial class GameView : Form, IGameView
     {
         public GameView()
         {

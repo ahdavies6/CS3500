@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace BoggleClient
+namespace BoggleClient.Open
 {
     public partial class OpenView : Form, Open.IOpenView
     {

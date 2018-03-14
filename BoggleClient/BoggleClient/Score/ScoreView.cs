@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace BoggleClient
+namespace BoggleClient.Score
 {
     public partial class ScoreView : Form, Score.ICloseView
     {
