@@ -17,7 +17,7 @@ namespace BoggleClient
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            Context context = Context.
+            // do the context bit
 
             Application.Run(new OpenView());
         }
