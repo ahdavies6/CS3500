@@ -37,7 +37,10 @@ namespace BoggleClient
             this.UserID = UID;
             this.view = _view;
             this.client = GenerateHttpClient(URL);
-            //TODO: add hooks
+
+            //adding event methods
+            this.view.AddWord += AddWordToGame;
+            this.view.CancelPushed += Cancel;
         }
 
         /// <summary>
@@ -56,6 +59,23 @@ namespace BoggleClient
         private HttpClient GenerateHttpClient(string url)
         {
             return null;
+        }
+
+        /// <summary>
+        /// Given a string word, attempts to add it to the boggle server
+        /// </summary>
+        /// <param name="word"></param>
+        private void AddWordToGame(string word)
+        {
+
+        }
+
+        /// <summary>
+        /// A method that runs if Cancel on the GUI is pushed 
+        /// </summary>
+        private void Cancel()
+        {
+
         }
     }
 }
