@@ -10,11 +10,14 @@ using System.Windows.Forms;
 
 namespace BoggleClient
 {
-    public partial class ScoreView : Form
+    public partial class ScoreView : Form, Score.ICloseView
     {
         public ScoreView()
         {
             InitializeComponent();
         }
+
+        public event Action CancelPushed;
+        public event Action NewGame;
     }
 }
