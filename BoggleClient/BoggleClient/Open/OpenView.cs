@@ -17,11 +17,10 @@ namespace BoggleClient.Open
             InitializeComponent();
         }
 
-        // todo: I don't think this needs to be here, in light of NextState (and its EventArgs)
         /// <summary>
         /// Attempt to connect to the server
         /// </summary>
-        public event Action<string, string> ConnectToServer;
+        public event ConnectEventHandler ConnectToServer;
 
         /// <summary>
         /// Event that occurs when the cancel button is pushed

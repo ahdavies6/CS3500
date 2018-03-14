@@ -10,9 +10,17 @@ using BoggleClient.Score;
 
 namespace BoggleClient
 {
-    // todo: write doc comments
+    // todo: add missing doc comments
+
+    /// <summary>
+    /// Singleton-pattern "meta-controller" that activates different Views (Forms) and Controllers in
+    /// the client, per user interaction.
+    /// </summary>
     class Context : ApplicationContext
     {
+        /// <summary>
+        /// Singleton pattern field exists independently of its instance.
+        /// </summary>
         private static Context context;
 
         private Context() { }
@@ -26,60 +34,56 @@ namespace BoggleClient
             return context;
         }
 
-        // todo: do I need to use this "wrapper", or should I just make StartOpen public?
         public void Start()
         {
             StartOpen();
         }
 
-        // todo: revisit after implementing OpenView
+        // todo: revisit after implementing OpenController and GameController
         private void StartOpen()
         {
             OpenView view = new OpenView();
-            // pass OpenController the openView?
+            // pass OpenController's constructor the openView
             OpenController controller = new OpenController();
 
             view.FormClosed += (sender, e) => ExitThread();
-            // revisit this:
             view.CancelPushed += Start;
-            view.NextState += (sender, e) => StartGame(e.UserID, e.URL, e.View);
+            // pass nickname in here too once it's a parameter for GameController's constructor
+            view.NextState += (sender, e) => StartGame(e.UserID, e.URL, e.Nickname);
 
             view.Show();
         }
 
-        // todo: do I need to pull in an IGameView here (requires understanding StartOpen's NextState and
-        // GameView better), or can I just use the old first line?
-        private void StartGame(string userID, string URL, IGameView gameView)
+        // todo: revisit after implementing GameController and ScoreController
+        private void StartGame(string userID, string URL, string nickname)
         {
-            // todo: go back to this? remove deprecated? does the replaced line's cast even work?
-            //GameView view = new GameView();
-            GameView view = (GameView)gameView;
-            GameController controller = new GameController(userID, URL, gameView);
+            GameView view = new GameView();
+            // change to this:
+            //GameController controller = new GameController(userID, URL, view, nickname);
+            GameController controller = new GameController(userID, URL, view);
 
             view.FormClosed += (sender, e) => ExitThread();
             view.CancelPushed += Start;
-            // todo: revisit upon ScoreView implementation; StartScore should have parameters
+            // after ScoreController implementation, StartScore should have some parameters, right?
             view.NextState += (sender, e) => StartScore();
 
             System.Timers.Timer timer = new System.Timers.Timer(1000);
-            // todo: GameController.Refresh should have some parameters, right?
+            // should GameController.Refresh have some parameters?
             timer.Elapsed += (sender, e) => controller.Refresh();
 
             view.Show();
         }
 
-        // todo: should this method have parameters (which will be passed as the properties of
-        // Game.NextStateEventArgs)?
+        // todo: revisit after implementing ScoreController
         private void StartScore()
         {
             ScoreView view = new ScoreView();
-            // pass ScoreController the view?
-            // pass ScoreController more params?
+            // pass ScoreController the view
+            // pass ScoreController more params (e.g. gameID or userID)?
             ScoreController controller = new ScoreController();
 
             view.FormClosed += (sender, e) => ExitThread();
             view.CancelPushed += Start;
-            // todo: either hook view.NewGame, or remove it from ScoreView and IScoreView
 
             view.Show();
         }

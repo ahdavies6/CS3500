@@ -30,16 +30,14 @@ namespace BoggleClient
         /// Constructs a GameController for game. The UID passed is the ID of the player and the URL is the URL to 
         /// connect to the server
         /// </summary>
-        /// <param name="userID"></param>
-        /// <param name="URL"></param>
         public GameController(string userID, string URL, Game.IGameView view)
         {
             this.UserID = userID;
             this.view = view;
             this.client = GenerateHttpClient(URL);
 
-            //adding event methods
             this.view.AddWord += AddWordToGame;
+            // remove next line? (event taken care of in Context)
             this.view.CancelPushed += Cancel;
         }
 
@@ -66,14 +64,6 @@ namespace BoggleClient
         /// </summary>
         /// <param name="word"></param>
         private void AddWordToGame(string word)
-        {
-
-        }
-
-        /// <summary>
-        /// A method that runs if Cancel on the GUI is pushed 
-        /// </summary>
-        private void Cancel()
         {
 
         }

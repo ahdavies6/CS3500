@@ -6,21 +6,24 @@ using System.Threading.Tasks;
 
 namespace BoggleClient.Open
 {
+    // todo: missing doc comments
+
     /// <summary>
     /// Event handler for NextState event, which contains all the data (within e) to construct a GameView.
     /// </summary>
     public delegate void NextStateEventHandler(object sender, NextStateEventArgs e);
+
+    public delegate void ConnectEventHandler(object sender, ConnectEventArgs e);
 
     /// <summary>
     /// Interface for the OpenController to interact with
     /// </summary>
     public interface IOpenView
     {
-        // todo: I don't think this needs to be here, in light of NextState (and its EventArgs)
         /// <summary>
         /// Attempt to connect to the server
         /// </summary>
-        event Action<string, string> ConnectToServer;
+        event ConnectEventHandler ConnectToServer;
 
         /// <summary>
         /// Event that occurs when the cancel button is pushed
@@ -33,9 +36,31 @@ namespace BoggleClient.Open
         event NextStateEventHandler NextState;
     }
 
-    // todo: finish implementing this after GameView is finished (inc doc comments)
+    // todo: revisit (check) after implementing OpenController
+    // is this necessary, considering NextState?
+    public class ConnectEventArgs : EventArgs
+    {
+        public string UserToken
+        {
+            get;
+            private set;
+        }
+
+        public int GameLength
+        {
+            get;
+            private set;
+        }
+
+        public ConnectEventArgs(string userID, int gameLength)
+        {
+            this.UserToken = userID;
+            this.GameLength = gameLength;
+        }
+    }
+
     /// <summary>
-    /// Contains the event data for NextState event, including all the data necessary to construct
+    /// Contains the event data for NextState event, including everything necessary to construct
     /// a GameView.
     /// </summary>
     public class NextStateEventArgs : EventArgs
@@ -52,17 +77,17 @@ namespace BoggleClient.Open
             private set;
         }
 
-        public Game.IGameView View
+        public string Nickname
         {
             get;
             private set;
         }
 
-        public NextStateEventArgs(string userID, string URL, Game.IGameView view)
+        public NextStateEventArgs(string userID, string URL, string nickname)
         {
             this.UserID = userID;
             this.URL = URL;
-            this.View = view;
+            this.Nickname = nickname;
         }
     }
 }

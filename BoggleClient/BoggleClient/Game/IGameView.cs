@@ -6,10 +6,14 @@ using System.Threading.Tasks;
 
 namespace BoggleClient.Game
 {
+    // todo: missing doc comments
+
     /// <summary>
     /// Event handler for NextState event, which contains all the data (within e) to construct a ScoreView.
     /// </summary>
     public delegate void NextStateEventHandler(object sender, NextStateEventArgs e);
+
+    public delegate void AddWordEventHandler(object sender, AddWordEventArgs e);
 
     /// <summary>
     /// Interface for the GameController to interact with
@@ -19,7 +23,7 @@ namespace BoggleClient.Game
         /// <summary>
         /// Event that gets fired when a new word is added
         /// </summary>
-        event Action<string> AddWord;
+        event AddWordEventHandler AddWord;
 
         /// <summary>
         /// Event that gets fired if the cancel button is clicked
@@ -35,6 +39,20 @@ namespace BoggleClient.Game
         /// Method that creates a set of labels for the dice passed through by DiceConfigs
         /// </summary>
         void GenerateLabels(string DiceConfig);
+    }
+
+    public class AddWordEventArgs : EventArgs
+    {
+        public string Word
+        {
+            get;
+            private set;
+        }
+
+        public AddWordEventArgs(string word)
+        {
+            this.Word = word;
+        }
     }
 
     // todo: implement this after ScoreView is finished

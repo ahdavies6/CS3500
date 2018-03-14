@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace BoggleClient.Score
 {
-    public partial class ScoreView : Form, Score.IScoreView
+    public partial class ScoreView : Form, IScoreView
     {
         public ScoreView()
         {
@@ -21,8 +21,5 @@ namespace BoggleClient.Score
         /// Restarts the application and returns it to the open screen
         /// </summary>
         public event Action CancelPushed;
-
-        // todo: decide whether this is necessary
-        public event Action NewGame;
     }
 }

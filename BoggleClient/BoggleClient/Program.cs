@@ -20,10 +20,6 @@ namespace BoggleClient
             Context context = Context.GetContext();
             context.Start();
             Application.Run(context);
-
-            // todo: remove deprecated
-            // old:
-            //Application.Run(new OpenView());
         }
     }
 }
