@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace BoggleClient
 {
-    public partial class GameView : Form
+    public partial class GameView : Form, IGameView
     {
         public GameView()
         {
