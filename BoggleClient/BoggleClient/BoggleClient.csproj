@@ -57,6 +57,7 @@
       <DependentUpon>GameView.cs</DependentUpon>
     </Compile>
     <Compile Include="Game\IGameView.cs" />
+    <Compile Include="Open\IOpenView.cs" />
     <Compile Include="Open\OpenController.cs" />
     <Compile Include="Open\OpenView.cs">
       <SubType>Form</SubType>

@@ -22,6 +22,12 @@ namespace BoggleClient.Game
         event Action CancelPushed;
 
         /// <summary>
+        /// Moves the game to the score state
+        /// </summary>
+        // TODO: Fix the action to a proper delegate type
+        event Action NextState;
+
+        /// <summary>
         /// Method that creates a set of labels for the dice passed through by DiceConfigs
         /// </summary>
         /// <param name="DiceConfig"></param>

@@ -10,11 +10,15 @@ using System.Windows.Forms;
 
 namespace BoggleClient
 {
-    public partial class OpenView : Form
+    public partial class OpenView : Form, Open.IOpenView
     {
         public OpenView()
         {
             InitializeComponent();
         }
+
+        public event Action<string, string> ConnectToServer;
+        public event Action CancelPushed;
+        public event Action NextState;
     }
 }
