@@ -37,10 +37,10 @@ namespace BoggleClient
             // pass OpenController the openView
             OpenController controller = new OpenController();
 
-            //view.Closed += () => { ExitThread(); };
+            view.FormClosed += (sender, e) => ExitThread();
 
             // hook an event for user exiting
-            //view.Cancel += Start;
+            //view.CancelPushed += Start;
 
             // hook an event for user starting a game
             // add params (for StartGame's GameController)
@@ -60,7 +60,7 @@ namespace BoggleClient
             System.Timers.Timer timer = new System.Timers.Timer(1000);
             //timer.Elapsed += (sender, e) => controller.Refresh();
 
-            //view.Closed += () => { ExitThread(); };
+            view.FormClosed += (sender, e) => ExitThread();
 
             // hook an event for user exiting
             //view.Cancel += Start;
@@ -80,7 +80,7 @@ namespace BoggleClient
             // pass ScoreController more params?
             ScoreController controller = new ScoreController();
 
-            //view.Closed += () => { ExitThread(); };
+            view.FormClosed += (sender, e) => ExitThread();
 
             // hook an event for user exiting
             //view.Cancel += Start;
