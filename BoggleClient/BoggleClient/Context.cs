@@ -4,10 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BoggleClient.Game;
+using BoggleClient.Open;
+using BoggleClient.Score;
 
 namespace BoggleClient
 {
-    // todo: doc comments
+    // todo: write doc comments
     class Context : ApplicationContext
     {
         private static Context context;
@@ -23,67 +26,60 @@ namespace BoggleClient
             return context;
         }
 
-        // todo: this
-        // do I need to use this "wrapper", or should I just make StartOpen public?
+        // todo: do I need to use this "wrapper", or should I just make StartOpen public?
         public void Start()
         {
             StartOpen();
         }
 
-        // todo: this
+        // todo: revisit after implementing OpenView
         private void StartOpen()
         {
-            Open.IOpenView view = new OpenView();
-            // pass OpenController the openView
+            OpenView view = new OpenView();
+            // pass OpenController the openView?
             OpenController controller = new OpenController();
 
             view.FormClosed += (sender, e) => ExitThread();
-
-            // hook an event for user exiting
-            //view.CancelPushed += Start;
-
-            // hook an event for user starting a game
-            // add params (for StartGame's GameController)
-            //view.Next += StartGame();
+            // revisit this:
+            view.CancelPushed += Start;
+            view.NextState += (sender, e) => StartGame(e.UserID, e.URL, e.View);
 
             view.Show();
         }
 
-        // todo: this
-        private void StartGame()
+        // todo: do I need to pull in an IGameView here (requires understanding StartOpen's NextState and
+        // GameView better), or can I just use the old first line?
+        private void StartGame(string userID, string URL, IGameView gameView)
         {
-            GameView view = new GameView();
-            // pass GameController the gameView
-            // pass GameController more params?
-            GameController controller = new GameController();
-
-            System.Timers.Timer timer = new System.Timers.Timer(1000);
-            //timer.Elapsed += (sender, e) => controller.Refresh();
+            // todo: go back to this? remove deprecated? does the replaced line's cast even work?
+            //GameView view = new GameView();
+            GameView view = (GameView)gameView;
+            GameController controller = new GameController(userID, URL, gameView);
 
             view.FormClosed += (sender, e) => ExitThread();
+            view.CancelPushed += Start;
+            // todo: revisit upon ScoreView implementation; StartScore should have parameters
+            view.NextState += (sender, e) => StartScore();
 
-            // hook an event for user exiting
-            //view.Cancel += Start;
-
-            // hook an event for user completing a game
-            // add params (for StartScore's ScoreController)
-            //view.Next += StartScore;
+            System.Timers.Timer timer = new System.Timers.Timer(1000);
+            // todo: GameController.Refresh should have some parameters, right?
+            timer.Elapsed += (sender, e) => controller.Refresh();
 
             view.Show();
         }
 
-        // todo: this
+        // todo: should this method have parameters (which will be passed as the properties of
+        // Game.NextStateEventArgs)?
         private void StartScore()
         {
             ScoreView view = new ScoreView();
-            // pass ScoreController the view
+            // pass ScoreController the view?
             // pass ScoreController more params?
             ScoreController controller = new ScoreController();
 
             view.FormClosed += (sender, e) => ExitThread();
-
-            // hook an event for user exiting
-            //view.Cancel += Start;
+            view.CancelPushed += Start;
+            // todo: either hook view.NewGame, or remove it from ScoreView and IScoreView
 
             view.Show();
         }

@@ -10,15 +10,27 @@ using System.Windows.Forms;
 
 namespace BoggleClient.Open
 {
-    public partial class OpenView : Form, Open.IOpenView
+    public partial class OpenView : Form, IOpenView
     {
         public OpenView()
         {
             InitializeComponent();
         }
 
+        // todo: I don't think this needs to be here, in light of NextState (and its EventArgs)
+        /// <summary>
+        /// Attempt to connect to the server
+        /// </summary>
         public event Action<string, string> ConnectToServer;
+
+        /// <summary>
+        /// Event that occurs when the cancel button is pushed
+        /// </summary>
         public event Action CancelPushed;
-        public event Action NextState;
+
+        /// <summary>
+        /// Moves to the next state in the game (the actual boggle game)
+        /// </summary>
+        public event NextStateEventHandler NextState;
     }
 }

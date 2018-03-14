@@ -27,15 +27,15 @@ namespace BoggleClient
         private Game.IGameView view;
 
         /// <summary>
-        /// Constructs a GameControler for game. The UID passed is the ID of the player and the URL is the URL to 
+        /// Constructs a GameController for game. The UID passed is the ID of the player and the URL is the URL to 
         /// connect to the server
         /// </summary>
-        /// <param name="UID"></param>
+        /// <param name="userID"></param>
         /// <param name="URL"></param>
-        public GameController(string UID, string URL, Game.IGameView _view)
+        public GameController(string userID, string URL, Game.IGameView view)
         {
-            this.UserID = UID;
-            this.view = _view;
+            this.UserID = userID;
+            this.view = view;
             this.client = GenerateHttpClient(URL);
 
             //adding event methods

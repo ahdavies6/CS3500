@@ -7,9 +7,14 @@ using System.Threading.Tasks;
 namespace BoggleClient.Game
 {
     /// <summary>
+    /// Event handler for NextState event, which contains all the data (within e) to construct a ScoreView.
+    /// </summary>
+    public delegate void NextStateEventHandler(object sender, NextStateEventArgs e);
+
+    /// <summary>
     /// Interface for the GameController to interact with
     /// </summary>
-    interface IGameView
+    public interface IGameView
     {
         /// <summary>
         /// Event that gets fired when a new word is added
@@ -24,14 +29,21 @@ namespace BoggleClient.Game
         /// <summary>
         /// Moves the game to the score state
         /// </summary>
-        // TODO: Fix the action to a proper delegate type
-        event Action NextState;
+        event NextStateEventHandler NextState;
 
         /// <summary>
         /// Method that creates a set of labels for the dice passed through by DiceConfigs
         /// </summary>
-        /// <param name="DiceConfig"></param>
         void GenerateLabels(string DiceConfig);
+    }
 
+    // todo: implement this after ScoreView is finished
+    /// <summary>
+    /// Contains the event data for NextState event, including all the data necessary to construct
+    /// a ScoreView.
+    /// </summary>
+    public class NextStateEventArgs : EventArgs
+    {
+        public NextStateEventArgs() { }
     }
 }
