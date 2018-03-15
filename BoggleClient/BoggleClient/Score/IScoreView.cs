@@ -10,6 +10,15 @@ namespace BoggleClient.Score
 
     interface IScoreView
     {
+        string PlayerName { set; }
+        int PlayerScore { set; }
+        string[] PlayerWords { set; }
+        int[] PlayerScores { set; }
+        string OpponentName { set; }
+        int OpponentScore { set; }
+        string[] OpponentWords { set; }
+        int[] OpponentScores { set; }
+
         /// <summary>
         /// Restarts the application and returns it to the open screen
         /// </summary>

@@ -24,5 +24,80 @@ namespace BoggleClient.Score
         /// Restarts the application and returns it to the open screen
         /// </summary>
         public event Action CancelPushed;
+
+        // todo: get ScoreController to call all of these
+        #region Data We Need From ScoreController
+
+        public string PlayerName
+        {
+            set { AbovePlayerWordsLabel.Text = value; }
+        }
+
+        public int PlayerScore
+        {
+            set { AbovePlayerScoresLabel.Text = value.ToString(); }
+        }
+
+        private string ArrayToString(string[] array)
+        {
+            string result = "";
+
+            foreach (string piece in array)
+            {
+                result = result + piece + "\r\n";
+            }
+
+            return result;
+        }
+
+        private string ArrayToString(int[] array)
+        {
+            string result = "";
+
+            foreach (int piece in array)
+            {
+                result = result + piece.ToString() + "\r\n";
+            }
+
+            return result;
+        }
+
+
+        public string[] PlayerWords
+        {
+            set { PlayerWordsDataLabel.Text = ArrayToString(value); }
+        }
+
+        public int[] PlayerScores
+        {
+            set { PlayerScoresDataLabel.Text = ArrayToString(value); }
+        }
+
+        public string OpponentName
+        {
+            set { AboveOpponentWordsLabel.Text = value; }
+        }
+
+        public int OpponentScore
+        {
+            set { AboveOpponentScoresLabel.Text = value.ToString(); }
+        }
+
+        public string[] OpponentWords
+        {
+            set { OpponentWordsDataLabel.Text = ArrayToString(value); }
+        }
+
+        public int[] OpponentScores
+        {
+            set { OpponentScoresDataLabel.Text = ArrayToString(value); }
+        }
+
+        #endregion
+
+        private void ReturnButton_Click(object sender, EventArgs e)
+        {
+            CancelPushed?.Invoke();
+        }
     }
 }

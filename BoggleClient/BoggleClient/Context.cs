@@ -72,7 +72,6 @@ namespace BoggleClient
             view.Show();
         }
 
-        // todo: revisit after implementing GameController and ScoreController
         private void StartGame(string URL, string nickname, string userID, int gameLength, string gameID)
         {
             GameView view = new GameView();
@@ -80,21 +79,28 @@ namespace BoggleClient
             // todo: rework the above to accept something like:
             //GameController controller = new GameController(URL, nickname, userID, gameLength, gameID, view);
 
-            view.CancelPushed += Start;
-            // after ScoreController implementation, StartScore should have some parameters, right?
-            view.NextState += (sender, e) => StartScore();
+            // todo: add something like these once GameController is implemented:
+            //view.AddWord += controller.AddWord();
+
+            view.CancelPushed += Start; 
+
+            // todo: StartScore params once GameController is implemented
+            //view.NextState += (sender, e) => StartScore();
 
             view.FormClosed += (sender, e) => ExitThread();
 
             System.Timers.Timer timer = new System.Timers.Timer(1000);
-            // should GameController.Refresh have some parameters?
+
+            // todo: should GameController.Refresh have some parameters?
             timer.Elapsed += (sender, e) => controller.Refresh();
 
             view.Show();
         }
 
-        // todo: revisit after implementing ScoreController
-        private void StartScore()
+        // todo: pick from these two constructors:
+        //private void StartScore(string playerName, int playerScore, string[] playerWords, int[] playerScores, 
+        //    string opponentName, int opponentScore, string[] opponentWords, int[] opponentScores)
+        private void StartScore(string gameID)
         {
             ScoreView view = new ScoreView();
             // pass ScoreController the view

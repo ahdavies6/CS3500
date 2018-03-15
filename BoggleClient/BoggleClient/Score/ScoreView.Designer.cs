@@ -33,10 +33,10 @@
             this.AbovePlayerScoresLabel = new System.Windows.Forms.Label();
             this.PlayerScoresDataLabel = new System.Windows.Forms.Label();
             this.AboveOpponentWordsLabel = new System.Windows.Forms.Label();
-            this.AboveOpponentScoreLabel = new System.Windows.Forms.Label();
+            this.AboveOpponentScoresLabel = new System.Windows.Forms.Label();
             this.OpponentWordsDataLabel = new System.Windows.Forms.Label();
             this.OpponentScoresDataLabel = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
+            this.ReturnButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // PlayerWordsDataLabel
@@ -84,12 +84,12 @@
             // 
             // AboveOpponentScoreLabel
             // 
-            this.AboveOpponentScoreLabel.AutoSize = true;
-            this.AboveOpponentScoreLabel.Location = new System.Drawing.Point(579, 58);
-            this.AboveOpponentScoreLabel.Name = "AboveOpponentScoreLabel";
-            this.AboveOpponentScoreLabel.Size = new System.Drawing.Size(45, 17);
-            this.AboveOpponentScoreLabel.TabIndex = 5;
-            this.AboveOpponentScoreLabel.Text = "Score";
+            this.AboveOpponentScoresLabel.AutoSize = true;
+            this.AboveOpponentScoresLabel.Location = new System.Drawing.Point(579, 58);
+            this.AboveOpponentScoresLabel.Name = "AboveOpponentScoreLabel";
+            this.AboveOpponentScoresLabel.Size = new System.Drawing.Size(45, 17);
+            this.AboveOpponentScoresLabel.TabIndex = 5;
+            this.AboveOpponentScoresLabel.Text = "Score";
             // 
             // OpponentWordsDataLabel
             // 
@@ -107,24 +107,25 @@
             this.OpponentScoresDataLabel.TabIndex = 7;
             this.OpponentScoresDataLabel.Text = "0";
             // 
-            // button1
+            // ReturnButton
             // 
-            this.button1.Location = new System.Drawing.Point(631, 393);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(157, 45);
-            this.button1.TabIndex = 8;
-            this.button1.Text = "Return To Main Menu";
-            this.button1.UseVisualStyleBackColor = true;
+            this.ReturnButton.Location = new System.Drawing.Point(631, 393);
+            this.ReturnButton.Name = "ReturnButton";
+            this.ReturnButton.Size = new System.Drawing.Size(157, 45);
+            this.ReturnButton.TabIndex = 8;
+            this.ReturnButton.Text = "Return To Main Menu";
+            this.ReturnButton.UseVisualStyleBackColor = true;
+            this.ReturnButton.Click += new System.EventHandler(this.ReturnButton_Click);
             // 
             // ScoreView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.ReturnButton);
             this.Controls.Add(this.OpponentScoresDataLabel);
             this.Controls.Add(this.OpponentWordsDataLabel);
-            this.Controls.Add(this.AboveOpponentScoreLabel);
+            this.Controls.Add(this.AboveOpponentScoresLabel);
             this.Controls.Add(this.AboveOpponentWordsLabel);
             this.Controls.Add(this.PlayerScoresDataLabel);
             this.Controls.Add(this.AbovePlayerScoresLabel);
@@ -144,9 +145,9 @@
         private System.Windows.Forms.Label AbovePlayerScoresLabel;
         private System.Windows.Forms.Label PlayerScoresDataLabel;
         private System.Windows.Forms.Label AboveOpponentWordsLabel;
-        private System.Windows.Forms.Label AboveOpponentScoreLabel;
+        private System.Windows.Forms.Label AboveOpponentScoresLabel;
         private System.Windows.Forms.Label OpponentWordsDataLabel;
         private System.Windows.Forms.Label OpponentScoresDataLabel;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button ReturnButton;
     }
 }
