@@ -17,13 +17,15 @@ namespace BoggleClient
             // todo: uncomment all of this as soon as the Controllers have been implemented
             //Application.EnableVisualStyles();
             //Application.SetCompatibleTextRenderingDefault(false);
-            
+
             //Context context = Context.GetContext();
             //context.Start();
             //Application.Run(context);
 
             // todo: delete this once the Controllers have been implemented
-            
+            //MainOpen();
+            MainGame();
+            //MainScore();
         }
 
         // todo: delete region as soon as the Controllers have been implemented

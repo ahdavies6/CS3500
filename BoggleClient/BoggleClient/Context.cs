@@ -23,6 +23,8 @@ namespace BoggleClient
         /// </summary>
         private static Context context;
 
+        
+
         private Context() { }
 
         public static Context GetContext()
@@ -39,33 +41,50 @@ namespace BoggleClient
             StartOpen();
         }
 
-        // todo: revisit after implementing OpenController and GameController
         private void StartOpen()
         {
             OpenView view = new OpenView();
             // pass OpenController's constructor the openView
             OpenController controller = new OpenController();
 
+            // todo: something along these lines:
+            //view.ConnectToServer += (sender, e) => controller.Connect(e.URL, e.Nickname);
+            //view.SearchGame += (sender, e) => controller.Search(e.GameLength);
+            //view.CancelPushed += () => controller.StopConnect();
+            //view.CancelSearch += () => controller.StopSearch();
+
             view.FormClosed += (sender, e) => ExitThread();
-            view.CancelPushed += Start;
-            // pass nickname in here too once it's a parameter for GameController's constructor
-            view.NextState += (sender, e) => StartGame(e.UserID, e.URL, e.Nickname);
+
+            // remove deprecated:
+            //view.NextState += (sender, e) => StartGame(e.UserToken, e.URL, e.Nickname);
+
+            // todo: implement an event in Controller that is fired when a game is found and (roughly)
+            // follows this spec: "event ...EventArgs GameFound", where EventArgs contains:
+            //     URL, Nickname, UserID, GameLength, GameID
+            //controller.GameFound += (sender, e) =>
+            //{
+            //    if (URL != null && Nickname != null)
+            //    {
+            //        StartGame(e.URL, e.Nickname, e.UserID, e.GameLength, e.GameID);
+            //    }
+            //};
 
             view.Show();
         }
 
         // todo: revisit after implementing GameController and ScoreController
-        private void StartGame(string userID, string URL, string nickname)
+        private void StartGame(string URL, string nickname, string userID, int gameLength, string gameID)
         {
             GameView view = new GameView();
-            // change to this:
-            //GameController controller = new GameController(userID, URL, view, nickname);
             GameController controller = new GameController(userID, URL, view);
+            // todo: rework the above to accept something like:
+            //GameController controller = new GameController(URL, nickname, userID, gameLength, gameID, view);
 
-            view.FormClosed += (sender, e) => ExitThread();
             view.CancelPushed += Start;
             // after ScoreController implementation, StartScore should have some parameters, right?
             view.NextState += (sender, e) => StartScore();
+
+            view.FormClosed += (sender, e) => ExitThread();
 
             System.Timers.Timer timer = new System.Timers.Timer(1000);
             // should GameController.Refresh have some parameters?

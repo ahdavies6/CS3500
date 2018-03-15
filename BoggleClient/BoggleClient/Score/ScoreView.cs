@@ -12,6 +12,9 @@ namespace BoggleClient.Score
 {
     public partial class ScoreView : Form, IScoreView
     {
+        /// <summary>
+        /// Opens the Form
+        /// </summary>
         public ScoreView()
         {
             InitializeComponent();

@@ -8,69 +8,45 @@ namespace BoggleClient.Open
 {
     // todo: missing doc comments
 
-    /// <summary>
-    /// Event handler for NextState event, which contains all the data (within e) to construct a GameView.
-    /// </summary>
-    public delegate void NextStateEventHandler(object sender, NextStateEventArgs e);
-
     public delegate void ConnectEventHandler(object sender, ConnectEventArgs e);
+
+    public delegate void SearchGameEventHandler(object sender, SearchGameEventArgs e);
+
+    // todo: remove deprecated?
+    ///// <summary>
+    ///// Event handler for NextState event, which contains all the data (within e) to construct a GameView.
+    ///// </summary>
+    //public delegate void NextStateEventHandler(object sender, NextStateEventArgs e);
 
     /// <summary>
     /// Interface for the OpenController to interact with
     /// </summary>
     public interface IOpenView
     {
+        // todo: after merging, refactor as RegisterUser
         /// <summary>
         /// Attempt to connect to the server
         /// </summary>
         event ConnectEventHandler ConnectToServer;
 
+        event SearchGameEventHandler SearchGame;
+
+        // todo: after merging, refactor as CancelRegister
         /// <summary>
         /// Event that occurs when the cancel button is pushed
         /// </summary>
         event Action CancelPushed;
 
+        event Action CancelSearch;
+
         /// <summary>
         /// Moves to the next state in the game (the actual boggle game)
         /// </summary>
-        event NextStateEventHandler NextState;
+        //event Action NextState;
     }
 
-    // todo: revisit (check) after implementing OpenController
-    // is this necessary, considering NextState?
     public class ConnectEventArgs : EventArgs
     {
-        public string UserToken
-        {
-            get;
-            private set;
-        }
-
-        public int GameLength
-        {
-            get;
-            private set;
-        }
-
-        public ConnectEventArgs(string userID, int gameLength)
-        {
-            this.UserToken = userID;
-            this.GameLength = gameLength;
-        }
-    }
-
-    /// <summary>
-    /// Contains the event data for NextState event, including everything necessary to construct
-    /// a GameView.
-    /// </summary>
-    public class NextStateEventArgs : EventArgs
-    {
-        public string UserID
-        {
-            get;
-            private set;
-        }
-
         public string URL
         {
             get;
@@ -83,11 +59,106 @@ namespace BoggleClient.Open
             private set;
         }
 
-        public NextStateEventArgs(string userID, string URL, string nickname)
+        //public int GameLength
+        //{
+        //    get;
+        //    private set;
+        //}
+
+        //public ConnectEventArgs(string URL, string userToken, int gameLength)
+        public ConnectEventArgs(string URL, string nickname)
         {
-            this.UserID = userID;
             this.URL = URL;
             this.Nickname = nickname;
+        }
+    }
+
+    // todo: remove deprecated?
+    ///// <summary>
+    ///// Contains the event data for NextState event, including everything necessary to construct
+    ///// a GameView.
+    ///// </summary>
+    //public class NextStateEventArgs : EventArgs
+    //{
+    //    // UserToken should be stored by controller
+    //    //public string UserToken
+    //    //{
+    //    //    get;
+    //    //    private set;
+    //    //}
+
+    //    // URL should be stored by controller
+    //    //public string URL
+    //    //{
+    //    //    get;
+    //    //    private set;
+    //    //}
+
+    //    // Nickname should be stored by Controller
+    //    //public string Nickname
+    //    //{
+    //    //    get;
+    //    //    private set;
+    //    //}
+
+    //    public int GameLength
+    //    {
+    //        get;
+    //        private set;
+    //    }
+
+    //    //public NextStateEventArgs(string userToken, string URL, string nickname)
+    //    public NextStateEventArgs(int gameLength)
+    //    {
+    //        this.GameLength = gameLength;
+    //    }
+
+    //    public NextStateEventArgs(string gameLength)
+    //    {
+    //        if (Int32.TryParse(gameLength, out int length) && length > 5 && length < 120)
+    //        {
+    //            this.GameLength = length;
+    //        }
+    //        else
+    //        {
+    //            // equivalent to an error message
+    //            this.GameLength = -1;
+    //        }
+    //    }
+    //}
+
+    public class SearchGameEventArgs : EventArgs
+    {
+        //public string UserToken
+        //{
+        //    get;
+        //    private set;
+        //}
+
+        public int GameLength
+        {
+            get;
+            private set;
+        }
+
+        //public SearchGameEventArgs(string userToken, int gameLength)
+        public SearchGameEventArgs(int gameLength)
+        {
+            this.GameLength = gameLength;
+        }
+
+        public SearchGameEventArgs(string gameLength)
+        {
+            // todo: decide whether to handle length checking here or in Context
+            if (Int32.TryParse(gameLength, out int length) && length > 5 && length < 120)
+            {
+                this.GameLength = length;
+            }
+            else
+            {
+                // equivalent to an error message
+                this.GameLength = -1;
+            }
         }
     }
 }

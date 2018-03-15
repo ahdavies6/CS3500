@@ -20,6 +20,13 @@ namespace BoggleClient.Game
     /// </summary>
     public interface IGameView
     {
+        // todo: implement setting of these into GameController, in some form
+        string PlayerName { set; }
+        int PlayerScore { set; }
+        string OpponentName { set; }
+        int OpponentScore { set; }
+        int TimeRemaining { set; }
+
         /// <summary>
         /// Event that gets fired when a new word is added
         /// </summary>

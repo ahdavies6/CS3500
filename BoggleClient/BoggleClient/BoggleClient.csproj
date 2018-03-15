@@ -75,6 +75,12 @@
     <Compile Include="Score\ScoreView.Designer.cs">
       <DependentUpon>ScoreView.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Game\GameView.resx">
+      <DependentUpon>GameView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Open\OpenView.resx">
+      <DependentUpon>OpenView.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -84,6 +90,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Score\ScoreView.resx">
+      <DependentUpon>ScoreView.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
