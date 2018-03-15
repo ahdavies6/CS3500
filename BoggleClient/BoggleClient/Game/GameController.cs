@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 
-namespace BoggleClient
+namespace BoggleClient.Game
 {
     class GameController
     {
@@ -36,9 +36,7 @@ namespace BoggleClient
             this.view = view;
             this.client = GenerateHttpClient(URL);
 
-            this.view.AddWord += AddWordToGame;
-            // remove next line? (event taken care of in Context)
-            this.view.CancelPushed += Cancel;
+            //this.view.AddWord += AddWordToGame;
         }
 
         /// <summary>
