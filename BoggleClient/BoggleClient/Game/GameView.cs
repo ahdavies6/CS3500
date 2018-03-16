@@ -58,6 +58,23 @@ namespace BoggleClient.Game
             BoggleFace10.Text = diceString[9].ToString();
             BoggleFace11.Text = diceString[10].ToString();
             BoggleFace12.Text = diceString[11].ToString();
+
+            BoggleFace13.Text = diceString[12].ToString();
+            BoggleFace14.Text = diceString[13].ToString();
+            BoggleFace15.Text = diceString[14].ToString();
+            BoggleFace16.Text = diceString[15].ToString();
+
+            HashSet<Label> labels = new HashSet<Label> { BoggleFace1, BoggleFace2, BoggleFace3, BoggleFace4,
+                BoggleFace5, BoggleFace6, BoggleFace7, BoggleFace8, BoggleFace9, BoggleFace10, BoggleFace11,
+                BoggleFace12, BoggleFace13, BoggleFace14, BoggleFace15, BoggleFace16};
+
+            foreach(Label l in labels)
+            {
+                if (l.Text.Equals("Q"))
+                {
+                    l.Text = "Qu";
+                }
+            }
         }
 
         // todo: get GameController to call all of these
