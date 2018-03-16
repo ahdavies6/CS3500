@@ -125,5 +125,10 @@ namespace BoggleClient.Open
 
             CancelSearch?.Invoke();
         }
+
+        public void ShowNameRegistrationMsg(string nickname, string URL)
+        {
+            MessageBox.Show(string.Format("Sorry! The server at: {0} did not allow registration of the name: {1}. Please try again!", URL, nickname));
+        }
     }
 }

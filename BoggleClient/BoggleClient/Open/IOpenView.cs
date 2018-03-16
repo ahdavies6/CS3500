@@ -52,6 +52,7 @@ namespace BoggleClient.Open
         event Action CancelSearch;
 
         void RefreshFieldAccess();
+        void ShowNameRegistrationMsg(string nickname, string URL);
 
         /// <summary>
         /// Moves to the next state in the game (the actual boggle game)

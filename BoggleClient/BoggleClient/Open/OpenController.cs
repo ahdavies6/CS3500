@@ -148,6 +148,13 @@ namespace BoggleClient.Open
                             view.Registered = true;
                             view.RefreshFieldAccess();
                         }
+                        else
+                        {
+                            view.Registering = false;
+                            view.Registered = false;
+                            view.RefreshFieldAccess();
+                            view.ShowNameRegistrationMsg(this.Nickname, this.URL);
+                        }
 
                     }
                     catch (TaskCanceledException ex)
