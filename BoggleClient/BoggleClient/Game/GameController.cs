@@ -65,7 +65,7 @@ namespace BoggleClient.Game
         /// <summary>
         /// Method that refreshes what is seen on the Boggle Board GUI
         /// </summary>
-        public async void Refresh()
+        public async void Refresh(bool RefreshLabels)
         {
             if (active)
             {
@@ -96,7 +96,12 @@ namespace BoggleClient.Game
                                 // todo: dafuq?
                                 this.view.TimeRemaining = (int)game.TimeLeft;
                                 //view.TimeRemaining--;
-                                view.GenerateLabels((string)game.Board);
+                                
+                                //If specified to refresh the labels
+                                if (RefreshLabels)
+                                {
+                                    view.GenerateLabels((string)game.Board);
+                                }
 
                                 //set the scores
                                 if (((string)game.Player1.Nickname).Equals(this.nickname))
@@ -167,7 +172,7 @@ namespace BoggleClient.Game
                     //deal with response
                     if (response.StatusCode == HttpStatusCode.Conflict)
                     {
-                        NextPhase?.Invoke(this, 
+                        NextPhase?.Invoke(this,
                             new GamePhaseEventArgs(this.userID, this.gameID, this.nickname, this.URL));
                     }
 

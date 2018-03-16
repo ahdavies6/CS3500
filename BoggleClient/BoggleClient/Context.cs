@@ -134,9 +134,9 @@ namespace BoggleClient
             view.CancelPushed += () => timer.Stop();
             view.FormClosed += (sender, e) => timer.Stop();
             timer.Start();
-            timer.Elapsed += (sender, e) => view.Invoke(new Action(controller.Refresh));
+            timer.Elapsed += (sender, e) => view.Invoke(new Action(() => controller.Refresh(false)));
             timer.AutoReset = true;
-            controller.Refresh();
+            controller.Refresh(true);
         }
 
         // todo: pick from these two constructors:
