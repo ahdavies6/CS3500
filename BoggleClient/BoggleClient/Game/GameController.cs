@@ -59,7 +59,7 @@ namespace BoggleClient.Game
 
         private void Cancel()
         {
-            tokenSource.Cancel();
+            tokenSource?.Cancel();
         }
 
         /// <summary>
@@ -119,10 +119,8 @@ namespace BoggleClient.Game
         }
 
         /// <summary>
-        /// Given a string url, the method returns a constructed HttpClient
+        /// Returns a constructed HttpClient
         /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
         private HttpClient GenerateHttpClient()
         {
             HttpClient c = new HttpClient();
