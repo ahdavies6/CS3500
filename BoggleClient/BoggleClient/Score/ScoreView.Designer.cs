@@ -37,20 +37,27 @@
             this.OpponentWordsDataLabel = new System.Windows.Forms.Label();
             this.OpponentScoresDataLabel = new System.Windows.Forms.Label();
             this.ReturnButton = new System.Windows.Forms.Button();
+            this.ScorePanel = new System.Windows.Forms.TableLayoutPanel();
+            this.ScorePanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // PlayerWordsDataLabel
             // 
-            this.PlayerWordsDataLabel.Location = new System.Drawing.Point(60, 98);
+            this.PlayerWordsDataLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.PlayerWordsDataLabel.Location = new System.Drawing.Point(11, 34);
+            this.PlayerWordsDataLabel.Margin = new System.Windows.Forms.Padding(0);
             this.PlayerWordsDataLabel.Name = "PlayerWordsDataLabel";
-            this.PlayerWordsDataLabel.Size = new System.Drawing.Size(96, 292);
+            this.PlayerWordsDataLabel.Size = new System.Drawing.Size(124, 276);
             this.PlayerWordsDataLabel.TabIndex = 0;
             this.PlayerWordsDataLabel.Text = "word";
+            this.PlayerWordsDataLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // AbovePlayerWordsLabel
             // 
+            this.AbovePlayerWordsLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.AbovePlayerWordsLabel.AutoSize = true;
-            this.AbovePlayerWordsLabel.Location = new System.Drawing.Point(63, 58);
+            this.AbovePlayerWordsLabel.Location = new System.Drawing.Point(29, 8);
+            this.AbovePlayerWordsLabel.Margin = new System.Windows.Forms.Padding(0);
             this.AbovePlayerWordsLabel.Name = "AbovePlayerWordsLabel";
             this.AbovePlayerWordsLabel.Size = new System.Drawing.Size(89, 17);
             this.AbovePlayerWordsLabel.TabIndex = 1;
@@ -58,8 +65,10 @@
             // 
             // AbovePlayerScoresLabel
             // 
+            this.AbovePlayerScoresLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.AbovePlayerScoresLabel.AutoSize = true;
-            this.AbovePlayerScoresLabel.Location = new System.Drawing.Point(177, 58);
+            this.AbovePlayerScoresLabel.Location = new System.Drawing.Point(198, 8);
+            this.AbovePlayerScoresLabel.Margin = new System.Windows.Forms.Padding(0);
             this.AbovePlayerScoresLabel.Name = "AbovePlayerScoresLabel";
             this.AbovePlayerScoresLabel.Size = new System.Drawing.Size(45, 17);
             this.AbovePlayerScoresLabel.TabIndex = 2;
@@ -67,55 +76,94 @@
             // 
             // PlayerScoresDataLabel
             // 
-            this.PlayerScoresDataLabel.Location = new System.Drawing.Point(180, 98);
+            this.PlayerScoresDataLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.PlayerScoresDataLabel.Location = new System.Drawing.Point(158, 34);
+            this.PlayerScoresDataLabel.Margin = new System.Windows.Forms.Padding(0);
             this.PlayerScoresDataLabel.Name = "PlayerScoresDataLabel";
-            this.PlayerScoresDataLabel.Size = new System.Drawing.Size(132, 292);
+            this.PlayerScoresDataLabel.Size = new System.Drawing.Size(124, 276);
             this.PlayerScoresDataLabel.TabIndex = 3;
             this.PlayerScoresDataLabel.Text = "0";
+            this.PlayerScoresDataLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // AboveOpponentWordsLabel
             // 
+            this.AboveOpponentWordsLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.AboveOpponentWordsLabel.AutoSize = true;
-            this.AboveOpponentWordsLabel.Location = new System.Drawing.Point(426, 58);
+            this.AboveOpponentWordsLabel.Location = new System.Drawing.Point(344, 8);
+            this.AboveOpponentWordsLabel.Margin = new System.Windows.Forms.Padding(0);
             this.AboveOpponentWordsLabel.Name = "AboveOpponentWordsLabel";
             this.AboveOpponentWordsLabel.Size = new System.Drawing.Size(112, 17);
             this.AboveOpponentWordsLabel.TabIndex = 4;
             this.AboveOpponentWordsLabel.Text = "OpponentWords";
             // 
-            // AboveOpponentScoreLabel
+            // AboveOpponentScoresLabel
             // 
+            this.AboveOpponentScoresLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.AboveOpponentScoresLabel.AutoSize = true;
-            this.AboveOpponentScoresLabel.Location = new System.Drawing.Point(579, 58);
-            this.AboveOpponentScoresLabel.Name = "AboveOpponentScoreLabel";
+            this.AboveOpponentScoresLabel.Location = new System.Drawing.Point(526, 8);
+            this.AboveOpponentScoresLabel.Margin = new System.Windows.Forms.Padding(0);
+            this.AboveOpponentScoresLabel.Name = "AboveOpponentScoresLabel";
             this.AboveOpponentScoresLabel.Size = new System.Drawing.Size(45, 17);
             this.AboveOpponentScoresLabel.TabIndex = 5;
             this.AboveOpponentScoresLabel.Text = "Score";
             // 
             // OpponentWordsDataLabel
             // 
-            this.OpponentWordsDataLabel.Location = new System.Drawing.Point(415, 98);
+            this.OpponentWordsDataLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.OpponentWordsDataLabel.Location = new System.Drawing.Point(338, 34);
+            this.OpponentWordsDataLabel.Margin = new System.Windows.Forms.Padding(0);
             this.OpponentWordsDataLabel.Name = "OpponentWordsDataLabel";
-            this.OpponentWordsDataLabel.Size = new System.Drawing.Size(100, 292);
+            this.OpponentWordsDataLabel.Size = new System.Drawing.Size(124, 276);
             this.OpponentWordsDataLabel.TabIndex = 6;
             this.OpponentWordsDataLabel.Text = "word";
+            this.OpponentWordsDataLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // OpponentScoresDataLabel
             // 
-            this.OpponentScoresDataLabel.Location = new System.Drawing.Point(573, 98);
+            this.OpponentScoresDataLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.OpponentScoresDataLabel.Location = new System.Drawing.Point(485, 34);
+            this.OpponentScoresDataLabel.Margin = new System.Windows.Forms.Padding(0);
             this.OpponentScoresDataLabel.Name = "OpponentScoresDataLabel";
-            this.OpponentScoresDataLabel.Size = new System.Drawing.Size(100, 292);
+            this.OpponentScoresDataLabel.Size = new System.Drawing.Size(127, 276);
             this.OpponentScoresDataLabel.TabIndex = 7;
             this.OpponentScoresDataLabel.Text = "0";
+            this.OpponentScoresDataLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // ReturnButton
             // 
-            this.ReturnButton.Location = new System.Drawing.Point(631, 393);
+            this.ReturnButton.Location = new System.Drawing.Point(623, 396);
             this.ReturnButton.Name = "ReturnButton";
-            this.ReturnButton.Size = new System.Drawing.Size(157, 45);
+            this.ReturnButton.Size = new System.Drawing.Size(165, 42);
             this.ReturnButton.TabIndex = 8;
             this.ReturnButton.Text = "Return To Main Menu";
             this.ReturnButton.UseVisualStyleBackColor = true;
             this.ReturnButton.Click += new System.EventHandler(this.ReturnButton_Click);
+            // 
+            // ScorePanel
+            // 
+            this.ScorePanel.ColumnCount = 5;
+            this.ScorePanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 23.66864F));
+            this.ScorePanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 23.66864F));
+            this.ScorePanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 5.325444F));
+            this.ScorePanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 23.66864F));
+            this.ScorePanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 23.66864F));
+            this.ScorePanel.Controls.Add(this.AbovePlayerWordsLabel, 0, 0);
+            this.ScorePanel.Controls.Add(this.PlayerWordsDataLabel, 0, 1);
+            this.ScorePanel.Controls.Add(this.OpponentScoresDataLabel, 4, 1);
+            this.ScorePanel.Controls.Add(this.AbovePlayerScoresLabel, 1, 0);
+            this.ScorePanel.Controls.Add(this.AboveOpponentScoresLabel, 4, 0);
+            this.ScorePanel.Controls.Add(this.OpponentWordsDataLabel, 3, 1);
+            this.ScorePanel.Controls.Add(this.PlayerScoresDataLabel, 1, 1);
+            this.ScorePanel.Controls.Add(this.AboveOpponentWordsLabel, 3, 0);
+            this.ScorePanel.Location = new System.Drawing.Point(0, 0);
+            this.ScorePanel.Margin = new System.Windows.Forms.Padding(0);
+            this.ScorePanel.Name = "ScorePanel";
+            this.ScorePanel.RowCount = 3;
+            this.ScorePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
+            this.ScorePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 80F));
+            this.ScorePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
+            this.ScorePanel.Size = new System.Drawing.Size(623, 346);
+            this.ScorePanel.TabIndex = 9;
             // 
             // ScoreView
             // 
@@ -123,18 +171,12 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.ReturnButton);
-            this.Controls.Add(this.OpponentScoresDataLabel);
-            this.Controls.Add(this.OpponentWordsDataLabel);
-            this.Controls.Add(this.AboveOpponentScoresLabel);
-            this.Controls.Add(this.AboveOpponentWordsLabel);
-            this.Controls.Add(this.PlayerScoresDataLabel);
-            this.Controls.Add(this.AbovePlayerScoresLabel);
-            this.Controls.Add(this.AbovePlayerWordsLabel);
-            this.Controls.Add(this.PlayerWordsDataLabel);
+            this.Controls.Add(this.ScorePanel);
             this.Name = "ScoreView";
             this.Text = "BoggleClient";
+            this.ScorePanel.ResumeLayout(false);
+            this.ScorePanel.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -149,5 +191,6 @@
         private System.Windows.Forms.Label OpponentWordsDataLabel;
         private System.Windows.Forms.Label OpponentScoresDataLabel;
         private System.Windows.Forms.Button ReturnButton;
+        private System.Windows.Forms.TableLayoutPanel ScorePanel;
     }
 }

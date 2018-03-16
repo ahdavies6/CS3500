@@ -19,6 +19,16 @@ namespace BoggleClient.Open
         public OpenView()
         {
             InitializeComponent();
+
+            //int scorePanelSizeX = (int)(this.ClientSize.Width);
+            //int scorePanelSizeY = (int)(this.ClientSize.Height * 0.8);
+            //ScorePanel.Size = new Size(scorePanelSizeX, scorePanelSizeY);
+            //ScorePanel.Location = Context.TLPointCenterDynamic(ScorePanel);
+
+            int mainPanelSizeX = (int)(this.ClientSize.Width);
+            int mainPanelSizeY = (int)(this.ClientSize.Height * 0.9);
+            MainPanel.Size = new Size(mainPanelSizeX, mainPanelSizeY);
+            MainPanel.Location = Context.TLPointCenterDynamic(MainPanel);
         }
 
         // todo: after merging, refactor to RegisterUser

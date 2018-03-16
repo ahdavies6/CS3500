@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using BoggleClient.Game;
 using BoggleClient.Open;
 using BoggleClient.Score;
+using System.Drawing;
 
 namespace BoggleClient
 {
@@ -23,8 +24,6 @@ namespace BoggleClient
         /// </summary>
         private static Context context;
 
-        
-
         private Context() { }
 
         public static Context GetContext()
@@ -39,6 +38,27 @@ namespace BoggleClient
         public void Start()
         {
             StartOpen();
+        }
+
+        /// <summary>
+        /// Helper method returns where the Top-Left location Point should be for Control
+        /// (within its Parent container).
+        /// </summary>
+        public static Point TLPointCenterDynamic(Control child)
+        {
+            try
+            {
+                Control parent = child.Parent;
+
+                int x = (parent.ClientSize.Width - child.ClientSize.Width) / 2;
+                int y = (parent.ClientSize.Height - child.ClientSize.Height) / 2;
+
+                return new Point(x, y);
+            }
+            catch
+            {
+                return new Point(0, 0);
+            }
         }
 
         private void StartOpen()
@@ -107,8 +127,8 @@ namespace BoggleClient
             // pass ScoreController more params (e.g. gameID or userID)?
             ScoreController controller = new ScoreController();
 
-            view.FormClosed += (sender, e) => ExitThread();
             view.CancelPushed += Start;
+            view.FormClosed += (sender, e) => ExitThread();
 
             view.Show();
         }

@@ -18,6 +18,11 @@ namespace BoggleClient.Score
         public ScoreView()
         {
             InitializeComponent();
+
+            int scorePanelSizeX = (int)(this.ClientSize.Width);
+            int scorePanelSizeY = (int)(this.ClientSize.Height * 0.8);
+            ScorePanel.Size = new Size(scorePanelSizeX, scorePanelSizeY);
+            ScorePanel.Location = Context.TLPointCenterDynamic(ScorePanel);
         }
 
         /// <summary>

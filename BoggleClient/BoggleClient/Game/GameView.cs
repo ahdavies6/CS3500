@@ -19,6 +19,9 @@ namespace BoggleClient.Game
         public GameView()
         {
             InitializeComponent();
+
+            RemainingDataLabel.Parent = RemainingBar;
+            RemainingDataLabel.Location = Context.TLPointCenterDynamic(RemainingDataLabel);
         }
 
         /// <summary>

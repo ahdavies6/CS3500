@@ -23,8 +23,8 @@ namespace BoggleClient
             //Application.Run(context);
 
             // todo: delete this once the Controllers have been implemented
-            //MainOpen();
-            MainGame();
+            MainOpen();
+            //MainGame();
             //MainScore();
         }
 
