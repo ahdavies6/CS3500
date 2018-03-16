@@ -111,7 +111,11 @@ namespace BoggleClient
             GameController controller = new GameController(URL, nickname, userID, gameID, view);
 
             view.AddWord += (sender, e) => controller.AddWordToGame(sender, e);
-            view.CancelPushed += StartOpen;
+            view.CancelPushed += () =>
+            {
+                StartOpen();
+                
+            };
             controller.NextPhase += (sender, e) =>
             {
                 StartScore(e.GameID);
@@ -142,12 +146,6 @@ namespace BoggleClient
             view.FormClosed += (sender, e) => ExitThread();
 
             view.Show();
-        }
-
-        protected override void OnMainFormClosed(object sender, EventArgs e)
-        {
-            //context.Start();
-            //Application.Run(context);
         }
     }
 }

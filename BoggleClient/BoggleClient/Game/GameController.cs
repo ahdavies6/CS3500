@@ -39,13 +39,15 @@ namespace BoggleClient.Game
         /// <summary>
         /// Controls the view of the board with an interface
         /// </summary>
-        private Game.IGameView view;
+        private IGameView view;
+
+        bool active;
 
         /// <summary>
         /// Constructs a GameController for game. The UID passed is the ID of the player and the URL is the URL to 
         /// connect to the server
         /// </summary>
-        public GameController(string URL, string nickname, string userID, string gameID, Game.IGameView view)
+        public GameController(string URL, string nickname, string userID, string gameID, IGameView view)
         {
             this.userID = userID;
             this.view = view;
@@ -54,6 +56,7 @@ namespace BoggleClient.Game
             this.gameID = gameID;
             this.view.AddWord += AddWordToGame;
             this.view.CancelPushed += Cancel;
+            this.active = true;
         }
 
         private void Cancel()
@@ -66,59 +69,63 @@ namespace BoggleClient.Game
         /// </summary>
         public async void Refresh()
         {
-            using (HttpClient client = GenerateHttpClient())
+            if (active)
             {
-                try
+                using (HttpClient client = GenerateHttpClient())
                 {
-                    //generate request
-                    string uri = string.Format("BoggleService.svc/games/{0}", this.gameID);
-                    tokenSource = new CancellationTokenSource();
-
-                    HttpResponseMessage response = await client.GetAsync(uri, tokenSource.Token);
-
-                    //update the display
-                    if (response.IsSuccessStatusCode)
+                    try
                     {
-                        string responseResult = await response.Content.ReadAsStringAsync();
-                        dynamic game = JsonConvert.DeserializeObject(responseResult);
+                        //generate request
+                        string uri = string.Format("BoggleService.svc/games/{0}", this.gameID);
+                        tokenSource = new CancellationTokenSource();
 
-                        if (((string)game.GameState).Equals("completed"))
+                        HttpResponseMessage response = await client.GetAsync(uri, tokenSource.Token);
+
+                        //update the display
+                        if (response.IsSuccessStatusCode)
                         {
-                            NextPhase?.Invoke(this,
-                                new GamePhaseEventArgs(this.userID, this.gameID, this.nickname, this.URL));
-                        }
-                        else if (!((string)game.GameState).Equals("pending"))
-                        {
-                            // todo: dafuq?
-                            this.view.TimeRemaining = (int)game.TimeLeft;
-                            //view.TimeRemaining--;
-                            view.GenerateLabels((string) game.Board);
+                            string responseResult = await response.Content.ReadAsStringAsync();
+                            dynamic game = JsonConvert.DeserializeObject(responseResult);
 
-                            //set the scores
-                            if (((string)game.Player1.Nickname).Equals(this.nickname))
+                            if (((string)game.GameState).Equals("completed"))
                             {
-                                this.view.PlayerName = (string)game.Player1.Nickname;
-                                this.view.OpponentName = (string)game.Player2.Nickname;
-                                this.view.OpponentScore = (int)game.Player2.Score;
-                                this.view.PlayerScore = (int)game.Player1.Score;
+                                NextPhase?.Invoke(this,
+                                    new GamePhaseEventArgs(this.userID, this.gameID, this.nickname, this.URL));
+                                this.active = false;
                             }
-                            else
+                            else if (!((string)game.GameState).Equals("pending"))
                             {
-                                this.view.PlayerName = (string)game.Player2.Nickname;
-                                this.view.OpponentName = (string)game.Player1.Nickname;
-                                this.view.OpponentScore = (int)game.Player1.Score;
-                                this.view.PlayerScore = (int)game.Player2.Score;
-                            }
+                                // todo: dafuq?
+                                this.view.TimeRemaining = (int)game.TimeLeft;
+                                //view.TimeRemaining--;
+                                view.GenerateLabels((string)game.Board);
 
+                                //set the scores
+                                if (((string)game.Player1.Nickname).Equals(this.nickname))
+                                {
+                                    this.view.PlayerName = (string)game.Player1.Nickname;
+                                    this.view.OpponentName = (string)game.Player2.Nickname;
+                                    this.view.OpponentScore = (int)game.Player2.Score;
+                                    this.view.PlayerScore = (int)game.Player1.Score;
+                                }
+                                else
+                                {
+                                    this.view.PlayerName = (string)game.Player2.Nickname;
+                                    this.view.OpponentName = (string)game.Player1.Nickname;
+                                    this.view.OpponentScore = (int)game.Player1.Score;
+                                    this.view.PlayerScore = (int)game.Player2.Score;
+                                }
+
+                            }
                         }
+
+                    }
+                    catch (TaskCanceledException)
+                    {
+
                     }
 
                 }
-                catch (TaskCanceledException)
-                {
-
-                }
-
             }
         }
 
