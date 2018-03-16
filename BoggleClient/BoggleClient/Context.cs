@@ -64,8 +64,7 @@ namespace BoggleClient
         private void StartOpen()
         {
             OpenView view = new OpenView();
-            // pass OpenController's constructor the openView
-            OpenController controller = new OpenController();
+            OpenController controller = new OpenController(view);
 
             // todo: something along these lines:
             //view.ConnectToServer += (sender, e) => controller.Connect(e.URL, e.Nickname);
