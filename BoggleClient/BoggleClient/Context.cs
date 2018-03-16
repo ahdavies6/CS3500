@@ -86,35 +86,40 @@ namespace BoggleClient
             //    if (URL != null && Nickname != null)
             //    {
             //        StartGame(e.URL, e.Nickname, e.UserID, e.GameLength, e.GameID);
+            //        view.FormClosed;
             //    }
             //};
 
             view.Show();
+
+            // todo: delete this once OpenController has been implemented
+            string URL = "http://ice.users.coe.utah.edu/";
+            string nickname = "Adam";
+            string userID = "e8cce19e-da8b-4a00-8861-ceb13e2e55aa";
+            int gameLength = 119;
+            string gameID = "G1549";
+            StartGame(URL, nickname, userID, gameLength, gameID);
+            view.Close();
         }
 
         private void StartGame(string URL, string nickname, string userID, int gameLength, string gameID)
         {
             GameView view = new GameView();
-            GameController controller = new GameController(userID, URL, view);
-            // todo: rework the above to accept something like:
-            //GameController controller = new GameController(URL, nickname, userID, gameLength, gameID, view);
+            // todo: where to work with gameLength?
+            GameController controller = new GameController(URL, nickname, userID, gameID, view);
 
-            // todo: add something like these once GameController is implemented:
-            //view.AddWord += controller.AddWord();
-
-            view.CancelPushed += Start; 
-
-            // todo: StartScore params once GameController is implemented
-            //view.NextState += (sender, e) => StartScore();
-
+            view.AddWord += (sender, e) => controller.AddWordToGame(sender, e);
+            view.CancelPushed += Start;
+            controller.NextPhase += (sender, e) => StartScore(e.GameID);
             view.FormClosed += (sender, e) => ExitThread();
 
             System.Timers.Timer timer = new System.Timers.Timer(1000);
-
             // todo: should GameController.Refresh have some parameters?
             timer.Elapsed += (sender, e) => controller.Refresh();
+            controller.Refresh();
 
             view.Show();
+            view.Close();
         }
 
         // todo: pick from these two constructors:
@@ -123,9 +128,9 @@ namespace BoggleClient
         private void StartScore(string gameID)
         {
             ScoreView view = new ScoreView();
-            // pass ScoreController the view
-            // pass ScoreController more params (e.g. gameID or userID)?
-            ScoreController controller = new ScoreController();
+            // todo: remove nulls
+            string URL = "http://ice.users.coe.utah.edu/";
+            ScoreController controller = new ScoreController(view, null, gameID, URL);
 
             view.CancelPushed += Start;
             view.FormClosed += (sender, e) => ExitThread();

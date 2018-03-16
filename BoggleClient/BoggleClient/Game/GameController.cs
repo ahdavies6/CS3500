@@ -15,8 +15,9 @@ namespace BoggleClient.Game
     //TODO doc comments
     class GameController
     {
+        public delegate void GamePhaseEventHandler(object sender, GamePhaseEventArgs e);
 
-        public event Action<GamePhaseArgs> NextPhase;
+        public event GamePhaseEventHandler NextPhase;
 
         /// <summary>
         /// String that keeps track of the Users unique ID
@@ -84,7 +85,8 @@ namespace BoggleClient.Game
                         dynamic game = JsonConvert.DeserializeObject(responseResult);
                         if (((string)game.GameState).Equals("completed"))
                         {
-                            NextPhase?.Invoke(new GamePhaseArgs(this.userID, this.gameID, this.nickname, this.URL));
+                            NextPhase?.Invoke(this,
+                                new GamePhaseEventArgs(this.userID, this.gameID, this.nickname, this.URL));
                         }
                         else
                         {
@@ -136,7 +138,7 @@ namespace BoggleClient.Game
         /// Given a string word, attempts to add it to the boggle server
         /// </summary>
         /// <param name="word"></param>
-        private async void AddWordToGame(AddWordEventArgs args)
+        public async void AddWordToGame(object sender, AddWordEventArgs args)
         {
             string word = args.Word;
             using (HttpClient client = GenerateHttpClient())
@@ -158,7 +160,8 @@ namespace BoggleClient.Game
                     //deal with response
                     if (response.StatusCode == HttpStatusCode.Conflict)
                     {
-                        NextPhase?.Invoke(new GamePhaseArgs(this.userID, this.gameID, this.nickname, this.URL));
+                        NextPhase?.Invoke(this, 
+                            new GamePhaseEventArgs(this.userID, this.gameID, this.nickname, this.URL));
                     }
 
                 }
@@ -171,7 +174,7 @@ namespace BoggleClient.Game
         }
     }
 
-    class GamePhaseArgs : EventArgs
+    class GamePhaseEventArgs : EventArgs
     {
         public string UserID { get; private set; }
 
@@ -181,7 +184,7 @@ namespace BoggleClient.Game
 
         public string URL { get; private set; }
 
-        public GamePhaseArgs(string uid, string gameid, string nickname, string url)
+        public GamePhaseEventArgs(string uid, string gameid, string nickname, string url)
         {
             this.UserID = uid;
             this.GameID = gameid;
