@@ -54,8 +54,6 @@ namespace BoggleClient.Game
             this.URL = URL;
             this.nickname = nickname;
             this.gameID = gameID;
-            this.view.AddWord += AddWordToGame;
-            this.view.CancelPushed += Cancel;
             this.active = true;
         }
 

@@ -15,7 +15,6 @@ namespace BoggleClient.Score
 
         private IScoreView view;
 
-        private string UserID;
 
         private string GameID;
 
@@ -23,10 +22,9 @@ namespace BoggleClient.Score
 
         private CancellationTokenSource tokenSource;
 
-        public ScoreController(IScoreView view, string UserID, string GameID, string URL)
+        public ScoreController(IScoreView view, string GameID, string URL)
         {
             this.view = view;
-            this.UserID = UserID;
             this.GameID = GameID;
             this.URL = URL;
             this.view.CancelPushed += Cancel;
@@ -79,8 +77,8 @@ namespace BoggleClient.Score
                         List<int> scoresp1 = new List<int>();
                         foreach(dynamic item in gamestatus.Player1.WordsPlayed)
                         {
-                            wordsp1.Add(item.Word);
-                            scoresp1.Add(item.Score);
+                            wordsp1.Add((string)item.Word);
+                            scoresp1.Add((int) item.Score);
                         }
                         this.view.PlayerScores = scoresp1.ToArray();
                         this.view.PlayerWords = wordsp1.ToArray();

@@ -76,8 +76,8 @@ namespace BoggleClient
             view.CancelRegister += controller.Cancel;
             view.CancelSearch += controller.Cancel;
 
-            view.FormClosed += (sender, e) => ExitThread();
-
+            FormClosedEventHandler exitDel = delegate (object sender, FormClosedEventArgs e) { ExitThread(); };
+            view.FormClosed += exitDel;
             // remove deprecated:
             //view.NextState += (sender, e) => StartGame(e.UserToken, e.URL, e.Nickname);
 
@@ -89,7 +89,8 @@ namespace BoggleClient
                 if (e.URL != null && e.Nickname != null)
                 {
                     StartGame(e.URL, e.Nickname, e.UserID, e.GameLength, e.GameID);
-                    view.Hide();
+                    view.FormClosed -= exitDel;
+                    view.Close();
                 }
             };
         }
@@ -111,21 +112,24 @@ namespace BoggleClient
             GameController controller = new GameController(URL, nickname, userID, gameID, view);
 
             view.AddWord += (sender, e) => controller.AddWordToGame(sender, e);
-            view.CancelPushed += () =>
-            {
+            FormClosedEventHandler exitDel = delegate (object sender, FormClosedEventArgs e) { ExitThread(); };
+            view.CancelPushed += () => {
                 StartOpen();
-                
+                view.FormClosed -= exitDel;
+                view.Close();
             };
+            view.FormClosed += exitDel;
+
             controller.NextPhase += (sender, e) =>
             {
-                StartScore(e.GameID);
-                // todo: get this to stop spawning windows
-                view.Hide();
+                StartScore(e.GameID, e.URL);
+                view.FormClosed -= exitDel;
+                view.Close();
             };
-            view.FormClosed += (sender, e) => ExitThread();
 
             System.Timers.Timer timer = new System.Timers.Timer(1000);
             // todo: should GameController.Refresh have some parameters?
+            controller.NextPhase += (sender, e) => timer.Stop();
             timer.Start();
             timer.Elapsed += (sender, e) => view.Invoke(new Action(controller.Refresh));
             timer.AutoReset = true;
@@ -135,16 +139,17 @@ namespace BoggleClient
         // todo: pick from these two constructors:
         //private void StartScore(string playerName, int playerScore, string[] playerWords, int[] playerScores, 
         //    string opponentName, int opponentScore, string[] opponentWords, int[] opponentScores)
-        private void StartScore(string gameID)
+        private void StartScore(string gameID, string URL)
         {
             ScoreView view = new ScoreView();
-            // todo: remove nulls
-            string URL = "http://ice.users.coe.utah.edu/";
-            ScoreController controller = new ScoreController(view, null, gameID, URL);
-
-            view.CancelPushed += StartOpen;
-            view.FormClosed += (sender, e) => ExitThread();
-
+            ScoreController controller = new ScoreController(view, gameID, URL);
+            FormClosedEventHandler exitDel = delegate(object sender, FormClosedEventArgs e) { ExitThread(); };
+            view.CancelPushed += () => {
+                StartOpen();
+                view.FormClosed -= exitDel;
+                view.Close();
+            } ;
+            view.FormClosed += exitDel;
             view.Show();
         }
     }
