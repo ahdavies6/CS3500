@@ -85,7 +85,7 @@
             // PlayerNameLabel
             // 
             this.PlayerNameLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.PlayerNameLabel.Location = new System.Drawing.Point(37, 50);
+            this.PlayerNameLabel.Location = new System.Drawing.Point(47, 61);
             this.PlayerNameLabel.Name = "PlayerNameLabel";
             this.PlayerNameLabel.Size = new System.Drawing.Size(85, 17);
             this.PlayerNameLabel.TabIndex = 3;
@@ -96,7 +96,7 @@
             // 
             this.PlayerScoreLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.PlayerScoreLabel.AutoSize = true;
-            this.PlayerScoreLabel.Location = new System.Drawing.Point(198, 50);
+            this.PlayerScoreLabel.Location = new System.Drawing.Point(227, 61);
             this.PlayerScoreLabel.Name = "PlayerScoreLabel";
             this.PlayerScoreLabel.Size = new System.Drawing.Size(85, 17);
             this.PlayerScoreLabel.TabIndex = 4;
@@ -106,7 +106,7 @@
             // 
             this.OpponentNameLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.OpponentNameLabel.AutoSize = true;
-            this.OpponentNameLabel.Location = new System.Drawing.Point(26, 167);
+            this.OpponentNameLabel.Location = new System.Drawing.Point(36, 201);
             this.OpponentNameLabel.Name = "OpponentNameLabel";
             this.OpponentNameLabel.Size = new System.Drawing.Size(108, 17);
             this.OpponentNameLabel.TabIndex = 5;
@@ -116,7 +116,7 @@
             // 
             this.OpponentScoreLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.OpponentScoreLabel.AutoSize = true;
-            this.OpponentScoreLabel.Location = new System.Drawing.Point(186, 167);
+            this.OpponentScoreLabel.Location = new System.Drawing.Point(216, 201);
             this.OpponentScoreLabel.Name = "OpponentScoreLabel";
             this.OpponentScoreLabel.Size = new System.Drawing.Size(108, 17);
             this.OpponentScoreLabel.TabIndex = 6;
@@ -124,7 +124,7 @@
             // 
             // WordTextbox
             // 
-            this.WordTextbox.Location = new System.Drawing.Point(611, 330);
+            this.WordTextbox.Location = new System.Drawing.Point(595, 409);
             this.WordTextbox.Name = "WordTextbox";
             this.WordTextbox.Size = new System.Drawing.Size(272, 22);
             this.WordTextbox.TabIndex = 7;
@@ -133,7 +133,7 @@
             // WordLabel
             // 
             this.WordLabel.AutoSize = true;
-            this.WordLabel.Location = new System.Drawing.Point(559, 330);
+            this.WordLabel.Location = new System.Drawing.Point(543, 409);
             this.WordLabel.Name = "WordLabel";
             this.WordLabel.Size = new System.Drawing.Size(46, 17);
             this.WordLabel.TabIndex = 8;
@@ -141,7 +141,7 @@
             // 
             // CancelGameButton
             // 
-            this.CancelGameButton.Location = new System.Drawing.Point(653, 464);
+            this.CancelGameButton.Location = new System.Drawing.Point(779, 527);
             this.CancelGameButton.Name = "CancelGameButton";
             this.CancelGameButton.Size = new System.Drawing.Size(136, 42);
             this.CancelGameButton.TabIndex = 9;
@@ -364,7 +364,7 @@
             // HelpSubmitLabel
             // 
             this.HelpSubmitLabel.AutoSize = true;
-            this.HelpSubmitLabel.Location = new System.Drawing.Point(521, 393);
+            this.HelpSubmitLabel.Location = new System.Drawing.Point(543, 468);
             this.HelpSubmitLabel.Name = "HelpSubmitLabel";
             this.HelpSubmitLabel.Size = new System.Drawing.Size(328, 17);
             this.HelpSubmitLabel.TabIndex = 11;
@@ -388,13 +388,13 @@
             this.GameInfoPanel.Controls.Add(this.PlayerScoreLabel, 1, 0);
             this.GameInfoPanel.Controls.Add(this.OpponentNameLabel, 0, 1);
             this.GameInfoPanel.Controls.Add(this.OpponentScoreLabel, 1, 1);
-            this.GameInfoPanel.Location = new System.Drawing.Point(562, 81);
+            this.GameInfoPanel.Location = new System.Drawing.Point(529, 81);
             this.GameInfoPanel.Margin = new System.Windows.Forms.Padding(0);
             this.GameInfoPanel.Name = "GameInfoPanel";
             this.GameInfoPanel.RowCount = 2;
             this.GameInfoPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.GameInfoPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.GameInfoPanel.Size = new System.Drawing.Size(321, 235);
+            this.GameInfoPanel.Size = new System.Drawing.Size(360, 280);
             this.GameInfoPanel.TabIndex = 12;
             // 
             // GameView
