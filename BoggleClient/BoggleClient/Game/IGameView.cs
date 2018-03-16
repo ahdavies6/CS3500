@@ -30,7 +30,7 @@ namespace BoggleClient.Game
         /// <summary>
         /// Event that gets fired when a new word is added
         /// </summary>
-        event AddWordEventHandler AddWord;
+        event Action<AddWordEventArgs> AddWord;
 
         /// <summary>
         /// Event that gets fired if the cancel button is clicked
