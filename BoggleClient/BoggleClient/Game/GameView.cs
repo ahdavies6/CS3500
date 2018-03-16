@@ -44,17 +44,17 @@ namespace BoggleClient.Game
         /// </summary>
         public void GenerateLabels(string diceString)
         {
-            TopLeftLabel.Text = diceString[0].ToString();
-            TopMiddleLabel.Text = diceString[1].ToString();
-            TopRightLabel.Text = diceString[2].ToString();
+            blable1.Text = diceString[0].ToString();
+            blable2.Text = diceString[1].ToString();
+            blable3.Text = diceString[2].ToString();
 
-            MiddleLeftLabel.Text = diceString[3].ToString();
-            MiddleMiddleLabel.Text = diceString[4].ToString();
-            MiddleRightLabel.Text = diceString[5].ToString();
+            blable5.Text = diceString[3].ToString();
+            blable6.Text = diceString[4].ToString();
+            blable7.Text = diceString[5].ToString();
 
-            BottomLeftLabel.Text = diceString[6].ToString();
-            BottomMiddleLabel.Text = diceString[7].ToString();
-            BottomRightLabel.Text = diceString[8].ToString();
+            blabel9.Text = diceString[6].ToString();
+            blabel10.Text = diceString[7].ToString();
+            blabel11.Text = diceString[8].ToString();
         }
 
         // todo: get GameController to call all of these
