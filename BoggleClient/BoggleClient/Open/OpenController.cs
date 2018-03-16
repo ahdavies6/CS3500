@@ -96,7 +96,7 @@ namespace BoggleClient.Open
                                 this.Nickname, this.URL, this.gameLength));
 
                         }
-                        catch (TaskCanceledException ex)
+                        catch (TaskCanceledException)
                         {
 
                         }

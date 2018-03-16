@@ -83,12 +83,13 @@ namespace BoggleClient.Game
                     {
                         string responseResult = await response.Content.ReadAsStringAsync();
                         dynamic game = JsonConvert.DeserializeObject(responseResult);
+
                         if (((string)game.GameState).Equals("completed"))
                         {
                             NextPhase?.Invoke(this,
                                 new GamePhaseEventArgs(this.userID, this.gameID, this.nickname, this.URL));
                         }
-                        else
+                        else if (!((string)game.GameState).Equals("pending"))
                         {
                             // todo: dafuq?
                             this.view.TimeRemaining = (int)game.TimeLeft;

@@ -112,7 +112,11 @@ namespace BoggleClient
 
             view.AddWord += (sender, e) => controller.AddWordToGame(sender, e);
             view.CancelPushed += StartOpen;
-            controller.NextPhase += (sender, e) => StartScore(e.GameID);
+            controller.NextPhase += (sender, e) =>
+            {
+                StartScore(e.GameID);
+                view.Close();
+            };
             view.FormClosed += (sender, e) => ExitThread();
 
             System.Timers.Timer timer = new System.Timers.Timer(1000);
