@@ -118,7 +118,7 @@ namespace BoggleClient
             System.Timers.Timer timer = new System.Timers.Timer(1000);
             // todo: should GameController.Refresh have some parameters?
             timer.Start();
-            timer.Elapsed += (sender, e) => controller.Refresh();
+            timer.Elapsed += (sender, e) => view.Invoke(new Action(controller.Refresh));
             timer.AutoReset = true;
             controller.Refresh();
         }
