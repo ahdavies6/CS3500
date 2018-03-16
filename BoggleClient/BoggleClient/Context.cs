@@ -66,11 +66,10 @@ namespace BoggleClient
             OpenView view = new OpenView();
             OpenController controller = new OpenController(view);
 
-            // todo: something along these lines:
-            //view.ConnectToServer += (sender, e) => controller.Connect(e.URL, e.Nickname);
-            //view.SearchGame += (sender, e) => controller.Search(e.GameLength);
-            //view.CancelPushed += () => controller.StopConnect();
-            //view.CancelSearch += () => controller.StopSearch();
+            view.ConnectToServer += controller.Register;
+            view.SearchGame += controller.Search;
+            view.CancelPushed += controller.Cancel;
+            view.CancelSearch += controller.Cancel;
 
             view.FormClosed += (sender, e) => ExitThread();
 
@@ -80,25 +79,25 @@ namespace BoggleClient
             // todo: implement an event in Controller that is fired when a game is found and (roughly)
             // follows this spec: "event ...EventArgs GameFound", where EventArgs contains:
             //     URL, Nickname, UserID, GameLength, GameID
-            //controller.GameFound += (sender, e) =>
-            //{
-            //    if (URL != null && Nickname != null)
-            //    {
-            //        StartGame(e.URL, e.Nickname, e.UserID, e.GameLength, e.GameID);
-            //        view.FormClosed;
-            //    }
-            //};
+            controller.NextPhase += (sender, e) =>
+            {
+                if (e.URL != null && e.Nickname != null)
+                {
+                    StartGame(e.URL, e.Nickname, e.UserID, e.GameLength, e.GameID);
+                    view.Close();
+                }
+            };
 
             view.Show();
 
             // todo: delete this once OpenController has been implemented
-            string URL = "http://ice.users.coe.utah.edu/";
-            string nickname = "Adam";
-            string userID = "e8cce19e-da8b-4a00-8861-ceb13e2e55aa";
-            int gameLength = 119;
-            string gameID = "G1549";
-            StartGame(URL, nickname, userID, gameLength, gameID);
-            view.Close();
+            //string URL = "http://ice.users.coe.utah.edu/";
+            //string nickname = "Adam";
+            //string userID = "e8cce19e-da8b-4a00-8861-ceb13e2e55aa";
+            //int gameLength = 119;
+            //string gameID = "G1549";
+            //StartGame(URL, nickname, userID, gameLength, gameID);
+            //view.Close();
         }
 
         private void StartGame(string URL, string nickname, string userID, int gameLength, string gameID)

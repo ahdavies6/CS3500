@@ -11,9 +11,11 @@ using System.Threading.Tasks;
 
 namespace BoggleClient.Open
 {
+    public delegate void OpenViewEventHandler(object sender, OpenViewEventArgs e);
+
     class OpenController
     {
-        public event Action<OpenViewArgs> NextPhase;
+        public event OpenViewEventHandler NextPhase;
 
         private IOpenView view;
 
@@ -27,6 +29,8 @@ namespace BoggleClient.Open
 
         private string UserID;
 
+        private int gameLength;
+
         private bool Registered;
 
         public OpenController(IOpenView view)
@@ -39,7 +43,7 @@ namespace BoggleClient.Open
             this.Registered = false;
         }
 
-        private async void Search(object sender, SearchGameEventArgs e)
+        public async void Search(object sender, SearchGameEventArgs e)
         {
             if (Registered)
             {
@@ -84,12 +88,14 @@ namespace BoggleClient.Open
                                     if (((string)game.GameStatus).Equals("active"))
                                     {
                                         foundGame = true;
+                                        gameLength = game.TimeLeft;
                                     }
                                 }
                             }
                         }
 
-                        NextPhase?.Invoke(new OpenViewArgs(this.UserID, this.GameID, this.Nickname, this.URL));
+                        NextPhase?.Invoke(this,new OpenViewEventArgs(this.UserID, this.GameID,
+                            this.Nickname, this.URL, this.gameLength));
 
                     }
                     catch (TaskCanceledException ex)
@@ -100,12 +106,12 @@ namespace BoggleClient.Open
             }
         }
 
-        private void Cancel()
+        public void Cancel()
         {
             this.TokenSource?.Cancel();
         }
 
-        private async void Register(object sender, ConnectEventArgs e)
+        public async void Register(object sender, ConnectEventArgs e)
         {
             this.URL = e.URL;
             this.Nickname = e.Nickname;
@@ -153,7 +159,7 @@ namespace BoggleClient.Open
 
     }
 
-    class OpenViewArgs : EventArgs
+    public class OpenViewEventArgs : EventArgs
     {
         public string UserID { get; private set; }
 
@@ -163,12 +169,15 @@ namespace BoggleClient.Open
 
         public string URL { get; private set; }
 
-        public OpenViewArgs(string userid, string gameid, string nickname, string url)
+        public int GameLength { get; private set; }
+
+        public OpenViewEventArgs(string userid, string gameid, string nickname, string url, int gameLength)
         {
             this.UserID = userid;
             this.GameID = gameid;
             this.Nickname = nickname;
             this.URL = url;
+            this.GameLength = gameLength;
         }
 
     }
