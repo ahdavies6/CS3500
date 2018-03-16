@@ -115,7 +115,8 @@ namespace BoggleClient
             controller.NextPhase += (sender, e) =>
             {
                 StartScore(e.GameID);
-                view.Close();
+                // todo: get this to stop spawning windows
+                view.Hide();
             };
             view.FormClosed += (sender, e) => ExitThread();
 
