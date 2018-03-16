@@ -114,7 +114,7 @@ namespace BoggleClient.Game
                     }
 
                 }
-                catch (TaskCanceledException ex)
+                catch (TaskCanceledException)
                 {
 
                 }
@@ -167,7 +167,7 @@ namespace BoggleClient.Game
                     }
 
                 }
-                catch (TaskCanceledException ex)
+                catch (TaskCanceledException)
                 {
 
                 }
