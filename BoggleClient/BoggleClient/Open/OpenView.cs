@@ -105,7 +105,7 @@ namespace BoggleClient.Open
             }
             else
             {
-                // todo: implement some kind of error?
+                MessageBox.Show("Please pick a value between 5 and 120 for the duration!");
             }
         }
 
