@@ -13,6 +13,19 @@ namespace BoggleClient.Open
     // todo: add doc comments
     public partial class OpenView : Form, IOpenView
     {
+        // todo: delete whichever of the first two is unnecessary
+        public bool Registering
+        {
+            get;
+            set;
+        }
+        public bool Registered
+        {
+            get;
+            set;
+        }
+        private bool Searching;
+
         /// <summary>
         /// Opens the Form
         /// </summary>
@@ -20,22 +33,24 @@ namespace BoggleClient.Open
         {
             InitializeComponent();
 
-            //int scorePanelSizeX = (int)(this.ClientSize.Width);
-            //int scorePanelSizeY = (int)(this.ClientSize.Height * 0.8);
-            //ScorePanel.Size = new Size(scorePanelSizeX, scorePanelSizeY);
-            //ScorePanel.Location = Context.TLPointCenterDynamic(ScorePanel);
-
             int mainPanelSizeX = (int)(this.ClientSize.Width);
             int mainPanelSizeY = (int)(this.ClientSize.Height * 0.9);
             MainPanel.Size = new Size(mainPanelSizeX, mainPanelSizeY);
             MainPanel.Location = Context.TLPointCenterDynamic(MainPanel);
+
+            Registering = false;
+            Registered = false;
+            Searching = false;
+            RefreshFieldAccess();
+
+            // todo: URGENT REMOVE THIS
+            ServerTextbox.Text = "http://ice.users.coe.utah.edu/";
         }
 
-        // todo: after merging, refactor to RegisterUser
         /// <summary>
         /// Attempt to connect to the server
         /// </summary>
-        public event ConnectEventHandler ConnectToServer;
+        public event ConnectEventHandler RegisterUser;
 
         public event SearchGameEventHandler SearchGame;
 
@@ -43,19 +58,30 @@ namespace BoggleClient.Open
         /// <summary>
         /// Event that occurs when the cancel button is pushed
         /// </summary>
-        public event Action CancelPushed;
+        public event Action CancelRegister;
 
         public event Action CancelSearch;
 
-        /// <summary>
-        /// Moves to the next state in the game (the actual boggle game)
-        /// </summary>
-        //public event NextStateEventHandler NextState;
+        public void RefreshFieldAccess()
+        {
+            ServerTextbox.Enabled = !Registering && !Searching;
+            NameTextbox.Enabled = !Registering && !Searching;
+            ServerRegisterButton.Enabled = !Registering && !Searching;
+            CancelRegisterButton.Enabled = Registering;
+
+            DurationTextbox.Enabled = Registered && !Searching;
+            SearchGamesButton.Enabled = Registered && !Searching;
+            CancelSearchButton.Enabled = Registered && Searching;
+        }
 
         private void ServerRegisterButton_Click(object sender, EventArgs e)
         {
+            Registered = false;
+            Registering = true;
+            RefreshFieldAccess();
+
             ConnectEventArgs args = new ConnectEventArgs(ServerTextbox.Text, NameTextbox.Text);
-            ConnectToServer?.Invoke(this, args);
+            RegisterUser?.Invoke(this, args);
         }
 
         private void SearchGamesButton_Click(object sender, EventArgs e)
@@ -72,22 +98,31 @@ namespace BoggleClient.Open
 
             if (args.GameLength != -1)
             {
+                Searching = true;
+                RefreshFieldAccess();
+
                 SearchGame?.Invoke(this, args);
             }
             else
             {
                 // todo: implement some kind of error?
             }
-
         }
 
         private void CancelRegisterButton_Click(object sender, EventArgs e)
         {
-            CancelPushed?.Invoke();
+            Registered = false;
+            Registering = false;
+            RefreshFieldAccess();
+
+            CancelRegister?.Invoke();
         }
 
         private void CancelSearchButton_Click(object sender, EventArgs e)
         {
+            Searching = false;
+            RefreshFieldAccess();
+
             CancelSearch?.Invoke();
         }
     }

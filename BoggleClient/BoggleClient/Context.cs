@@ -64,11 +64,12 @@ namespace BoggleClient
         private void StartOpen()
         {
             OpenView view = new OpenView();
+            view.Show();
             OpenController controller = new OpenController(view);
 
-            view.ConnectToServer += controller.Register;
+            view.RegisterUser += controller.Register;
             view.SearchGame += controller.Search;
-            view.CancelPushed += controller.Cancel;
+            view.CancelRegister += controller.Cancel;
             view.CancelSearch += controller.Cancel;
 
             view.FormClosed += (sender, e) => ExitThread();
@@ -87,27 +88,17 @@ namespace BoggleClient
                     view.Close();
                 }
             };
-
-            view.Show();
-
-            // todo: delete this once OpenController has been implemented
-            //string URL = "http://ice.users.coe.utah.edu/";
-            //string nickname = "Adam";
-            //string userID = "e8cce19e-da8b-4a00-8861-ceb13e2e55aa";
-            //int gameLength = 119;
-            //string gameID = "G1549";
-            //StartGame(URL, nickname, userID, gameLength, gameID);
-            //view.Close();
         }
 
         private void StartGame(string URL, string nickname, string userID, int gameLength, string gameID)
         {
             GameView view = new GameView();
+            view.Show();
             // todo: where to work with gameLength?
             GameController controller = new GameController(URL, nickname, userID, gameID, view);
 
             view.AddWord += (sender, e) => controller.AddWordToGame(sender, e);
-            view.CancelPushed += Start;
+            view.CancelPushed += StartOpen;
             controller.NextPhase += (sender, e) => StartScore(e.GameID);
             view.FormClosed += (sender, e) => ExitThread();
 
@@ -115,9 +106,6 @@ namespace BoggleClient
             // todo: should GameController.Refresh have some parameters?
             timer.Elapsed += (sender, e) => controller.Refresh();
             controller.Refresh();
-
-            view.Show();
-            view.Close();
         }
 
         // todo: pick from these two constructors:
@@ -130,7 +118,7 @@ namespace BoggleClient
             string URL = "http://ice.users.coe.utah.edu/";
             ScoreController controller = new ScoreController(view, null, gameID, URL);
 
-            view.CancelPushed += Start;
+            view.CancelPushed += StartOpen;
             view.FormClosed += (sender, e) => ExitThread();
 
             view.Show();

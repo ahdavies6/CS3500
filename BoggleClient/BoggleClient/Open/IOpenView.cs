@@ -23,11 +23,23 @@ namespace BoggleClient.Open
     /// </summary>
     public interface IOpenView
     {
+        bool Registering
+        {
+            get;
+            set;
+        }
+
+        bool Registered
+        {
+            get;
+            set;
+        }
+
         // todo: after merging, refactor as RegisterUser
         /// <summary>
         /// Attempt to connect to the server
         /// </summary>
-        event ConnectEventHandler ConnectToServer;
+        event ConnectEventHandler RegisterUser;
 
         event SearchGameEventHandler SearchGame;
 
@@ -35,9 +47,11 @@ namespace BoggleClient.Open
         /// <summary>
         /// Event that occurs when the cancel button is pushed
         /// </summary>
-        event Action CancelPushed;
+        event Action CancelRegister;
 
         event Action CancelSearch;
+
+        void RefreshFieldAccess();
 
         /// <summary>
         /// Moves to the next state in the game (the actual boggle game)
@@ -150,7 +164,7 @@ namespace BoggleClient.Open
         public SearchGameEventArgs(string gameLength)
         {
             // todo: decide whether to handle length checking here or in Context
-            if (Int32.TryParse(gameLength, out int length) && length > 5 && length < 120)
+            if (Int32.TryParse(gameLength, out int length) && !(length < 5) && !(length > 120))
             {
                 this.GameLength = length;
             }

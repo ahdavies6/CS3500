@@ -36,10 +36,6 @@ namespace BoggleClient.Open
         public OpenController(IOpenView view)
         {
             this.view = view;
-            this.view.ConnectToServer += Register;
-            this.view.SearchGame += Search;
-            this.view.CancelSearch += Cancel;
-            this.view.CancelPushed += Cancel;
             this.Registered = false;
         }
 
@@ -47,61 +43,70 @@ namespace BoggleClient.Open
         {
             if (Registered)
             {
-                using (HttpClient Client = GenerateHttpClient(URL))
+                try
                 {
-                    try
+                    using (HttpClient Client = GenerateHttpClient(URL))
                     {
-                        //request
-                        string uri = string.Format("BoggleService.svc/games");
-                        dynamic body = new ExpandoObject();
-                        body.UserToken = UserID;
-                        body.TimeLimit = e.GameLength;
-                        TokenSource = new CancellationTokenSource();
-                        StringContent content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
-
-                        HttpResponseMessage response = await Client.PostAsync(uri, content, TokenSource.Token);
-
-
-                        //dealing with response
-                        if (response.IsSuccessStatusCode)
+                        try
                         {
-                            string result = await response.Content.ReadAsStringAsync();
-                            dynamic game = JsonConvert.DeserializeObject(result);
-                            this.GameID = game.GameID;
-                        }
+                            //request
+                            string uri = string.Format("BoggleService.svc/games");
+                            dynamic body = new ExpandoObject();
+                            body.UserToken = UserID;
+                            body.TimeLimit = e.GameLength;
+                            TokenSource = new CancellationTokenSource();
+                            StringContent content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
 
-                        if (response.StatusCode == HttpStatusCode.Accepted)
-                        {
-                            bool foundGame = false;
+                            HttpResponseMessage response = await Client.PostAsync(uri, content, TokenSource.Token);
 
-                            uri = string.Format("BoggleService.svc/games/{0}?Brief=yes", this.GameID);
 
-                            while (!foundGame)
+                            //dealing with response
+                            if (response.IsSuccessStatusCode)
                             {
-                                Thread.Sleep(1000);
+                                string result = await response.Content.ReadAsStringAsync();
+                                dynamic game = JsonConvert.DeserializeObject(result);
+                                this.GameID = game.GameID;
+                            }
 
-                                HttpResponseMessage msg = await Client.GetAsync(uri, TokenSource.Token);
-                                if (msg.IsSuccessStatusCode)
+                            if (response.StatusCode == HttpStatusCode.Accepted)
+                            {
+                                bool foundGame = false;
+
+                                uri = string.Format("BoggleService.svc/games/{0}?Brief=yes", this.GameID);
+
+                                while (!foundGame)
                                 {
-                                    string result = await response.Content.ReadAsStringAsync();
-                                    dynamic game = JsonConvert.DeserializeObject(result);
-                                    if (((string)game.GameStatus).Equals("active"))
+                                    Thread.Sleep(250);
+
+                                    HttpResponseMessage msg = await Client.GetAsync(uri, TokenSource.Token);
+                                    if (msg.IsSuccessStatusCode)
                                     {
-                                        foundGame = true;
-                                        gameLength = game.TimeLeft;
+                                        string result = await msg.Content.ReadAsStringAsync();
+                                        dynamic game = JsonConvert.DeserializeObject(result);
+                                        if (((string)game.GameState).Equals("active"))
+                                        {
+                                            foundGame = true;
+                                            gameLength = game.TimeLeft;
+                                        }
                                     }
                                 }
                             }
+
+                            NextPhase?.Invoke(this, new OpenViewEventArgs(this.UserID, this.GameID,
+                                this.Nickname, this.URL, this.gameLength));
+
                         }
+                        catch (TaskCanceledException ex)
+                        {
 
-                        NextPhase?.Invoke(this,new OpenViewEventArgs(this.UserID, this.GameID,
-                            this.Nickname, this.URL, this.gameLength));
-
+                        }
                     }
-                    catch (TaskCanceledException ex)
-                    {
-
-                    }
+                }
+                catch (BadRequestException)
+                {
+                    view.Registered = false;
+                    view.Registering = false;
+                    view.RefreshFieldAccess();
                 }
             }
         }
@@ -115,47 +120,71 @@ namespace BoggleClient.Open
         {
             this.URL = e.URL;
             this.Nickname = e.Nickname;
-            using (HttpClient Client = GenerateHttpClient(e.URL))
+            try
             {
-                try
+                using (HttpClient Client = GenerateHttpClient(e.URL))
                 {
-                    //request
-                    string uri = string.Format("BoggleService.svc/users");
-                    dynamic body = new ExpandoObject();
-                    body.Nickname = e.Nickname;
-                    TokenSource = new CancellationTokenSource();
-                    StringContent content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
-
-                    HttpResponseMessage response = await Client.PostAsync(uri, content, TokenSource.Token);
-
-
-                    //dealing with response
-                    if (response.IsSuccessStatusCode)
+                    try
                     {
-                        string result = await response.Content.ReadAsStringAsync();
-                        dynamic register = JsonConvert.DeserializeObject(result);
-                        this.UserID = (string)register.UserToken;
-                        this.Registered = true;
+                        //request
+                        string uri = string.Format("BoggleService.svc/users");
+                        dynamic body = new ExpandoObject();
+                        body.Nickname = e.Nickname;
+                        TokenSource = new CancellationTokenSource();
+                        StringContent content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
+
+                        HttpResponseMessage response = await Client.PostAsync(uri, content, TokenSource.Token);
+
+
+                        //dealing with response
+                        if (response.IsSuccessStatusCode)
+                        {
+                            string result = await response.Content.ReadAsStringAsync();
+                            dynamic register = JsonConvert.DeserializeObject(result);
+                            this.UserID = (string)register.UserToken;
+                            this.Registered = true;
+
+                            view.Registering = false;
+                            view.Registered = true;
+                            view.RefreshFieldAccess();
+                        }
+
                     }
+                    catch (TaskCanceledException ex)
+                    {
 
+                    }
                 }
-                catch (TaskCanceledException ex)
-                {
-
-                }
+            }
+            catch (BadRequestException)
+            {
+                view.Registered = false;
+                view.Registering = false;
+                view.RefreshFieldAccess();
             }
         }
 
         private HttpClient GenerateHttpClient(string url)
         {
-            HttpClient c = new HttpClient();
-            c.BaseAddress = new Uri(url);
+            try
+            {
+                HttpClient c = new HttpClient();
+                c.BaseAddress = new Uri(url);
 
-            c.DefaultRequestHeaders.Accept.Clear();
-            c.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
+                c.DefaultRequestHeaders.Accept.Clear();
+                c.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
 
-            return c;
+                return c;
+            }
+            catch (UriFormatException)
+            {
+                throw new BadRequestException();
+            }
         }
+    }
+
+    public class BadRequestException : Exception
+    {
 
     }
 
