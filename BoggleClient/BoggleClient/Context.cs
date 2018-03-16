@@ -117,6 +117,7 @@ namespace BoggleClient
                 StartOpen();
                 view.FormClosed -= exitDel;
                 view.Close();
+                controller.Cancel();
             };
             view.FormClosed += exitDel;
 
@@ -130,6 +131,8 @@ namespace BoggleClient
             System.Timers.Timer timer = new System.Timers.Timer(1000);
             // todo: should GameController.Refresh have some parameters?
             controller.NextPhase += (sender, e) => timer.Stop();
+            view.CancelPushed += () => timer.Stop();
+            view.FormClosed += (sender, e) => timer.Stop();
             timer.Start();
             timer.Elapsed += (sender, e) => view.Invoke(new Action(controller.Refresh));
             timer.AutoReset = true;

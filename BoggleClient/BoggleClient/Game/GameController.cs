@@ -57,7 +57,7 @@ namespace BoggleClient.Game
             this.active = true;
         }
 
-        private void Cancel()
+        public void Cancel()
         {
             tokenSource?.Cancel();
         }
