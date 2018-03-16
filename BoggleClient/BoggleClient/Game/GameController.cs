@@ -91,8 +91,9 @@ namespace BoggleClient.Game
                         else
                         {
                             // todo: dafuq?
-                            //this.view.TimeRemaining = (int)game.TimeLeft;
+                            this.view.TimeRemaining = (int)game.TimeLeft;
                             //view.TimeRemaining--;
+                            view.GenerateLabels((string) game.Board);
 
                             //set the scores
                             if (((string)game.Player1.Nickname).Equals(this.nickname))
