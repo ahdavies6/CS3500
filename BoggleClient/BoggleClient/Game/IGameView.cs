@@ -25,7 +25,7 @@ namespace BoggleClient.Game
         int PlayerScore { set; }
         string OpponentName { set; }
         int OpponentScore { set; }
-        int TimeRemaining { set; }
+        int TimeRemaining { get;  set; }
 
         /// <summary>
         /// Event that gets fired when a new word is added

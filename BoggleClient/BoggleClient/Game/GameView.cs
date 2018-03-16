@@ -82,10 +82,18 @@ namespace BoggleClient.Game
 
         private int beginTime;
 
+        private int timeRemaining;
+
         public int TimeRemaining
         {
+            get
+            {
+                return timeRemaining;
+            }
             set
             {
+                timeRemaining = value;
+
                 if (beginTime == default(int))
                 {
                     beginTime = value;

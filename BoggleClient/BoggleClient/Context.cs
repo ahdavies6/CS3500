@@ -8,6 +8,7 @@ using BoggleClient.Game;
 using BoggleClient.Open;
 using BoggleClient.Score;
 using System.Drawing;
+using System.Threading;
 
 namespace BoggleClient
 {
@@ -37,6 +38,8 @@ namespace BoggleClient
 
         public void Start()
         {
+            //OpenView view = new OpenView();
+            //StartOpen(view);
             StartOpen();
         }
 
@@ -61,6 +64,7 @@ namespace BoggleClient
             }
         }
 
+        //private void StartOpen(OpenView view)
         private void StartOpen()
         {
             OpenView view = new OpenView();
@@ -85,10 +89,19 @@ namespace BoggleClient
                 if (e.URL != null && e.Nickname != null)
                 {
                     StartGame(e.URL, e.Nickname, e.UserID, e.GameLength, e.GameID);
-                    view.Close();
+                    view.Hide();
                 }
             };
         }
+
+        //private void StartGame(object o)
+        //{
+        //    if (o is OpenViewEventArgs)
+        //    {
+        //        OpenViewEventArgs e = (OpenViewEventArgs)o;
+        //        StartGame(e.URL, e.Nickname, e.UserID, e.GameLength, e.GameID);
+        //    }
+        //}
 
         private void StartGame(string URL, string nickname, string userID, int gameLength, string gameID)
         {
@@ -104,7 +117,9 @@ namespace BoggleClient
 
             System.Timers.Timer timer = new System.Timers.Timer(1000);
             // todo: should GameController.Refresh have some parameters?
+            timer.Start();
             timer.Elapsed += (sender, e) => controller.Refresh();
+            timer.AutoReset = true;
             controller.Refresh();
         }
 
@@ -122,6 +137,12 @@ namespace BoggleClient
             view.FormClosed += (sender, e) => ExitThread();
 
             view.Show();
+        }
+
+        protected override void OnMainFormClosed(object sender, EventArgs e)
+        {
+            //context.Start();
+            //Application.Run(context);
         }
     }
 }
