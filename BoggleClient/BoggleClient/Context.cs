@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using BoggleClient.Game;
 using BoggleClient.Open;
 using BoggleClient.Score;
+using System.Drawing;
 
 namespace BoggleClient
 {
@@ -39,51 +40,95 @@ namespace BoggleClient
             StartOpen();
         }
 
-        // todo: revisit after implementing OpenController and GameController
+        /// <summary>
+        /// Helper method returns where the Top-Left location Point should be for Control
+        /// (within its Parent container).
+        /// </summary>
+        public static Point TLPointCenterDynamic(Control child)
+        {
+            try
+            {
+                Control parent = child.Parent;
+
+                int x = (parent.ClientSize.Width - child.ClientSize.Width) / 2;
+                int y = (parent.ClientSize.Height - child.ClientSize.Height) / 2;
+
+                return new Point(x, y);
+            }
+            catch
+            {
+                return new Point(0, 0);
+            }
+        }
+
         private void StartOpen()
         {
             OpenView view = new OpenView();
             // pass OpenController's constructor the openView
             OpenController controller = new OpenController();
 
+            // todo: something along these lines:
+            //view.ConnectToServer += (sender, e) => controller.Connect(e.URL, e.Nickname);
+            //view.SearchGame += (sender, e) => controller.Search(e.GameLength);
+            //view.CancelPushed += () => controller.StopConnect();
+            //view.CancelSearch += () => controller.StopSearch();
+
             view.FormClosed += (sender, e) => ExitThread();
-            view.CancelPushed += Start;
-            // pass nickname in here too once it's a parameter for GameController's constructor
-            view.NextState += (sender, e) => StartGame(e.UserID, e.URL, e.Nickname);
+
+            // remove deprecated:
+            //view.NextState += (sender, e) => StartGame(e.UserToken, e.URL, e.Nickname);
+
+            // todo: implement an event in Controller that is fired when a game is found and (roughly)
+            // follows this spec: "event ...EventArgs GameFound", where EventArgs contains:
+            //     URL, Nickname, UserID, GameLength, GameID
+            //controller.GameFound += (sender, e) =>
+            //{
+            //    if (URL != null && Nickname != null)
+            //    {
+            //        StartGame(e.URL, e.Nickname, e.UserID, e.GameLength, e.GameID);
+            //    }
+            //};
 
             view.Show();
         }
 
-        // todo: revisit after implementing GameController and ScoreController
-        private void StartGame(string userID, string URL, string nickname)
+        private void StartGame(string URL, string nickname, string userID, int gameLength, string gameID)
         {
             GameView view = new GameView();
-            // change to this:
-            //GameController controller = new GameController(userID, URL, view, nickname);
             GameController controller = new GameController(userID, URL, view);
+            // todo: rework the above to accept something like:
+            //GameController controller = new GameController(URL, nickname, userID, gameLength, gameID, view);
+
+            // todo: add something like these once GameController is implemented:
+            //view.AddWord += controller.AddWord();
+
+            view.CancelPushed += Start; 
+
+            // todo: StartScore params once GameController is implemented
+            //view.NextState += (sender, e) => StartScore();
 
             view.FormClosed += (sender, e) => ExitThread();
-            view.CancelPushed += Start;
-            // after ScoreController implementation, StartScore should have some parameters, right?
-            view.NextState += (sender, e) => StartScore();
 
             System.Timers.Timer timer = new System.Timers.Timer(1000);
-            // should GameController.Refresh have some parameters?
+
+            // todo: should GameController.Refresh have some parameters?
             timer.Elapsed += (sender, e) => controller.Refresh();
 
             view.Show();
         }
 
-        // todo: revisit after implementing ScoreController
-        private void StartScore()
+        // todo: pick from these two constructors:
+        //private void StartScore(string playerName, int playerScore, string[] playerWords, int[] playerScores, 
+        //    string opponentName, int opponentScore, string[] opponentWords, int[] opponentScores)
+        private void StartScore(string gameID)
         {
             ScoreView view = new ScoreView();
             // pass ScoreController the view
             // pass ScoreController more params (e.g. gameID or userID)?
             ScoreController controller = new ScoreController();
 
-            view.FormClosed += (sender, e) => ExitThread();
             view.CancelPushed += Start;
+            view.FormClosed += (sender, e) => ExitThread();
 
             view.Show();
         }
