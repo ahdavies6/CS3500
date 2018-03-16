@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 
 namespace BoggleClient.Game
 {
+    //TODO doc comments
     class GameController
     {
 
