@@ -22,15 +22,13 @@ namespace BoggleClient.Game
         /// <summary>
         /// String that keeps track of the Users unique ID
         /// </summary>
-        private string UserID;
+        private string userID;
 
         /// <summary>
         /// HttpClient that connects with the boggle server
         /// </summary>
         // TODO doc comments
         private string URL;
-
-        private string userID;
 
         private string gameID;
 
@@ -49,7 +47,7 @@ namespace BoggleClient.Game
         /// </summary>
         public GameController(string URL, string nickname, string userID, string gameID, Game.IGameView view)
         {
-            this.UserID = userID;
+            this.userID = userID;
             this.view = view;
             this.URL = URL;
             this.nickname = nickname;
