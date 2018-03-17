@@ -137,10 +137,14 @@ namespace BoggleClient
             timer.Start();
             timer.Elapsed += (sender, e) =>
             {
-                if (!view.IsDisposed)
+                lock (view)
                 {
-                    view.Invoke(new Action(() => controller?.Refresh(false)));
-                };
+                    if (!view.IsDisposed)
+                    {
+                        view.Invoke(new Action(() => controller?.Refresh(false)));
+
+                    };
+                }
             };
             timer.AutoReset = true;
             controller.Refresh(true);
