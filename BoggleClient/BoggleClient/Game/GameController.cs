@@ -55,6 +55,10 @@ namespace BoggleClient.Game
             this.nickname = nickname;
             this.gameID = gameID;
             this.active = true;
+
+            //Initial refresh
+            //Also update labels
+            Refresh(true);
         }
 
         public void Cancel()
