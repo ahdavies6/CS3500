@@ -92,6 +92,20 @@ namespace BoggleClient.Open
                                 }
                             }
 
+                            if(response.StatusCode == HttpStatusCode.Conflict)
+                            {
+                                //Removes from the old game and adds to a new game
+                                uri = string.Format("BoggleService.svc/games");
+                                body = new ExpandoObject();
+                                body.UserToken = UserID;
+                                TokenSource = new CancellationTokenSource();
+                                content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
+
+                                 response = await Client.PutAsync(uri, content, TokenSource.Token);
+                                this.Search(sender, e);
+                                return;
+                            }
+
                             NextPhase?.Invoke(this, new OpenViewEventArgs(this.UserID, this.GameID,
                                 this.Nickname, this.URL, this.gameLength));
 
