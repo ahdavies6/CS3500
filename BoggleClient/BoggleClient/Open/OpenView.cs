@@ -10,20 +10,32 @@ using System.Windows.Forms;
 
 namespace BoggleClient.Open
 {
-    // todo: add doc comments
+    /// <summary>
+    /// Windows form to join a boggle game
+    /// </summary>
     public partial class OpenView : Form, IOpenView
     {
-        // todo: delete whichever of the first two is unnecessary
+        /// <summary>
+        /// Whether the client is registering a new user
+        /// </summary>
         public bool Registering
         {
             get;
             set;
         }
+
+        /// <summary>
+        /// Whether the user has been registered
+        /// </summary>
         public bool Registered
         {
             get;
             set;
         }
+
+        /// <summary>
+        /// Whether the client is searching for a game
+        /// </summary>
         private bool Searching;
 
         /// <summary>
@@ -42,9 +54,6 @@ namespace BoggleClient.Open
             Registered = false;
             Searching = false;
             RefreshFieldAccess();
-
-            // todo: URGENT REMOVE THIS
-            ServerTextbox.Text = "http://ice.users.coe.utah.edu/";
         }
 
         /// <summary>
@@ -52,16 +61,24 @@ namespace BoggleClient.Open
         /// </summary>
         public event ConnectEventHandler RegisterUser;
 
+        /// <summary>
+        /// Attemt to search for a game
+        /// </summary>
         public event SearchGameEventHandler SearchGame;
 
-        // todo: after merging, refactor to CancelRegister
         /// <summary>
-        /// Event that occurs when the cancel button is pushed
+        /// Fired when the user cancels registering their username
         /// </summary>
         public event Action CancelRegister;
 
+        /// <summary>
+        /// Fired when the user cancels searching for a game
+        /// </summary>
         public event Action CancelSearch;
 
+        /// <summary>
+        /// Refreshes which textboxes and buttons should be accessible to the user
+        /// </summary>
         public void RefreshFieldAccess()
         {
             ServerTextbox.Enabled = !Registering && !Searching;
@@ -74,6 +91,11 @@ namespace BoggleClient.Open
             CancelSearchButton.Enabled = Registered && Searching;
         }
 
+        /// <summary>
+        /// Registers the player with the server
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ServerRegisterButton_Click(object sender, EventArgs e)
         {
             Registered = false;
@@ -84,6 +106,11 @@ namespace BoggleClient.Open
             RegisterUser?.Invoke(this, args);
         }
 
+        /// <summary>
+        /// Begins searching for a game
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SearchGamesButton_Click(object sender, EventArgs e)
         {
             //NextStateEventArgs args = new NextStateEventArgs(DurationTextbox.Text);
@@ -109,6 +136,11 @@ namespace BoggleClient.Open
             }
         }
 
+        /// <summary>
+        /// Cancels username registration
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CancelRegisterButton_Click(object sender, EventArgs e)
         {
             Registered = false;
@@ -118,6 +150,11 @@ namespace BoggleClient.Open
             CancelRegister?.Invoke();
         }
 
+        /// <summary>
+        /// Cancels searching for a game
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CancelSearchButton_Click(object sender, EventArgs e)
         {
             Searching = false;
@@ -126,11 +163,21 @@ namespace BoggleClient.Open
             CancelSearch?.Invoke();
         }
 
+        /// <summary>
+        /// Called when the user's name is illegal
+        /// </summary>
+        /// <param name="nickname"></param>
+        /// <param name="URL"></param>
         public void ShowNameRegistrationMsg(string nickname, string URL)
         {
             MessageBox.Show(string.Format("Sorry! The server at: {0} did not allow registration of the name: {1}. Please try again!", URL, nickname));
         }
 
+        /// <summary>
+        /// Shows a help message box when the user clicks the help button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
             string messageText = "To register a new username (or connect with an existing one), " +

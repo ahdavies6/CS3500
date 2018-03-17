@@ -12,8 +12,6 @@ using System.Threading;
 
 namespace BoggleClient
 {
-    // todo: add missing doc comments
-
     /// <summary>
     /// Singleton-pattern "meta-controller" that activates different Views (Forms) and Controllers in
     /// the client, per user interaction.
@@ -25,8 +23,16 @@ namespace BoggleClient
         /// </summary>
         private static Context context;
 
+        /// <summary>
+        /// Returns the active context
+        /// </summary>
         private Context() { }
 
+        /// <summary>
+        /// Returns the active context if one exists.
+        /// Otherwise, creates and returns a new context
+        /// </summary>
+        /// <returns></returns>
         public static Context GetContext()
         {
             if (context == null)
@@ -36,10 +42,11 @@ namespace BoggleClient
             return context;
         }
 
+        /// <summary>
+        /// Starts a new boggle client
+        /// </summary>
         public void Start()
         {
-            //OpenView view = new OpenView();
-            //StartOpen(view);
             StartOpen();
         }
 
@@ -64,7 +71,9 @@ namespace BoggleClient
             }
         }
 
-        //private void StartOpen(OpenView view)
+        /// <summary>
+        /// Opens the server connection GUI
+        /// </summary>
         private void StartOpen()
         {
             OpenView view = new OpenView();
@@ -78,12 +87,7 @@ namespace BoggleClient
 
             FormClosedEventHandler exitDel = delegate (object sender, FormClosedEventArgs e) { ExitThread(); };
             view.FormClosed += exitDel;
-            // remove deprecated:
-            //view.NextState += (sender, e) => StartGame(e.UserToken, e.URL, e.Nickname);
-
-            // todo: implement an event in Controller that is fired when a game is found and (roughly)
-            // follows this spec: "event ...EventArgs GameFound", where EventArgs contains:
-            //     URL, Nickname, UserID, GameLength, GameID
+            
             controller.NextPhase += (sender, e) =>
             {
                 if (e.URL != null && e.Nickname != null)
@@ -95,20 +99,19 @@ namespace BoggleClient
             };
         }
 
-        //private void StartGame(object o)
-        //{
-        //    if (o is OpenViewEventArgs)
-        //    {
-        //        OpenViewEventArgs e = (OpenViewEventArgs)o;
-        //        StartGame(e.URL, e.Nickname, e.UserID, e.GameLength, e.GameID);
-        //    }
-        //}
-
+        /// <summary>
+        /// Starts a new game with server URL, username nickname, user ID token userID, game duration
+        /// gameLength, and game ID token gameID.
+        /// </summary>
+        /// <param name="URL"></param>
+        /// <param name="nickname"></param>
+        /// <param name="userID"></param>
+        /// <param name="gameLength"></param>
+        /// <param name="gameID"></param>
         private void StartGame(string URL, string nickname, string userID, int gameLength, string gameID)
         {
             GameView view = new GameView();
             view.Show();
-            // todo: where to work with gameLength?
             GameController controller = new GameController(URL, nickname, userID, gameID, view);
 
             view.AddWord += (sender, e) => controller.AddWordToGame(sender, e);
@@ -130,7 +133,6 @@ namespace BoggleClient
             };
 
             System.Timers.Timer timer = new System.Timers.Timer(1000);
-            // todo: should GameController.Refresh have some parameters?
             controller.NextPhase += (sender, e) => timer.Stop();
             view.CancelPushed += () => timer.Stop();
             view.FormClosing += (sender, e) => timer.Stop();
@@ -150,9 +152,11 @@ namespace BoggleClient
             controller.Refresh(true);
         }
 
-        // todo: pick from these two constructors:
-        //private void StartScore(string playerName, int playerScore, string[] playerWords, int[] playerScores, 
-        //    string opponentName, int opponentScore, string[] opponentWords, int[] opponentScores)
+        /// <summary>
+        /// Starts the score GUI with the gameID token at the server URL
+        /// </summary>
+        /// <param name="gameID"></param>
+        /// <param name="URL"></param>
         private void StartScore(string gameID, string URL)
         {
             ScoreView view = new ScoreView();

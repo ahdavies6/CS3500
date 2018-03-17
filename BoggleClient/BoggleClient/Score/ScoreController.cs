@@ -10,18 +10,38 @@ using System.Threading.Tasks;
 
 namespace BoggleClient.Score
 {
+    /// <summary>
+    /// Controls the data from the user's game session
+    /// </summary>
     class ScoreController
     {
-
+        /// <summary>
+        /// The view being controlled
+        /// </summary>
         private IScoreView view;
 
-
+        /// <summary>
+        /// The ID token of the game session
+        /// </summary>
         private string GameID;
 
+        /// <summary>
+        /// The server's URL
+        /// </summary>
         private string URL;
 
+        /// <summary>
+        /// Cancels an active server request
+        /// </summary>
         private CancellationTokenSource tokenSource;
 
+        /// <summary>
+        /// Creates a new scorecontroller controlling the relevant view and contacting the server
+        /// at (URL) with the gameID
+        /// </summary>
+        /// <param name="view"></param>
+        /// <param name="GameID"></param>
+        /// <param name="URL"></param>
         public ScoreController(IScoreView view, string GameID, string URL)
         {
             this.view = view;
@@ -31,7 +51,6 @@ namespace BoggleClient.Score
 
             ShowScores();
         }
-
 
         /// <summary>
         /// Given a string url, the method returns a constructed HttpClient
@@ -49,6 +68,9 @@ namespace BoggleClient.Score
             return c;
         }
 
+        /// <summary>
+        /// Shows the user and opponent scores and words
+        /// </summary>
         private async void ShowScores()
         {
             using (HttpClient client = GenerateHttpClient())
@@ -101,6 +123,9 @@ namespace BoggleClient.Score
             }
         }
 
+        /// <summary>
+        /// Cancels the score form and returns to the connect form (OpenView)
+        /// </summary>
         private void Cancel()
         {
             tokenSource?.Cancel();

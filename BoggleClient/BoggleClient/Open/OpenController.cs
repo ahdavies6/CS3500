@@ -11,34 +11,78 @@ using System.Threading.Tasks;
 
 namespace BoggleClient.Open
 {
+    /// <summary>
+    /// Contains data necessary to begin a new game
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     public delegate void OpenViewEventHandler(object sender, OpenViewEventArgs e);
 
+    /// <summary>
+    /// Registers the user with a server and finds a game
+    /// </summary>
     class OpenController
     {
+        /// <summary>
+        /// Fired when the user is ready to begin the game phase
+        /// </summary>
         public event OpenViewEventHandler NextPhase;
 
+        /// <summary>
+        /// The GUI the user interacts with
+        /// </summary>
         private IOpenView view;
 
+        /// <summary>
+        /// Used to cancel an active server request
+        /// </summary>
         private CancellationTokenSource TokenSource;
 
+        /// <summary>
+        /// The URL of the game server
+        /// </summary>
         private string URL;
 
+        /// <summary>
+        /// The game ID token
+        /// </summary>
         private string GameID;
 
+        /// <summary>
+        /// The user's username
+        /// </summary>
         private string Nickname;
 
+        /// <summary>
+        /// The user's token ID
+        /// </summary>
         private string UserID;
 
+        /// <summary>
+        /// The desired length of the game
+        /// </summary>
         private int gameLength;
 
+        /// <summary>
+        /// Whether the user has been registered by the server
+        /// </summary>
         private bool Registered;
 
+        /// <summary>
+        /// Opens a new controller controlling (view)
+        /// </summary>
+        /// <param name="view"></param>
         public OpenController(IOpenView view)
         {
             this.view = view;
             this.Registered = false;
         }
 
+        /// <summary>
+        /// Searches for a game
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public async void Search(object sender, SearchGameEventArgs e)
         {
             if (Registered)
@@ -125,11 +169,19 @@ namespace BoggleClient.Open
             }
         }
 
+        /// <summary>
+        /// Cancels registering username or searching for a game
+        /// </summary>
         public void Cancel()
         {
             this.TokenSource?.Cancel();
         }
 
+        /// <summary>
+        /// Registers the user with the server
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public async void Register(object sender, ConnectEventArgs e)
         {
             this.URL = e.URL;
@@ -185,6 +237,11 @@ namespace BoggleClient.Open
             }
         }
 
+        /// <summary>
+        /// Returns an HttpClient to interact with the server
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         private HttpClient GenerateHttpClient(string url)
         {
             try
@@ -204,11 +261,17 @@ namespace BoggleClient.Open
         }
     }
 
+    /// <summary>
+    /// Thrown when the user attempts to contact an invalid server
+    /// </summary>
     public class BadRequestException : Exception
     {
 
     }
 
+    /// <summary>
+    /// The data necessary to begin a game
+    /// </summary>
     public class OpenViewEventArgs : EventArgs
     {
         public string UserID { get; private set; }

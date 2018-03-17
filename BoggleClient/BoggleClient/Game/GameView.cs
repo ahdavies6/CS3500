@@ -10,7 +10,9 @@ using System.Windows.Forms;
 
 namespace BoggleClient.Game
 {
-    // todo: doc comments
+    /// <summary>
+    /// Windows form containing the boggle game client
+    /// </summary>
     public partial class GameView : Form, IGameView
     {
         /// <summary>
@@ -19,9 +21,6 @@ namespace BoggleClient.Game
         public GameView()
         {
             InitializeComponent();
-
-            //RemainingDataLabel.Parent = RemainingBar;
-            //RemainingDataLabel.Location = Context.TLPointCenterDynamic(RemainingDataLabel);
         }
 
         /// <summary>
@@ -77,33 +76,51 @@ namespace BoggleClient.Game
             }
         }
 
-        // todo: get GameController to call all of these
-        #region Data We Need From GameController
-
+        /// <summary>
+        /// The player's name
+        /// </summary>
         public string PlayerName
         {
             set { PlayerNameLabel.Text = value; }
         }
 
+        /// <summary>
+        /// The player's score
+        /// </summary>
         public int PlayerScore
         {
             set { PlayerScoreLabel.Text = value.ToString(); }
         }
 
+        /// <summary>
+        /// The opponent's name
+        /// </summary>
         public string OpponentName
         {
             set { OpponentNameLabel.Text = value.ToString(); }
         }
 
+        /// <summary>
+        /// The opponent's score
+        /// </summary>
         public int OpponentScore
         {
             set { OpponentScoreLabel.Text = value.ToString(); }
         }
 
+        /// <summary>
+        /// The time the game started at
+        /// </summary>
         private int beginTime;
 
+        /// <summary>
+        /// The amount of time remaining in the game
+        /// </summary>
         private int timeRemaining;
 
+        /// <summary>
+        /// Public wrapper property to timeRemaining; also displays time.
+        /// </summary>
         public int TimeRemaining
         {
             get
@@ -126,9 +143,12 @@ namespace BoggleClient.Game
                 RemainingBar.Value = (value / beginTime) * 100;
             }
         }
-        
-        #endregion
 
+        /// <summary>
+        /// Submits an addword request when the player presses enter in the textbox
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void WordTextbox_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)13) // (char)13 is enter
@@ -140,11 +160,21 @@ namespace BoggleClient.Game
             }
         }
 
+        /// <summary>
+        /// Cancels the active game
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CancelGameButton_Click(object sender, EventArgs e)
         {
             CancelPushed?.Invoke();
         }
 
+        /// <summary>
+        /// Shows the user a help menu
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
             string messageText = "To submit a word, type it into the \"Word:\" textbox, and press enter. \r\n" +

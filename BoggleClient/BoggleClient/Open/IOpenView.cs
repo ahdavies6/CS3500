@@ -6,81 +6,104 @@ using System.Threading.Tasks;
 
 namespace BoggleClient.Open
 {
-    // todo: missing doc comments
-
+    /// <summary>
+    /// The data necessary to connect to the server
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     public delegate void ConnectEventHandler(object sender, ConnectEventArgs e);
 
+    /// <summary>
+    /// The data necessary to search for a game
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     public delegate void SearchGameEventHandler(object sender, SearchGameEventArgs e);
-
-    // todo: remove deprecated?
-    ///// <summary>
-    ///// Event handler for NextState event, which contains all the data (within e) to construct a GameView.
-    ///// </summary>
-    //public delegate void NextStateEventHandler(object sender, NextStateEventArgs e);
 
     /// <summary>
     /// Interface for the OpenController to interact with
     /// </summary>
     public interface IOpenView
     {
+        /// <summary>
+        /// Whether the user is registering with the server
+        /// </summary>
         bool Registering
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Whether the user has been registered with the server
+        /// </summary>
         bool Registered
         {
             get;
             set;
         }
 
-        // todo: after merging, refactor as RegisterUser
         /// <summary>
         /// Attempt to connect to the server
         /// </summary>
         event ConnectEventHandler RegisterUser;
 
+        /// <summary>
+        /// Searches for a new game
+        /// </summary>
         event SearchGameEventHandler SearchGame;
 
-        // todo: after merging, refactor as CancelRegister
         /// <summary>
         /// Event that occurs when the cancel button is pushed
         /// </summary>
         event Action CancelRegister;
 
+        /// <summary>
+        /// Cancels searching for a game
+        /// </summary>
         event Action CancelSearch;
 
+        /// <summary>
+        /// Refreshes which controls are accessible to the user
+        /// </summary>
         void RefreshFieldAccess();
-        void ShowNameRegistrationMsg(string nickname, string URL);
 
         /// <summary>
-        /// Moves to the next state in the game (the actual boggle game)
+        /// Informs the user that their nickname or URL is invalid
         /// </summary>
-        //event Action NextState;
+        /// <param name="nickname"></param>
+        /// <param name="URL"></param>
+        void ShowNameRegistrationMsg(string nickname, string URL);
     }
 
+    /// <summary>
+    /// Contains the necessary data to connect to the server
+    /// </summary>
     public class ConnectEventArgs : EventArgs
     {
+        /// <summary>
+        /// The server's URL
+        /// </summary>
         public string URL
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// The player's username
+        /// </summary>
         public string Nickname
         {
             get;
             private set;
         }
 
-        //public int GameLength
-        //{
-        //    get;
-        //    private set;
-        //}
-
-        //public ConnectEventArgs(string URL, string userToken, int gameLength)
+        /// <summary>
+        /// The data necessary to connect to the server
+        /// </summary>
+        /// <param name="URL"></param>
+        /// <param name="nickname"></param>
         public ConnectEventArgs(string URL, string nickname)
         {
             this.URL = URL;
@@ -88,83 +111,36 @@ namespace BoggleClient.Open
         }
     }
 
-    // todo: remove deprecated?
-    ///// <summary>
-    ///// Contains the event data for NextState event, including everything necessary to construct
-    ///// a GameView.
-    ///// </summary>
-    //public class NextStateEventArgs : EventArgs
-    //{
-    //    // UserToken should be stored by controller
-    //    //public string UserToken
-    //    //{
-    //    //    get;
-    //    //    private set;
-    //    //}
-
-    //    // URL should be stored by controller
-    //    //public string URL
-    //    //{
-    //    //    get;
-    //    //    private set;
-    //    //}
-
-    //    // Nickname should be stored by Controller
-    //    //public string Nickname
-    //    //{
-    //    //    get;
-    //    //    private set;
-    //    //}
-
-    //    public int GameLength
-    //    {
-    //        get;
-    //        private set;
-    //    }
-
-    //    //public NextStateEventArgs(string userToken, string URL, string nickname)
-    //    public NextStateEventArgs(int gameLength)
-    //    {
-    //        this.GameLength = gameLength;
-    //    }
-
-    //    public NextStateEventArgs(string gameLength)
-    //    {
-    //        if (Int32.TryParse(gameLength, out int length) && length > 5 && length < 120)
-    //        {
-    //            this.GameLength = length;
-    //        }
-    //        else
-    //        {
-    //            // equivalent to an error message
-    //            this.GameLength = -1;
-    //        }
-    //    }
-    //}
-
+    /// <summary>
+    /// Contains the data to search for a game
+    /// </summary>
     public class SearchGameEventArgs : EventArgs
     {
-        //public string UserToken
-        //{
-        //    get;
-        //    private set;
-        //}
-
+        /// <summary>
+        /// The desired game length
+        /// </summary>
         public int GameLength
         {
             get;
             private set;
         }
 
-        //public SearchGameEventArgs(string userToken, int gameLength)
+        /// <summary>
+        /// Creates an eventargs containg data to search for a game
+        /// </summary>
+        /// <param name="gameLength"></param>
         public SearchGameEventArgs(int gameLength)
         {
             this.GameLength = gameLength;
         }
 
+        /// <summary>
+        /// Creates an eventargs containing data to search for a game. Converts (gameLength) to an int, and returns -1 if gameLength
+        /// cannot be converted, or is outside the required range.
+        /// </summary>
+        /// <param name="gameLength"></param>
         public SearchGameEventArgs(string gameLength)
         {
-            // todo: decide whether to handle length checking here or in Context
             if (Int32.TryParse(gameLength, out int length) && !(length < 5) && !(length > 120))
             {
                 this.GameLength = length;

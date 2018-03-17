@@ -12,11 +12,21 @@ using Newtonsoft.Json;
 
 namespace BoggleClient.Game
 {
-    //TODO doc comments
+    /// <summary>
+    /// Handles data and server interaction for the game phase of the boggle game client
+    /// </summary>
     class GameController
     {
+        /// <summary>
+        /// Fired when the player connects with a server
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public delegate void GamePhaseEventHandler(object sender, GamePhaseEventArgs e);
 
+        /// <summary>
+        /// Fired when the client is ready to move into the game phase
+        /// </summary>
         public event GamePhaseEventHandler NextPhase;
 
         /// <summary>
@@ -27,13 +37,21 @@ namespace BoggleClient.Game
         /// <summary>
         /// HttpClient that connects with the boggle server
         /// </summary>
-        // TODO doc comments
         private string URL;
 
+        /// <summary>
+        /// The game token ID
+        /// </summary>
         private string gameID;
 
+        /// <summary>
+        /// The player's username
+        /// </summary>
         private string nickname;
 
+        /// <summary>
+        /// Allows cancelling a request
+        /// </summary>
         private CancellationTokenSource tokenSource;
 
         /// <summary>
@@ -41,6 +59,9 @@ namespace BoggleClient.Game
         /// </summary>
         private IGameView view;
 
+        /// <summary>
+        /// Whether the game is still running on the server
+        /// </summary>
         bool active;
 
         /// <summary>
@@ -56,11 +77,12 @@ namespace BoggleClient.Game
             this.gameID = gameID;
             this.active = true;
 
-            //Initial refresh
-            //Also update labels
             Refresh(true);
         }
 
+        /// <summary>
+        /// Cancels a request to the server
+        /// </summary>
         public void Cancel()
         {
             tokenSource?.Cancel();
@@ -97,9 +119,7 @@ namespace BoggleClient.Game
                             }
                             else if (!((string)game.GameState).Equals("pending"))
                             {
-                                // todo: dafuq?
                                 this.view.TimeRemaining = (int)game.TimeLeft;
-                                //view.TimeRemaining--;
                                 
                                 //If specified to refresh the labels
                                 if (RefreshLabels)
@@ -131,7 +151,6 @@ namespace BoggleClient.Game
                     {
 
                     }
-
                 }
             }
         }
@@ -186,20 +205,41 @@ namespace BoggleClient.Game
 
                 }
             }
-
         }
     }
 
+    /// <summary>
+    /// Contains all the data necessary to enter the game phase
+    /// </summary>
     class GamePhaseEventArgs : EventArgs
     {
+        /// <summary>
+        /// User token ID
+        /// </summary>
         public string UserID { get; private set; }
 
+        /// <summary>
+        /// Game token ID
+        /// </summary>
         public string GameID { get; private set; }
 
+        /// <summary>
+        /// Player's username
+        /// </summary>
         public string Nickname { get; private set; }
 
+        /// <summary>
+        /// Server URL
+        /// </summary>
         public string URL { get; private set; }
 
+        /// <summary>
+        /// Creates GamePhaseEventArgs with data necessary to begin and run a game
+        /// </summary>
+        /// <param name="uid"></param>
+        /// <param name="gameid"></param>
+        /// <param name="nickname"></param>
+        /// <param name="url"></param>
         public GamePhaseEventArgs(string uid, string gameid, string nickname, string url)
         {
             this.UserID = uid;
