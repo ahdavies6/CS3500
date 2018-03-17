@@ -57,6 +57,7 @@
             this.HelpSubmitLabel = new System.Windows.Forms.Label();
             this.RemainingBar = new System.Windows.Forms.ProgressBar();
             this.GameInfoPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.button1 = new System.Windows.Forms.Button();
             this.BoggleTable.SuspendLayout();
             this.GameInfoPanel.SuspendLayout();
             this.SuspendLayout();
@@ -74,7 +75,7 @@
             // 
             this.RemainingDataLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.RemainingDataLabel.AutoSize = true;
-            this.RemainingDataLabel.Location = new System.Drawing.Point(63, 65);
+            this.RemainingDataLabel.Location = new System.Drawing.Point(125, 28);
             this.RemainingDataLabel.Margin = new System.Windows.Forms.Padding(0);
             this.RemainingDataLabel.Name = "RemainingDataLabel";
             this.RemainingDataLabel.Size = new System.Drawing.Size(36, 17);
@@ -372,12 +373,14 @@
             // 
             // RemainingBar
             // 
+            this.RemainingBar.Enabled = false;
             this.RemainingBar.ForeColor = System.Drawing.SystemColors.ButtonShadow;
             this.RemainingBar.Location = new System.Drawing.Point(125, 28);
             this.RemainingBar.Name = "RemainingBar";
             this.RemainingBar.Size = new System.Drawing.Size(793, 23);
             this.RemainingBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.RemainingBar.TabIndex = 0;
+            this.RemainingBar.Visible = false;
             // 
             // GameInfoPanel
             // 
@@ -397,11 +400,22 @@
             this.GameInfoPanel.Size = new System.Drawing.Size(360, 280);
             this.GameInfoPanel.TabIndex = 12;
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(883, 12);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(32, 32);
+            this.button1.TabIndex = 13;
+            this.button1.Text = "?";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // GameView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(927, 581);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.GameInfoPanel);
             this.Controls.Add(this.HelpSubmitLabel);
             this.Controls.Add(this.BoggleTable);
@@ -452,5 +466,6 @@
         private System.Windows.Forms.Label BoggleFace15;
         private System.Windows.Forms.Label BoggleFace14;
         private System.Windows.Forms.Label BoggleFace13;
+        private System.Windows.Forms.Button button1;
     }
 }

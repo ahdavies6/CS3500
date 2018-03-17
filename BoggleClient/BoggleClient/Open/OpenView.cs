@@ -130,5 +130,19 @@ namespace BoggleClient.Open
         {
             MessageBox.Show(string.Format("Sorry! The server at: {0} did not allow registration of the name: {1}. Please try again!", URL, nickname));
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string messageText = "To register a new username (or connect with an existing one), " +
+                "enter the server URL into the \"Server Address\" textbox, enter your desired username " +
+                "into the \"Player Name\" textbox, and click \"Register with Server\". \r\n" +
+                "To cancel this registration (if registering takes too long, or you wish to change " +
+                "your username), click \"Cancel Registration. \r\n" +
+                "Once your username has been accepted by the server, type the desired game duration " +
+                "(in seconds) into the \"Game Duration\" textbox, and click \"Search for Game\". \r\n" +
+                "If you wish to cancel the search for your game (if the wait is taking too long, " +
+                "or you wish to adjust your game duration), click \"Stop Searching\".";
+            MessageBox.Show(messageText);
+        }
     }
 }

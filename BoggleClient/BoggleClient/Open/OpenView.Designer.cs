@@ -39,6 +39,7 @@
             this.ServerTextbox = new System.Windows.Forms.TextBox();
             this.ServerLabel = new System.Windows.Forms.Label();
             this.MainPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.button1 = new System.Windows.Forms.Button();
             this.MainPanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -68,16 +69,16 @@
             // 
             this.NameTextbox.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.MainPanel.SetColumnSpan(this.NameTextbox, 2);
-            this.NameTextbox.Location = new System.Drawing.Point(147, 68);
+            this.NameTextbox.Location = new System.Drawing.Point(115, 56);
             this.NameTextbox.Name = "NameTextbox";
-            this.NameTextbox.Size = new System.Drawing.Size(218, 22);
+            this.NameTextbox.Size = new System.Drawing.Size(186, 22);
             this.NameTextbox.TabIndex = 3;
             // 
             // NameLabel
             // 
             this.NameLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.NameLabel.AutoSize = true;
-            this.NameLabel.Location = new System.Drawing.Point(24, 71);
+            this.NameLabel.Location = new System.Drawing.Point(11, 59);
             this.NameLabel.Name = "NameLabel";
             this.NameLabel.Size = new System.Drawing.Size(89, 17);
             this.NameLabel.TabIndex = 7;
@@ -109,17 +110,17 @@
             // 
             this.DurationTextbox.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.MainPanel.SetColumnSpan(this.DurationTextbox, 2);
-            this.DurationTextbox.Location = new System.Drawing.Point(534, 42);
+            this.DurationTextbox.Location = new System.Drawing.Point(435, 34);
             this.DurationTextbox.Name = "DurationTextbox";
             this.MainPanel.SetRowSpan(this.DurationTextbox, 2);
-            this.DurationTextbox.Size = new System.Drawing.Size(225, 22);
+            this.DurationTextbox.Size = new System.Drawing.Size(186, 22);
             this.DurationTextbox.TabIndex = 4;
             // 
             // DurationLabel
             // 
             this.DurationLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.DurationLabel.AutoSize = true;
-            this.DurationLabel.Location = new System.Drawing.Point(410, 44);
+            this.DurationLabel.Location = new System.Drawing.Point(324, 36);
             this.DurationLabel.Name = "DurationLabel";
             this.MainPanel.SetRowSpan(this.DurationLabel, 2);
             this.DurationLabel.Size = new System.Drawing.Size(104, 17);
@@ -130,16 +131,16 @@
             // 
             this.ServerTextbox.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.MainPanel.SetColumnSpan(this.ServerTextbox, 2);
-            this.ServerTextbox.Location = new System.Drawing.Point(147, 15);
+            this.ServerTextbox.Location = new System.Drawing.Point(115, 11);
             this.ServerTextbox.Name = "ServerTextbox";
-            this.ServerTextbox.Size = new System.Drawing.Size(218, 22);
+            this.ServerTextbox.Size = new System.Drawing.Size(186, 22);
             this.ServerTextbox.TabIndex = 0;
             // 
             // ServerLabel
             // 
             this.ServerLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ServerLabel.AutoSize = true;
-            this.ServerLabel.Location = new System.Drawing.Point(16, 18);
+            this.ServerLabel.Location = new System.Drawing.Point(3, 14);
             this.ServerLabel.Name = "ServerLabel";
             this.ServerLabel.Size = new System.Drawing.Size(106, 17);
             this.ServerLabel.TabIndex = 6;
@@ -172,14 +173,25 @@
             this.MainPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.66611F));
             this.MainPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.66611F));
             this.MainPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.66611F));
-            this.MainPanel.Size = new System.Drawing.Size(791, 322);
+            this.MainPanel.Size = new System.Drawing.Size(641, 272);
             this.MainPanel.TabIndex = 11;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(756, 12);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(32, 32);
+            this.button1.TabIndex = 12;
+            this.button1.Text = "?";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // OpenView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.CancelSearchButton);
             this.Controls.Add(this.ServerRegisterButton);
             this.Controls.Add(this.CancelRegisterButton);
@@ -205,6 +217,7 @@
         private System.Windows.Forms.TextBox ServerTextbox;
         private System.Windows.Forms.Label ServerLabel;
         private System.Windows.Forms.TableLayoutPanel MainPanel;
+        private System.Windows.Forms.Button button1;
     }
 }
 

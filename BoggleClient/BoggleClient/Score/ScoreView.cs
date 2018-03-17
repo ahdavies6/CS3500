@@ -104,5 +104,10 @@ namespace BoggleClient.Score
         {
             CancelPushed?.Invoke();
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Click \"Return to Main Menu\" to return to the main menu.");
+        }
     }
 }

@@ -20,8 +20,8 @@ namespace BoggleClient.Game
         {
             InitializeComponent();
 
-            RemainingDataLabel.Parent = RemainingBar;
-            RemainingDataLabel.Location = Context.TLPointCenterDynamic(RemainingDataLabel);
+            //RemainingDataLabel.Parent = RemainingBar;
+            //RemainingDataLabel.Location = Context.TLPointCenterDynamic(RemainingDataLabel);
         }
 
         /// <summary>
@@ -143,6 +143,16 @@ namespace BoggleClient.Game
         private void CancelGameButton_Click(object sender, EventArgs e)
         {
             CancelPushed?.Invoke();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string messageText = "To submit a word, type it into the \"Word:\" textbox, and press enter. \r\n" +
+                "To cancel the game, click the \"Cancel Game\" button. \r\n" +
+                "Once the timer reaches zero, the game will terminate, and all of the words that you " +
+                "and your opponent played will be displayed, along with the scores that they earned. \r\n" +
+                "For more information on the rules of Boggle, visit: https://en.wikipedia.org/wiki/Boggle";
+            MessageBox.Show(messageText);
         }
     }
 }

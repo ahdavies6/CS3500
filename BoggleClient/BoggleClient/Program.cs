@@ -18,13 +18,13 @@ namespace BoggleClient
             //Application.EnableVisualStyles();
             //Application.SetCompatibleTextRenderingDefault(false);
 
-            Context context = Context.GetContext();
-            context.Start();
-            Application.Run(context);
+            //Context context = Context.GetContext();
+            //context.Start();
+            //Application.Run(context);
 
             // todo: delete this once the Controllers have been implemented
             //MainOpen();
-            //MainGame();
+            MainGame();
             //MainScore();
         }
 
