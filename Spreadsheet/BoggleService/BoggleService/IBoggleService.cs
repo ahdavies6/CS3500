@@ -36,7 +36,6 @@ namespace Boggle
 
         /// <summary>
         /// Joins a game for the given R
-        /// 
         // todo commments
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
@@ -45,7 +44,6 @@ namespace Boggle
         /// <summary>
         /// Canel Join request
         // todo commments
-        /// 
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games")]
         dynamic CancelJoinRequest(CancelJoinRequest request);
