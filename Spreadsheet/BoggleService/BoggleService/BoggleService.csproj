@@ -22,6 +22,7 @@
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -129,6 +130,7 @@
     <Content Include="index.html" />
     <Content Include="dictionary.txt" />
     <Content Include="BoggleService.svc" />
+    <Content Include="todo and design.txt" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

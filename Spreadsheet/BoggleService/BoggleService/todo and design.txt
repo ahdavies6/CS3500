@@ -1,0 +1,7 @@
+﻿Assignment seems pretty straightforward.
+
+The main things are:
+1. Create IBoggleService methods
+2. Write tests using IBoggleService as reference 
+3. Implement some sort of game class that keeps track of scores, player names, etc (maybe this can also be a variety of dictionaries)
+4. Implement BoggleService
