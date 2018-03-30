@@ -34,7 +34,7 @@ namespace Boggle
         /// Contains both active and completed games but NOT pending games
         /// </summary>
         private static Dictionary<string, BoggleGame> Games = new Dictionary<string, BoggleGame>();
-        
+
         /// <summary>
         /// Lock object for server threading.
         /// </summary>
@@ -99,8 +99,10 @@ namespace Boggle
                 Users.Add(token, user);
 
                 //response to the client
-                UserTokenResponse response = new UserTokenResponse();
-                response.UserToken = token;
+                UserTokenResponse response = new UserTokenResponse
+                {
+                    UserToken = token
+                };
                 SetStatus(Created);
                 return response;
             }
@@ -140,16 +142,8 @@ namespace Boggle
                     return null;
                 }
 
-                int timeLimit;
-                if (Int32.TryParse(request.TimeLimit, out timeLimit))
-                {
-                    if (!(timeLimit >= 5 && timeLimit <= 120))
-                    {
-                        SetStatus(Forbidden);
-                        return null;
-                    }
-                }
-                else
+
+                if (!(request.TimeLimit >= 5 && request.TimeLimit <= 120))
                 {
                     SetStatus(Forbidden);
                     return null;
@@ -164,13 +158,16 @@ namespace Boggle
                 GameIDResponse response = new GameIDResponse();
                 if (PendingGames.Count > 0)
                 {
-                    //BoggleGame game = PendingGames.GetEnumerator().Current.Value;
-                    var games = PendingGames.GetEnumerator();
-                    games.MoveNext();
-                    BoggleGame game = games.Current.Value;
+                    string currkey = null;
+                    BoggleGame game = null;
+                    foreach (string key in PendingGames.Keys)
+                    {
+                        currkey = key;
+                        game = PendingGames[key];
+                    }
 
-                    game.AddSecondPlayer(player, timeLimit);
-                    PendingGames.Remove(request.UserToken);
+                    game.AddSecondPlayer(player, request.TimeLimit);
+                    PendingGames.Remove(currkey);
 
                     Games.Add(game.GameID, game);
 
@@ -179,7 +176,7 @@ namespace Boggle
                 }
                 else
                 {
-                    BoggleGame newGame = new BoggleGame(player, timeLimit, GenerateGameID());
+                    BoggleGame newGame = new BoggleGame(player, request.TimeLimit, GenerateGameID());
 
                     PendingGames.Add(request.UserToken, newGame);
 
@@ -203,7 +200,7 @@ namespace Boggle
         {
             lock (sync)
             {
-                if(request.UserToken is null || !PendingGames.ContainsKey(request.UserToken) )
+                if (request.UserToken is null || !PendingGames.ContainsKey(request.UserToken))
                 {
                     SetStatus(Forbidden);
                 }
@@ -211,7 +208,7 @@ namespace Boggle
                 {
                     PendingGames.Remove(request.UserToken);
                     NumberOfGames--;
-                    SetStatus(OK); 
+                    SetStatus(OK);
                 }
             }
         }

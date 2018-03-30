@@ -34,7 +34,7 @@ namespace Boggle
         /// <summary>
         /// Time limit the user wants
         /// </summary>
-        public string TimeLimit { get; set; }
+        public int TimeLimit { get; set; }
     }
 
     /// <summary>
