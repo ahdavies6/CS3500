@@ -96,26 +96,26 @@ namespace Boggle
     /// <summary>
     /// An interface to label what data structures can come from a Status response
     /// </summary>
-    public interface Status
+    public interface IStatus
     {
     }
 
     /// <summary>
     /// Class for when status just needs to send "pending"
     /// </summary>
-    public class StateResponse : Status
+    public class StateResponse : IStatus
     {
-        public string GameState { get; set; }
+        public GameStatus GameState { get; set; }
     }
 
     /// <summary>
     /// Class that represents the response from the server when get status is called
     /// </summary>
     [DataContract]
-    public class FullStatusResponse : Status
+    public class FullStatusResponse : IStatus
     {
         [DataMember]
-        public string GameState { get; set; }
+        public GameStatus GameState { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
         public string Board { get; set; }

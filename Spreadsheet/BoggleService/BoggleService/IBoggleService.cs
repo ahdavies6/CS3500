@@ -89,6 +89,6 @@ namespace Boggle
         /// not case sensitive.
         /// </summary>
         [WebGet(UriTemplate = "/games/{GameID}?Brief={brief}")]
-        Status GetGameStatus(string GameID, string brief);
+        IStatus GetGameStatus(string GameID, string brief);
     }
 }

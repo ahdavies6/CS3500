@@ -320,9 +320,70 @@ namespace Boggle
         /// on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are
         /// not case sensitive.
         /// </summary>
-        public Status GetGameStatus(string GameID, string brief)
+        public IStatus GetGameStatus(string gameID, string brief)
         {
-            throw new NotImplementedException();
+            BoggleGame game = Games[gameID];
+
+            if (PendingGames.ContainsKey(gameID))
+            {
+                StateResponse response = new StateResponse();
+                response.GameState = GameStatus.Pending;
+
+                SetStatus(OK);
+                return response;
+            }
+            else if (Games.ContainsKey(gameID))
+            {
+                game = Games[gameID];
+
+                FullStatusResponse response = new FullStatusResponse();
+
+                // non-player game data
+                response.GameState = game.Status;
+                response.Board = game.Board.ToString();
+                response.TimeLimit = game.TimeLimit;
+                response.TimeLeft = game.TimeLeft;
+
+                // player1 game data
+                SerialPlayer player1 = new SerialPlayer();
+                player1.Nickname = game.Player1.User.Nickname;
+                player1.Score = game.Player1.Score;
+
+                HashSet<WordEntry> wordsPlayed1 = new HashSet<WordEntry>();
+                for (int i = 0; i < game.Player1.Words.Count; i++)
+                {
+                    WordEntry wordEntry = new WordEntry();
+                    wordEntry.Word = game.Player1.Words[i];
+                    wordEntry.Score = game.Player1.WordScores[i];
+
+                    wordsPlayed1.Add(wordEntry);
+                }
+                player1.WordsPlayed = wordsPlayed1;
+
+                // player 2 game data
+                SerialPlayer player2 = new SerialPlayer();
+                player2.Nickname = game.Player2.User.Nickname;
+                player2.Score = game.Player2.Score;
+
+                HashSet<WordEntry> wordsPlayed2 = new HashSet<WordEntry>();
+                for (int i = 0; i < game.Player2.Words.Count; i++)
+                {
+                    WordEntry wordEntry = new WordEntry();
+                    wordEntry.Word = game.Player2.Words[i];
+                    wordEntry.Score = game.Player2.WordScores[i];
+
+                    wordsPlayed2.Add(wordEntry);
+                }
+                player2.WordsPlayed = wordsPlayed2;
+
+                SetStatus(OK);
+                return response;
+            }
+            else
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
         }
     }
 

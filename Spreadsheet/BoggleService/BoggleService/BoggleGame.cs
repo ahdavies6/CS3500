@@ -19,11 +19,6 @@ namespace Boggle
         public BoggleBoard Board;
 
         /// <summary>
-        /// Property that returns the string for the board 
-        /// </summary>
-        public string BoardString { get { return Board.ToString(); } }
-
-        /// <summary>
         /// Player object that represents the first player
         /// </summary>
         public Player Player1 { get; private set; }
@@ -63,7 +58,19 @@ namespace Boggle
         /// </summary>
         public int TimeLeft
         {
-            get { return TimeLimit - (int)stopwatch.ElapsedMilliseconds; }
+            get
+            {
+                int timeLeft = TimeLimit - (int)stopwatch.ElapsedMilliseconds;
+
+                if (timeLeft > 0)
+                {
+                    return timeLeft;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
         }
 
         /// <summary>
