@@ -19,15 +19,6 @@ namespace Boggle
         /// Nickname passed to a create user request
         /// </summary>
         public string Nickname { get; set; }
-
-        /// <summary>
-        /// Creates a request with nickname
-        /// </summary>
-        /// <param name="nickname"></param>
-        public CreateUserRequest(string nickname)
-        {
-            Nickname = nickname;
-        }
     }
 
     /// <summary>
@@ -44,17 +35,6 @@ namespace Boggle
         /// Time limit the user wants
         /// </summary>
         public string TimeLimit { get; set; }
-
-        /// <summary>
-        /// Creates a request with userToken and timeLimit
-        /// </summary>
-        /// <param name="userToken"></param>
-        /// <param name="timeLimit"></param>
-        public JoinRequest(string userToken, string timeLimit)
-        {
-            UserToken = userToken;
-            TimeLimit = timeLimit;
-        }
     }
 
     /// <summary>
@@ -66,15 +46,6 @@ namespace Boggle
         /// UserToken of the person who wants to cancel a join request
         /// </summary>
         public string UserToken { get; set; }
-
-        /// <summary>
-        /// Creates a request with userToken
-        /// </summary>
-        /// <param name="userToken"></param>
-        public CancelJoinRequest(string userToken)
-        {
-            UserToken = userToken;
-        }
     }
 
     /// <summary>
@@ -91,17 +62,6 @@ namespace Boggle
         /// Word being played
         /// </summary>
         public string Word { get; set; }
-
-        /// <summary>
-        /// Creates a request with userToken and word
-        /// </summary>
-        /// <param name="userToken"></param>
-        /// <param name="word"></param>
-        public PlayWord(string userToken, string word)
-        {
-            UserToken = userToken;
-            Word = word;
-        }
     }
 
     #endregion
