@@ -132,7 +132,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="BoggleService.svc" />
-    <Content Include="todo and design.txt" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

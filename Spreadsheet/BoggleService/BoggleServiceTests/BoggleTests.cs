@@ -47,6 +47,7 @@ namespace Boggle
             }
         }
     }
+
     [TestClass]
     public class BoggleTests
     //todo add a test for the timelimit average
@@ -614,7 +615,5 @@ namespace Boggle
             }
 
         }
-
     }
-
 }

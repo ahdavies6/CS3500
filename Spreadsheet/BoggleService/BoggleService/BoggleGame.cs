@@ -8,19 +8,21 @@ using System.Web;
 
 namespace Boggle
 {
+    // todo: remove all the commented out code in here
+
     /// <summary>
     /// Class that represents a single BoggleGame
     /// </summary>
     public class BoggleGame
     {
-
-        /// <summary>
-        /// Represents all of the valid words possible
-        /// 
-        /// NOTE: You might have to remove this if the memory overhead is too large and it crashes, this is something to test
-        /// against the tests i wrote
-        /// </summary>
-        public static ISet<string> DicationaryWords;
+        // todo: remove deprecated
+        ///// <summary>
+        ///// Represents all of the valid words possible
+        ///// 
+        ///// NOTE: You might have to remove this if the memory overhead is too large and it crashes, this is something to test
+        ///// against the tests i wrote
+        ///// </summary>
+        //public static ISet<string> DictionaryWords;
 
         /// <summary>
         /// The board model provided by Joe Zachary
@@ -113,14 +115,15 @@ namespace Boggle
             Player2 = new Player(player, requestedTime);
             TimeLimit = (Player1.RequestedTime + Player2.RequestedTime) / 2;
 
-            //I also added this hashset that hold all the dictionary words, it should make looking up words faster 
-            //but there might be too much memory used 
-            //Thats why i kept it static 
-            if (DicationaryWords == null)
-            {
-                DicationaryWords = new HashSet<string>();
-                GenerateDictionary();
-            }
+            // todo: remove deprecated
+            ////I also added this hashset that hold all the dictionary words, it should make looking up words faster 
+            ////but there might be too much memory used 
+            ////Thats why i kept it static 
+            //if (DictionaryWords == null)
+            //{
+            //    DictionaryWords = new HashSet<string>();
+            //    GenerateDictionary();
+            //}
 
             //see note below
             Start = DateTime.UtcNow;
@@ -137,21 +140,21 @@ namespace Boggle
             Status = GameStatus.Active;
         }
 
-        /// <summary>
-        /// Helper method that generates the static dictionary
-        /// </summary>
-        private void GenerateDictionary()
-        {
-            using (StreamReader file = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dicationary.txt"))
-            {
-                string currLine;
-                while ((currLine = file.ReadLine()) != null)
-                {
-                    DicationaryWords.Add(currLine.ToUpper());
-
-                }
-            }
-        }
+        // todo: remove deprecated
+        ///// <summary>
+        ///// Helper method that generates the static dictionary
+        ///// </summary>
+        //private void GenerateDictionary()
+        //{
+        //    using (StreamReader file = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dicationary.txt"))
+        //    {
+        //        string currLine;
+        //        while ((currLine = file.ReadLine()) != null)
+        //        {
+        //            DictionaryWords.Add(currLine.ToUpper());
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// If this game contains user player, returns them
@@ -285,7 +288,7 @@ namespace Boggle
             {
                 return 0;
             }
-            else if (this.Board.CanBeFormed(word) && IsValidWord(word))
+            else if (this.Board.CanBeFormed(word) && Words.IsValidWord(word))
             {
                 int leng = word.Length;
 
@@ -312,31 +315,31 @@ namespace Boggle
             }
         }
 
-        // todo: consider moving this into a data structure?
-        /// <summary>
-        /// Checks if the param word is a valid word within dictionary.txt
-        /// 
-        /// Method is case insensitive
-        /// </summary>
-        private bool IsValidWord(string word)
-        {
-            return DicationaryWords.Contains(word.ToUpper());
-            /*
-            using (StreamReader file = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dicationary.txt"))
-            {
-                string currLine;
-                while ((currLine = file.ReadLine()) != null)
-                {
-                    if (word.Equals(currLine))
-                    {
-                        return true;
-                    }
-                }
-            }
+        // todo: remove deprecated
+        ///// <summary>
+        ///// Checks if the param word is a valid word within dictionary.txt
+        ///// 
+        ///// Method is case insensitive
+        ///// </summary>
+        //private bool IsValidWord(string word)
+        //{
+        //    return DictionaryWords.Contains(word.ToUpper());
+        //    /*
+        //    using (StreamReader file = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dicationary.txt"))
+        //    {
+        //        string currLine;
+        //        while ((currLine = file.ReadLine()) != null)
+        //        {
+        //            if (word.Equals(currLine))
+        //            {
+        //                return true;
+        //            }
+        //        }
+        //    }
 
-            //Case no dictionary word matches with the word param
-            return false;*/
-        }
+        //    //Case no dictionary word matches with the word param
+        //    return false;*/
+        //}
 
         /// <summary>
         /// Ends the game once the time has run out

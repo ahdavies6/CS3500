@@ -361,6 +361,57 @@ namespace Boggle
         }
     }
 
+    /// <summary>
+    /// Singleton class allows checking whether a word is valid
+    /// </summary>
+    public class Words
+    {
+        /// <summary>
+        /// Singleton self
+        /// </summary>
+        private static Words me;
+
+        /// <summary>
+        /// All the valid words
+        /// </summary>
+        private static ISet<string> words;
+
+        /// <summary>
+        /// Singleton constructor
+        /// 
+        /// Passes in all the words from dictionary.txt to words field
+        /// </summary>
+        private Words()
+        {
+            if (me == null)
+            {
+                words = new HashSet<string>();
+
+                using (StreamReader file = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dictionary.txt"))
+                {
+                    string currLine;
+                    while ((currLine = file.ReadLine()) != null)
+                    {
+                        words.Add(currLine.ToUpper());
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks whether word is a valid dictionary word
+        /// </summary>
+        public static bool IsValidWord(string word)
+        {
+            if (me == null)
+            {
+                me = new Words();
+            }
+
+            return words.Contains(word);
+        }
+    }
+
     public class User
     {
         /// <summary>
