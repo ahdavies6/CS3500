@@ -175,8 +175,11 @@ namespace Boggle
                 GameIDResponse response = new GameIDResponse();
                 if (PendingGames.Count > 0)
                 {
-                    BoggleGame game = PendingGames.GetEnumerator().Current.Value;
-                    
+                    //BoggleGame game = PendingGames.GetEnumerator().Current.Value;
+                    var games = PendingGames.GetEnumerator();
+                    games.MoveNext();
+                    BoggleGame game = games.Current.Value;
+
                     game.AddSecondPlayer(player, timeLimit);
                     PendingGames.Remove(request.UserToken);
 
@@ -322,8 +325,6 @@ namespace Boggle
         /// </summary>
         public IStatus GetGameStatus(string gameID, string brief)
         {
-            BoggleGame game = Games[gameID];
-
             if (PendingGames.ContainsKey(gameID))
             {
                 StateResponse response = new StateResponse();
@@ -334,7 +335,7 @@ namespace Boggle
             }
             else if (Games.ContainsKey(gameID))
             {
-                game = Games[gameID];
+                BoggleGame game = Games[gameID];
 
                 FullStatusResponse response = new FullStatusResponse();
 
