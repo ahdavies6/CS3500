@@ -30,6 +30,20 @@ namespace Boggle
             return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
         }
 
+        /// <summary>
+        /// Creates a user with request.Nickname as the Nickname. 
+        /// 
+        /// If Nickname is null, or is empty when trimmed, responds with status 403 (Forbidden). 
+        /// 
+        /// Otherwise, creates a new user with a unique UserToken and the trimmed Nickname.
+        /// The returned UserToken should be used to identify the user in subsequent requests.
+        /// Responds with status 201 (Created). 
+        /// </summary>
+        public dynamic RegisterUser(CreateUserRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
         public dynamic CancelJoinRequest(CancelJoinRequest request)
         {
             throw new NotImplementedException();
@@ -46,11 +60,6 @@ namespace Boggle
         }
 
         public dynamic PlayWord(PlayWord wordRequest, string GameID)
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic RegisterUser(CreateUserRequest request)
         {
             throw new NotImplementedException();
         }
