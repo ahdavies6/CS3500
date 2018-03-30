@@ -9,32 +9,10 @@ using System.Web;
 namespace Boggle
 {
     /// <summary>
-    /// Returns the score of word, should it be playable with the BoggleGame's BoggleBoard.
-    /// </summary>
-    /// <param name="word"></param>
-    /// <returns></returns>
-    public delegate int GetWordScore(string word);
-
-    /// <summary>
     /// Class that represents a single BoggleGame
     /// </summary>
     public class BoggleGame
     {
-        /// <summary>
-        /// Constant representing a pending game 
-        /// </summary>
-        public const int PENDING_GAME = 1;
-
-        /// <summary>
-        /// Constant representing an active game 
-        /// </summary>
-        public const int ACTIVE_GAME = 2;
-
-        /// <summary>
-        /// Constant representing a completed game 
-        /// </summary>
-        public const int COMPLETED_GAME = 3;
-
         /// <summary>
         /// The board model provided by Joe Zachary
         /// </summary>
@@ -43,7 +21,7 @@ namespace Boggle
         /// <summary>
         /// Property that returns the string for the board 
         /// </summary>
-        public string Board { get { return BoardModel.ToString(); } }
+        public string BoardString { get { return Board.ToString(); } }
 
         /// <summary>
         /// Player object that represents the first player
@@ -56,159 +34,109 @@ namespace Boggle
         public Player Player2 { get; private set; }
 
         /// <summary>
-        /// The Time limit of the game. Does not change after the initial set
-        /// </summary>
-        public int TimeLimit { get; private set; }
-
-        /// <summary>
-        /// Represents the game status
-        /// </summary>
-        public string GameStatus { get; private set; }
-
-        /// <summary>
-        /// Timer object that keeps track of how long the game has. Fires the end game method when completed
-        /// </summary>
-        private DateTime StartTime;
-
-        public int TimeLeft
-        {
-            get
-            {
-                return (int) (StartTime - DateTime.UtcNow).TotalSeconds;
-            }
-        }
-
-        /// <summary>
         /// GameID of this game
         /// </summary>
         public string GameID { get; private set; }
 
         /// <summary>
-        /// Property that represents how much time is left in the game
+        /// Represents the game status
         /// </summary>
-        public int TimeRemaining
+        public GameStatus Status;
+
+        /// <summary>
+        /// The Time limit of the game. Does not change after the initial set
+        /// </summary>
+        public int TimeLimit { get; private set; }
+
+        /// <summary>
+        /// Will refresh the game each second
+        /// </summary>
+        private Timer timer;
+
+        /// <summary>
+        /// Keeps track of the time since the game began
+        /// </summary>
+        private Stopwatch stopwatch;
+
+        /// <summary>
+        /// How much time is left in the game
+        /// </summary>
+        public int TimeLeft
         {
-            get
-            {
-                if (Status == ACTIVE_GAME)
-                {
-                    return 0;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
+            get { return TimeLimit - (int)stopwatch.ElapsedMilliseconds; }
         }
 
         /// <summary>
-        /// Represents the game status.
-        /// 1 = pending
-        /// 2 = active
-        /// 3 = completed 
+        /// Initializes a new game with one player
         /// </summary>
-        private int Status;
-
-        /// <summary>
-        /// Property that refreshes then gets the current games status
-        /// 1 = pending
-        /// 2 = active
-        /// 3 = completed 
-        /// </summary>
-        public int GameStatus { get { Refresh(); return Status; } }
-
-        /// <summary>
-        /// Adds the first player to the Boggle Game and makes the game. 
-        /// </summary>
-        public BoggleGame(string Nickname1, string UserToken1, int requestedTime, string GameID)
+        public BoggleGame(string letters, string playerName, string userToken, int requestedTime, string gameID)
         {
-            this.Player1 = new Player(Nickname1, UserToken1);
-            this.TimeLimit = requestedTime;
-            this.Status = PENDING_GAME;
-            this.GameID = GameID;
+            Board = new BoggleBoard(letters);
+            Player1 = new Player(playerName, userToken, requestedTime);
+            GameID = gameID;
 
+            Status = GameStatus.Pending;
         }
 
         /// <summary>
         /// Adds the second player into the game and starts the game. The Time limit of the game is set to the 
         /// overage of the two times requested by the players
         /// </summary>
-        public void AddSecondPlayer(string Nickname2, string UserToken2, int requestedTime)
+        public void AddSecondPlayer(string playerName, string userToken, int requestedTime)
         {
-            this.Player2 = new Player(Nickname2, UserToken2);
-            this.TimeLimit = (TimeLimit + requestedTime) / 2;
-            this.BoardModel = new BoggleBoard();
-            this.StartTime = DateTime.UtcNow;
+            Player2 = new Player(playerName, userToken, requestedTime);
+            TimeLimit = (Player1.RequestedTime + Player2.RequestedTime) / 2;
+
+            timer = new Timer(1000);
+            timer.Elapsed += (object sender, ElapsedEventArgs e) => { Refresh(); };
+            stopwatch = new Stopwatch();
+
+            Status = GameStatus.Active;
         }
 
         /// <summary>
-        /// Adds a word to the game and scores it. 
-        /// Returns the score if adding the word was successful. Returns -1 if the game is not active anymore.
+        /// If game is still active, adds a word to the game (under player playerName), scores it, adds it (and
+        /// its score) to player's data, and returns the score.
         /// 
-        /// Throws PlayerNotInGameException() if the userToken is not part of the game
-        /// Thowos GameNotActiveException() if the game is not active
-        /// 
-        /// Assumes that word is a valid word less than 30 characters and not null
+        /// If game is no longer active, throws GameNotActiveException.
+        /// If a player with userToken is not in the game, throws PlayerNotInGameException.
         /// </summary>
-        public int AddWord(string userToken, string word)
+        public int PlayWord(string userToken, string word)
         {
-            //Refreshes the status of the game
             Refresh();
 
-            //Checks if the game is still active
-            if (this.Status != ACTIVE_GAME)
+            if (Status != GameStatus.Active)
             {
                 throw new GameNotActiveException();
             }
 
-            Player currentPlayer;
+            Player player;
+            int wordScore;
 
-            if (Player1.UserToken.Equals(userToken))
+            if (userToken == Player1.UserToken)
             {
-                currentPlayer = Player1;
+                player = Player1;
             }
-            else if (Player2.UserToken.Equals(userToken))
+            else if (userToken == Player2.UserToken)
             {
-                currentPlayer = Player2;
+                player = Player2;
             }
-            else
+            else // there is no Player with userToken in this game
             {
                 throw new PlayerNotInGameException();
             }
 
-            int score = ScoreWord(word, currentPlayer);
-
-            currentPlayer.Score += score;
-            currentPlayer.Words.Add(word);
-            currentPlayer.ScoreIncrements.Add(score);
-
-            return score;
-
-        }
-
-        //Todo move this into a data structure?
-        /// <summary>
-        /// Checks if the param word is a valid word within dictionary.txt
-        /// 
-        /// Method is case insensitive
-        /// </summary>
-        private bool IsValidWord(string word)
-        {
-            word = word.ToUpper();
-            using (StreamReader file = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dicationary.txt"))
+            if (Board.CanBeFormed(word))
             {
-                string currLine;
-                while ((currLine = file.ReadLine()) != null)
-                {
-                    if (word.Equals(currLine))
-                    {
-                        return true;
-                    }
-                }
+                wordScore = ScoreWord(word, player);
+            }
+            else
+            {
+                wordScore = -1;
             }
 
-            //Case no dictionary word matches with the word param
-            return false;
+            player.AddWord(word, wordScore);
+            return wordScore;
         }
 
         /// <summary>
@@ -216,10 +144,10 @@ namespace Boggle
         /// 
         /// If a string has fewer than three characters, it scores zero points.
         /// Otherwise, if a string has a duplicate that occurs earlier in the list, it scores zero points.
-        /// Otherwise, if a string is legal(it appears in the dictionary and occurs on the board), 
-        ///     it receives a score that depends on its length.Three- and four-letter words are worth one point, 
-        ///     five-letter words are worth two points, six-letter words are worth three points, 
-        ///     seven-letter words are worth five points, and longer words are worth 11 points.
+        /// Otherwise, if a string is legal (it appears in the dictionary and occurs on the board), 
+        /// it receives a score that depends on its length. Three- and four-letter words are worth one point, 
+        /// five-letter words are worth two points, six-letter words are worth three points, 
+        /// seven-letter words are worth five points, and longer words are worth 11 points.
         /// Otherwise, the string scores negative one point.
         /// 
         /// Method is case insensitive
@@ -234,7 +162,7 @@ namespace Boggle
             {
                 return 0;
             }
-            else if (this.BoardModel.CanBeFormed(word) && IsValidWord(word))
+            else if (this.Board.CanBeFormed(word) && IsValidWord(word))
             {
                 int leng = word.Length;
 
@@ -261,95 +189,52 @@ namespace Boggle
             }
         }
 
+        // todo: consider moving this into a data structure?
         /// <summary>
-        /// Private method that signals the end of the game
+        /// Checks if the param word is a valid word within dictionary.txt
+        /// 
+        /// Method is case insensitive
         /// </summary>
-        private void EndGame()
+        private bool IsValidWord(string word)
         {
-            this.Status = COMPLETED_GAME;
+            word = word.ToUpper();
+            using (StreamReader file = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dicationary.txt"))
+            {
+                string currLine;
+                while ((currLine = file.ReadLine()) != null)
+                {
+                    if (word.Equals(currLine))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            //Case no dictionary word matches with the word param
+            return false;
         }
 
         /// <summary>
-        /// Returns the score of word, should it be playable with the BoggleGame's BoggleBoard.
-        /// </summary>
-        /// <param name="word"></param>
-        /// <returns></returns>
-        private GetWordScore getWordScore;
-
-        /// <summary>
-        /// Creates a new BoggleGame.
-        /// </summary>
-        /// <param name="letters"></param>
-        /// <param name="p1Name"></param>
-        /// <param name="p2Name"></param>
-        /// <param name="timeLimit"></param>
-        public BoggleGame(string letters, string p1Name, string p2Name, int timeLimit, GetWordScore getWordScore)
-        {
-            Board = new BoggleBoard(letters);
-            Player1 = new Player(p1Name);
-            Player2 = new Player(p2Name);
-            TimeLimit = timeLimit;
-            GameStatus = "active";
-
-            timer = new Timer(timeLimit * 1000);
-            timer.Elapsed += Completed;
-            this.getWordScore = getWordScore;
-        }
-
-        /// <summary>
-        /// Plays word under player.
-        /// </summary>
-        /// <param name="playerName"></param>
-        /// <param name="word"></param>
-        public void PlayWord(string playerName, string word)
-        {
-            Player player;
-            int wordScore;
-
-            if (playerName == Player1.Nickname)
-            {
-                player = Player1;
-            }
-            else if (playerName == Player2.Nickname)
-            {
-                player = Player2;
-            }
-            else // there is no Player named "playerName" in this game
-            {
-                throw new ArgumentOutOfRangeException(playerName);
-            }
-
-            if (Board.CanBeFormed(word))
-            {
-                wordScore = getWordScore(word);
-            }
-            else
-            {
-                wordScore = -1;
-            }
-
-            player.AddWord(word, wordScore);
-        }
-
-        /// <summary>
-        /// Called when the game has expired
+        /// Ends the game once the time has run out
         /// </summary>
         private void Refresh()
         {
-            double timeLeft = (DateTime.UtcNow - this.StartTime).TotalSeconds;
-            if (timeLeft < 0)
+            if (TimeLeft < 0)
             {
-                EndGame();
-            }
+                Status = GameStatus.Completed;
 
+                timer = null;
+                stopwatch = null;
+            }
         }
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Completed(object sender, ElapsedEventArgs e)
-        {
-            timer = null;
-            GameStatus = "completed";
-        }
+    }
+
+    /// <summary>
+    /// Represents the state of the game, be it pending, active, or completed
+    /// </summary>
+    public enum GameStatus
+    {
+        Pending, Active, Completed
     }
 
     /// <summary>
@@ -361,6 +246,16 @@ namespace Boggle
         /// Represents the nickname of the player
         /// </summary>
         public string Nickname { get; private set; }
+
+        /// <summary>
+        /// UserToken of the player 
+        /// </summary>
+        public string UserToken { get; private set; }
+
+        /// <summary>
+        /// How much time the player requested
+        /// </summary>
+        public int RequestedTime { get; private set; }
 
         /// <summary>
         /// Represents the Score the player
@@ -378,18 +273,15 @@ namespace Boggle
         public IList<int> WordScores { get; private set; }
 
         /// <summary>
-        /// UserToken of the player 
-        /// </summary>
-        public string UserToken { get; private set; }
-
-        /// <summary>
         /// Creates a new player struct with score set to 0, words and ScoreIncrements as empty lists, and Nickname as nickname
         /// </summary>
         /// <param name="nickname"></param>
-        public Player(string nickname, string uToken)
+        public Player(string nickname, string userToken, int requestedTime)
         {
-            Nickanme = nickname;
-            UserToken = uToken;
+            Nickname = nickname;
+            UserToken = userToken;
+            RequestedTime = requestedTime;
+
             Score = 0;
             Words = new List<string>();
             WordScores = new List<int>();
@@ -423,7 +315,6 @@ namespace Boggle
         }
     }
 
-
     /// <summary>
     /// Exception that signals that the game is not active
     /// </summary>
@@ -437,5 +328,4 @@ namespace Boggle
 
         }
     }
-
 }
