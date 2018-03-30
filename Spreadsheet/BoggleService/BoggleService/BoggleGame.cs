@@ -95,6 +95,29 @@ namespace Boggle
         }
 
         /// <summary>
+        /// If this game contains user player, returns them
+        /// 
+        /// Otherwise, returns null
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
+        public User GetUser(User player)
+        {
+            if (Player1.User == player)
+            {
+                return Player1.User;
+            }
+            else if (Player2.User == player)
+            {
+                return Player2.User;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
         /// If game is still active, adds a word to the game (under player playerName), scores it, adds it (and
         /// its score) to player's data, and returns the score.
         /// 
@@ -151,32 +174,32 @@ namespace Boggle
             return wordScore;
         }
 
-        /// <summary>
-        /// If game is still active, adds a word to the game (under user with ID userToken), scores it,
-        /// adds it (and its score) to player's data, and returns the score.
-        /// 
-        /// If game is no longer active, throws GameNotActiveException.
-        /// If user is not in this game, throws PlayerNotInGameException.
-        /// </summary>
-        public int PlayWord(string userToken, string word)
-        {
-            int wordScore;
+        ///// <summary>
+        ///// If game is still active, adds a word to the game (under user with ID userToken), scores it,
+        ///// adds it (and its score) to player's data, and returns the score.
+        ///// 
+        ///// If game is no longer active, throws GameNotActiveException.
+        ///// If user is not in this game, throws PlayerNotInGameException.
+        ///// </summary>
+        //public int PlayWord(string userToken, string word)
+        //{
+        //    int wordScore;
 
-            if (Player1.User.UserToken == userToken)
-            {
-                wordScore = PlayWord(Player1, word);
-            }
-            else if (Player2.User.UserToken == userToken)
-            {
-                wordScore = PlayWord(Player2, word);
-            }
-            else
-            {
-                throw new PlayerNotInGameException();
-            }
+        //    if (Player1.User.UserToken == userToken)
+        //    {
+        //        wordScore = PlayWord(Player1, word);
+        //    }
+        //    else if (Player2.User.UserToken == userToken)
+        //    {
+        //        wordScore = PlayWord(Player2, word);
+        //    }
+        //    else
+        //    {
+        //        throw new PlayerNotInGameException();
+        //    }
 
-            return wordScore;
-        }
+        //    return wordScore;
+        //}
 
         /// <summary>
         /// Given a word, it scores it given that it is a valid word. Follows these guidlines from PS8:

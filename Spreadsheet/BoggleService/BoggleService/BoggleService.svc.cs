@@ -236,13 +236,55 @@ namespace Boggle
 
         /// <summary>
         /// Plays word to game gameID
+        /// 
+        /// If Word is null or empty or longer than 30 characters when trimmed, or if GameID
+        /// or UserToken is invalid, or if UserToken is not a player in the game identified by GameID,
+        /// responds with response code 403 (Forbidden).
+        /// 
+        /// Otherwise, if the game state is anything other than "active", responds with response
+        /// code 409 (Conflict).
+        /// 
+        /// Otherwise, records the trimmed Word as being played by UserToken in the game identified by
+        /// GameID. Returns the score for Word in the context of the game (e.g. if Word has been played before
+        /// the score is zero). Responds with status 200 (OK). Note: The word is not case sensitive.
         /// </summary>
-        /// <param name="wordRequest"></param>
-        /// <param name="gameID"></param>
-        /// <returns></returns>
-        public ScoreResponse PlayWord(PlayWord wordRequest, string gameID)
+        public ScoreResponse PlayWord(PlayWord request, string gameID)
         {
-            throw new NotImplementedException();
+            string trimmedWord = request.Word.Trim();
+
+            if (trimmedWord == null || trimmedWord == "" || trimmedWord.Length > 30)
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
+
+            if (!(Games.ContainsKey(gameID)))
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
+
+            User player = Games[gameID].GetUser(Users[request.UserToken]);
+
+            if (player == null)
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
+
+            BoggleGame game = Games[gameID];
+
+            if (game.Status != GameStatus.Active)
+            {
+                SetStatus(Conflict);
+                return null;
+            }
+
+            ScoreResponse response = new ScoreResponse();
+            response.Score = game.PlayWord(player, request.Word);
+            SetStatus(OK);
+
+            return response;
         }
 
         /// <summary>
