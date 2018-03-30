@@ -16,6 +16,9 @@ namespace Boggle
 
         /// <summary>
         /// Represents all of the valid words possible
+        /// 
+        /// NOTE: You might have to remove this if the memory overhead is too large and it crashes, this is something to test
+        /// against the tests i wrote
         /// </summary>
         public static ISet<string> DicationaryWords;
 
