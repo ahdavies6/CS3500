@@ -250,41 +250,44 @@ namespace Boggle
         /// </summary>
         public ScoreResponse PlayWord(PlayWord request, string gameID)
         {
-            string trimmedWord = request.Word.Trim();
-
-            if (trimmedWord == null || trimmedWord == "" || trimmedWord.Length > 30)
+            lock (sync)
             {
-                SetStatus(Forbidden);
-                return null;
+                string trimmedWord = request.Word.Trim();
+
+                if (trimmedWord == null || trimmedWord == "" || trimmedWord.Length > 30)
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                }
+
+                if (!(Games.ContainsKey(gameID)))
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                }
+
+                User player = Games[gameID].GetUser(Users[request.UserToken]);
+
+                if (player == null)
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                }
+
+                BoggleGame game = Games[gameID];
+
+                if (game.Status != GameStatus.Active)
+                {
+                    SetStatus(Conflict);
+                    return null;
+                }
+
+                ScoreResponse response = new ScoreResponse();
+                response.Score = game.PlayWord(player, request.Word);
+                SetStatus(OK);
+
+                return response;
             }
-
-            if (!(Games.ContainsKey(gameID)))
-            {
-                SetStatus(Forbidden);
-                return null;
-            }
-
-            User player = Games[gameID].GetUser(Users[request.UserToken]);
-
-            if (player == null)
-            {
-                SetStatus(Forbidden);
-                return null;
-            }
-
-            BoggleGame game = Games[gameID];
-
-            if (game.Status != GameStatus.Active)
-            {
-                SetStatus(Conflict);
-                return null;
-            }
-
-            ScoreResponse response = new ScoreResponse();
-            response.Score = game.PlayWord(player, request.Word);
-            SetStatus(OK);
-
-            return response;
         }
 
         /// <summary>
