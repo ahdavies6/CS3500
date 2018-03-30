@@ -90,5 +90,8 @@ namespace Boggle
         /// </summary>
         [WebGet(UriTemplate = "/games/{GameID}?Brief={brief}")]
         IStatus GetGameStatus(string GameID, string brief);
+
+        // note: I also tried this, to no success
+        //[WebInvoke(Method = "GET", UriTemplate = "/games/{GameID}?Brief={brief}")]
     }
 }
