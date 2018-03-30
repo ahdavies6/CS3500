@@ -82,10 +82,10 @@ namespace Boggle
     /// </summary>
     public class PlayWord
     {
-        ///// <summary>
-        ///// UserToken of the person putting in the play word request
-        ///// </summary>
-        //public string UserToken { get; set; }
+        /// <summary>
+        /// UserToken of the person putting in the play word request
+        /// </summary>
+        public string UserToken { get; set; }
 
         /// <summary>
         /// Word being played
