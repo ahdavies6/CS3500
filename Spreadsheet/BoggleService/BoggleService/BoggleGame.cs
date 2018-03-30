@@ -67,6 +67,11 @@ namespace Boggle
         }
 
         /// <summary>
+        /// GameID of this game
+        /// </summary>
+        public string GameID { get; private set; }
+
+        /// <summary>
         /// Property that represents how much time is left in the game
         /// </summary>
         public int TimeRemaining
@@ -103,11 +108,13 @@ namespace Boggle
         /// <summary>
         /// Adds the first player to the Boggle Game and makes the game. 
         /// </summary>
-        public BoggleGame(string Nickname1, string UserToken1, int requestedTime)
+        public BoggleGame(string Nickname1, string UserToken1, int requestedTime, string GameID)
         {
             this.Player1 = new Player(Nickname1, UserToken1);
             this.TimeLimit = requestedTime;
             this.Status = PENDING_GAME;
+            this.GameID = GameID;
+
         }
 
         /// <summary>
