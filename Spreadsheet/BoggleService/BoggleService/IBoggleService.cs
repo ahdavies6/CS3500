@@ -33,6 +33,7 @@ namespace Boggle
         /// Responds with status 201 (Created). 
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/users")]
+        UserTokenResponse RegisterUser(CreateUserRequest request);
         HttpStatusCode RegisterUser(string nickname);
 
         /// <summary>
@@ -56,6 +57,7 @@ namespace Boggle
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
         HttpStatusCode JoinGame(string userToken, int timeLimit);
+        GameIDResponse JoinGame(JoinRequest request);
 
         /// <summary>
         /// Cancels an active join request from user userToken.
@@ -67,6 +69,7 @@ namespace Boggle
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games")]
         HttpStatusCode CancelJoinRequest(string userToken);
+        void CancelJoinRequest(CancelJoinRequest request);
 
         /// <summary>
         /// Plays word under userToken in game GameID.
@@ -85,6 +88,7 @@ namespace Boggle
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games/{GameID}")]
         HttpStatusCode PlayWord(string userToken, string word, string GameID);
+        ScoreResponse PlayWord(PlayWord wordRequest, string GameID);
 
         // todo: make sure having param "brief" be bool doesn't screw up UriTemplate
         /// <summary>
@@ -99,5 +103,6 @@ namespace Boggle
         /// </summary>
         [WebGet(UriTemplate = "/games/{GameID}?Brief={brief}")]
         HttpStatusCode GetGameStatus(string GameID, bool brief);
+        Status GetGameStatus(string GameID, string brief);
     }
 }

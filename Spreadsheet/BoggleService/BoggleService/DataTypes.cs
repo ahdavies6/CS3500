@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Web;
 
 /// <summary>
@@ -8,8 +9,7 @@ using System.Web;
 /// </summary>
 namespace Boggle
 {
-    // todo: remove all of these
-
+    #region Request Structures
     /// <summary>
     /// Class the represents the request to make a user
     /// </summary>
@@ -104,80 +104,99 @@ namespace Boggle
         }
     }
 
-    #region excess - to delete if the expando object works for returning a json
+    #endregion
+
+    #region Response structures
+
     /// <summary>
-    /// Class that holds a UserToken string for Json serialization and deserialization
+    /// Sends back the UserToken
     /// </summary>
-    public class UserTokenClass
+    public class UserTokenResponse
     {
-
-        /// <summary>
-        /// Token of the user
-        /// </summary>
         public string UserToken { get; set; }
-
     }
 
 
     /// <summary>
-    /// Holds the score when responding to playing a word 
+    /// Sends back the score produced by a play word request
     /// </summary>
     public class ScoreResponse
     {
-        /// <summary>
-        /// Int that represents a score sent back from the server
-        /// </summary>
         public int Score { get; set; }
     }
 
     /// <summary>
-    /// Represents just the game state, used for a pending game status 
+    /// Class that sends back the GameID of the game
     /// </summary>
-    public class GameStateClass
+    public class GameIDResponse
     {
-        /// <summary>
-        /// Represents the game state
-        /// </summary>
+        public string GameID { get; set; }
+    }
+
+    /// <summary>
+    /// An interface to label what data structures can come from a Status response
+    /// </summary>
+    public interface Status
+    {
+    }
+
+    /// <summary>
+    /// Class for when status just needs to send "pending"
+    /// </summary>
+    public class StateResponse : Status
+    {
         public string GameState { get; set; }
     }
 
     /// <summary>
-    /// Serialized when game status is asked for and is meant to be brief
+    /// Class that represents the response from the server when get status is called
     /// </summary>
-    public class GameStatusBrief
+    [DataContract]
+    public class FullStatusResponse : Status
     {
-        /// <summary>
-        /// Represents the state of the game
-        /// </summary>
+        [DataMember]
         public string GameState { get; set; }
 
-        /// <summary>
-        /// Time left in the game
-        /// </summary>
+        [DataMember(EmitDefaultValue = false)]
+        public string Board { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public int TimeLimit { get; set; }
+
+        [DataMember]
         public int TimeLeft { get; set; }
 
-        /// <summary>
-        /// Player1 1's score
-        /// </summary>
-        public PlayerBrief Player1 { get; set; }
+        [DataMember]
+        public SerialPlayer Player1 { get; set; }
 
-        /// <summary>
-        /// Player1 2's score
-        /// </summary>
-        public PlayerBrief Player2 { get; set; }
-
-        /// <summary>
-        /// Player class for brief game status
-        /// </summary>
-        public class PlayerBrief
-        {
-            /// <summary>
-            /// Score the current player 
-            /// </summary>
-            string Score { get; set; }
-        }
-
+        [DataMember]
+        public SerialPlayer Player2 { get; set; }
     }
 
+    /// <summary>
+    /// Class that represents each player in the game when sending a status
+    /// </summary>
+    [DataContract]
+    public class SerialPlayer
+    {
+        [DataMember(EmitDefaultValue = false)]
+        public string Nickname { get; set; }
+
+        [DataMember]
+        public int Score { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public ISet<WordEntry> WordsPlayed { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a list of words that are played in the game when sent back as a status
+    /// </summary>
+    public class WordEntry
+    {
+        public string Word { get; set; }
+
+        public int Score { get; set; }
+    }
     #endregion
 }

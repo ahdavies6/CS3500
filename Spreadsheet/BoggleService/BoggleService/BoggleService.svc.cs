@@ -11,14 +11,40 @@ namespace Boggle
     public class BoggleService : IBoggleService
     {
         /// <summary>
-        /// All the users that have been registered
+        /// Keeps track of any pending games, should only be one but kept as a dictionary in case requests get large 
+        /// Dicationary key: string UserID
+        /// Dicationary Value: BoggleGame 
+        /// 
+        /// Once a second player is found, the game is removed and then moved into the games dictionary
         /// </summary>
-        HashSet<User> users;
+        private static Dictionary<string, BoggleGame> PendingGames = new Dictionary<string, BoggleGame>();
 
         /// <summary>
-        /// All of the games the server has handled, either active or completed
+        /// Keeps track of all users
+        /// Key: UserID
+        /// Value; Nickname
         /// </summary>
-        HashSet<BoggleGame> games;
+        private static Dictionary<string, string> Users = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Dictionary to represent the games in use
+        /// Key: GameID (gotten from when the game is created). It is a property in BoggleGame
+        /// Value: BoggleGame game 
+        /// 
+        /// Contains both active and completed games but NOT pending games
+        /// </summary>
+        private static Dictionary<string, BoggleGame> Games = new Dictionary<string, BoggleGame>();
+        
+        /// <summary>
+        /// Lock object for server threading.
+        /// </summary>
+        private static object sync = new object();
+
+        /// <summary>
+        /// Value that keeps track of the amount of games created when the server was created.
+        /// Used to make GameIDs
+        /// </summary>
+        private static int NumberOfGames = 0;
 
         /// <summary>
         /// The most recent call to SetStatus determines the response code used when
@@ -51,6 +77,16 @@ namespace Boggle
         /// Responds with status 201 (Created). 
         /// </summary>
         public HttpStatusCode RegisterUser(string nickname)
+        public void CancelJoinRequest(CancelJoinRequest request)
+        {
+            lock (sync)
+            {
+                PendingGames.Remove(request.UserToken);
+                SetStatus(OK);
+            }
+        }
+
+        public Status GetGameStatus(string GameID, string brief)
         {
             if (nickname == null || nickname.Trim() == null)
             {
@@ -94,21 +130,60 @@ namespace Boggle
         /// status 202 (Accepted).
         /// </summary>
         public HttpStatusCode JoinGame(string userToken, int timeLimit)
+        public GameIDResponse JoinGame(JoinRequest request)
+        {
+            throw new ArgumentException();
+        }
+
+        public ScoreResponse PlayWord(PlayWord wordRequest, string GameID)
         {
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Cancels an active join request from user userToken.
-        /// 
-        /// If UserToken is invalid or is not a player in the pending game, responds with status
-        /// 403 (Forbidden).
-        /// 
-        /// Otherwise, removes UserToken from the pending game and responds with status 200 (OK).
-        /// </summary>
-        public HttpStatusCode CancelJoinRequest(string userToken)
+        public UserTokenResponse RegisterUser(CreateUserRequest request)
         {
-            throw new NotImplementedException();
+            lock (sync)
+            {
+                if (request.Nickname is null)
+                {
+                    SetStatus(Forbidden);
+                    return null; //valid or nah?
+                                 //todo
+                }
+
+                string trimmedNickname = request.Nickname.Trim();
+                if (trimmedNickname.Length == 0 || trimmedNickname.Length > 50)
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                    //todo?
+                }
+
+                string token = UserTokenGenerator();
+
+                //Get a unique token
+                while (Users.ContainsKey(token))
+                {
+                    token = UserTokenGenerator();
+                }
+
+                Users.Add(token, trimmedNickname);
+
+                //response to the client
+                UserTokenResponse response = new UserTokenResponse();
+                response.UserToken = token;
+                SetStatus(Created);
+                return response;
+            }
+        }
+
+        /// <summary>
+        /// Increments the number of games and creates a unique GameID
+        /// </summary>
+        private string GenerateGameID()
+        {
+            NumberOfGames++;
+            return "G" + NumberOfGames;
         }
 
         /// <summary>
@@ -131,6 +206,14 @@ namespace Boggle
             throw new NotImplementedException();
         }
 
+                //Every iteration but the last 
+                if (i != 3)
+                {
+                    token = token + "-";
+                }
+            }
+
+            return token;
         /// <summary>
         /// Get the game status of game GameID
         /// 
@@ -145,6 +228,8 @@ namespace Boggle
         {
             throw new NotImplementedException();
         }
+
+
 
         /// <summary>
         /// Demo.  You can delete this.
