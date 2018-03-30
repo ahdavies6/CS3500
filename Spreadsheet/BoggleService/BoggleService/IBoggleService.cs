@@ -88,12 +88,12 @@ namespace Boggle
         /// on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are
         /// not case sensitive.
         /// </summary>
-        [WebInvoke(Method = "GET", UriTemplate = "/games/{GameID}?Brief={brief}")]
+        [WebGet(UriTemplate = "/games/{GameID}?Brief={brief}")]
         IStatus GetGameStatus(string GameID, string brief);
 
         // original:
         //[WebGet(UriTemplate = "/games/{GameID}?Brief={brief}")]
-        // minimalist:
+        // minimalist (breaks it):
         //[WebGet(UriTemplate = "/games/{GameID}")]
         // redux:
         //[WebInvoke(Method = "GET", UriTemplate = "/games/{GameID}?Brief={brief}")]

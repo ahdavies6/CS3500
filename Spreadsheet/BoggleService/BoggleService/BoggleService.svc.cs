@@ -11,15 +11,6 @@ namespace Boggle
     public class BoggleService : IBoggleService
     {
         /// <summary>
-        /// Keeps track of any pending games, should only be one but kept as a dictionary in case requests get large 
-        /// Dicationary key: string UserToken
-        /// Dicationary Value: BoggleGame 
-        /// 
-        /// Once a second player is found, the game is removed and then moved into the games dictionary
-        /// </summary>
-        private static Dictionary<string, BoggleGame> PendingGames = new Dictionary<string, BoggleGame>();
-
-        /// <summary>
         /// Keeps track of all users
         /// Key: UserToken
         /// Value: Nickname
@@ -34,6 +25,15 @@ namespace Boggle
         /// Contains both active and completed games but NOT pending games
         /// </summary>
         private static Dictionary<string, BoggleGame> Games = new Dictionary<string, BoggleGame>();
+
+        /// <summary>
+        /// Keeps track of any pending games, should only be one but kept as a dictionary in case requests get large 
+        /// Dicationary key: string GameID
+        /// Dicationary Value: BoggleGame 
+        /// 
+        /// Once a second player is found, the game is removed and then moved into the games dictionary
+        /// </summary>
+        private static Dictionary<string, BoggleGame> PendingGames = new Dictionary<string, BoggleGame>();
 
         /// <summary>
         /// Lock object for server threading.

@@ -130,7 +130,8 @@ namespace Boggle
 
             //I removed this since having it run every second might be too much overhead? We can just have it refresh before 
             // any operation is done to check if the status is still active. 
-            //using stopwatch and timer spawns 3 threads just for timing and updating status, this should update just the same but without the overhead, especially when more games are added
+            //using stopwatch and timer spawns 3 threads just for timing and updating status, this should update just the same
+            //but without the overhead, especially when more games are added
             //using DateTime is how joe does it in piazza so i just kept that version
             //if this logic doesnt make senes text me and ill try to explain better
             //timer = new Timer(1000);
