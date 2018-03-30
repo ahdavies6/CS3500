@@ -9,11 +9,41 @@ namespace Boggle
 {
     public class BoggleService : IBoggleService
     {
-
+        /// <summary>
+        /// Keeps track of any pending games, should only be one but kept as a dictionary in case requests get large 
+        /// Dicationary key: string UserID
+        /// Dicationary Value: BoggleGame 
+        /// 
+        /// Once a second player is found, the game is removed and then moved into the games dictionary
+        /// </summary>
         private static Dictionary<string, BoggleGame> PendingGames = new Dictionary<string, BoggleGame>();
+
+        /// <summary>
+        /// Keeps track of all users
+        /// Key: UserID
+        /// Value; Nickname
+        /// </summary>
         private static Dictionary<string, string> Users = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Dictionary to represent the games in use
+        /// Key: GameID (gotten from when the game is created). It is a property in BoggleGame
+        /// Value: BoggleGame game 
+        /// 
+        /// Contains both active and completed games but NOT pending games
+        /// </summary>
         private static Dictionary<string, BoggleGame> Games = new Dictionary<string, BoggleGame>();
+        
+        /// <summary>
+        /// Lock object for server threading.
+        /// </summary>
         private static object sync = new object();
+
+        /// <summary>
+        /// Value that keeps track of the amount of games created when the server was created.
+        /// Used to make GameIDs
+        /// </summary>
+        private static int NumberOfGames = 0;
 
         /// <summary>
         /// The most recent call to SetStatus determines the response code used when
@@ -97,6 +127,19 @@ namespace Boggle
             }
         }
 
+        /// <summary>
+        /// Increments the number of games and creates a unique GameID
+        /// </summary>
+        private string GenerateGameID()
+        {
+            NumberOfGames++;
+            return "G" + NumberOfGames;
+        }
+
+        /// <summary>
+        /// Helper method that creates a randomly generated UserToken of the form
+        /// xxxx-xxxx-xxxx-xxxx
+        /// </summary>
         private string UserTokenGenerator()
         {
             Random rand = new Random();
