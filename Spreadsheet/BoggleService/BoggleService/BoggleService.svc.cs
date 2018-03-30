@@ -175,7 +175,6 @@ namespace Boggle
                 GameIDResponse response = new GameIDResponse();
                 if (PendingGames.Count > 0)
                 {
-                    //BoggleGame game = PendingGames.GetEnumerator().Current.Value;
                     var games = PendingGames.GetEnumerator();
                     games.MoveNext();
                     BoggleGame game = games.Current.Value;
