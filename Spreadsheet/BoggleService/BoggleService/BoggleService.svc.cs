@@ -137,16 +137,21 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Plays word
+        /// Plays word to game gameID
         /// </summary>
         /// <param name="wordRequest"></param>
-        /// <param name="GameID"></param>
+        /// <param name="gameID"></param>
         /// <returns></returns>
-        public ScoreResponse PlayWord(PlayWord wordRequest, string GameID)
+        public ScoreResponse PlayWord(PlayWord wordRequest, string gameID)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Registers new user
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         public UserTokenResponse RegisterUser(CreateUserRequest request)
         {
             lock (sync)
