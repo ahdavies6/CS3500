@@ -12,7 +12,7 @@ namespace Boggle
     {
         /// <summary>
         /// Keeps track of any pending games, should only be one but kept as a dictionary in case requests get large 
-        /// Dicationary key: string UserID
+        /// Dicationary key: string UserToken
         /// Dicationary Value: BoggleGame 
         /// 
         /// Once a second player is found, the game is removed and then moved into the games dictionary
@@ -21,8 +21,8 @@ namespace Boggle
 
         /// <summary>
         /// Keeps track of all users
-        /// Key: UserID
-        /// Value; Nickname
+        /// Key: UserToken
+        /// Value: Nickname
         /// </summary>
         private static Dictionary<string, string> Users = new Dictionary<string, string>();
 
@@ -50,7 +50,6 @@ namespace Boggle
         /// The most recent call to SetStatus determines the response code used when
         /// an http response is sent.
         /// </summary>
-        /// <param name="status"></param>
         private static void SetStatus(HttpStatusCode status)
         {
             WebOperationContext.Current.OutgoingResponse.StatusCode = status;
@@ -76,7 +75,7 @@ namespace Boggle
         /// The returned UserToken should be used to identify the user in subsequent requests.
         /// Responds with status 201 (Created). 
         /// </summary>
-        public HttpStatusCode RegisterUser(string nickname)
+        //public HttpStatusCode RegisterUser(string nickname)
         public void CancelJoinRequest(CancelJoinRequest request)
         {
             lock (sync)
@@ -86,18 +85,23 @@ namespace Boggle
             }
         }
 
-        public Status GetGameStatus(string GameID, string brief)
+        /// <summary>
+        /// Returns the status of game with ID gameID
+        /// </summary>
+        public Status GetGameStatus(string gameID, string brief)
         {
-            if (nickname == null || nickname.Trim() == null)
-            {
-                return HttpStatusCode.Forbidden;
-            }
-            else
-            {
-                User newUser = new User(nickname.Trim(), GenerateNewToken());
-                users.Add(newUser);
-                return HttpStatusCode.Created;
-            }
+            //if (nickname == null || nickname.Trim() == null)
+            //{
+            //    return HttpStatusCode.Forbidden;
+            //}
+            //else
+            //{
+            //    User newUser = new User(nickname.Trim(), GenerateNewToken());
+            //    users.Add(newUser);
+            //    return HttpStatusCode.Created;
+            //}
+
+            throw new NotImplementedException();
         }
 
         // todo: implement this!
@@ -129,10 +133,10 @@ namespace Boggle
         /// the pending game's requested time limit. Returns the pending game's GameID. Responds with
         /// status 202 (Accepted).
         /// </summary>
-        public HttpStatusCode JoinGame(string userToken, int timeLimit)
+        //public HttpStatusCode JoinGame(string userToken, int timeLimit)
         public GameIDResponse JoinGame(JoinRequest request)
         {
-            throw new ArgumentException();
+            throw new NotImplementedException();
         }
 
         public ScoreResponse PlayWord(PlayWord wordRequest, string GameID)
@@ -147,8 +151,7 @@ namespace Boggle
                 if (request.Nickname is null)
                 {
                     SetStatus(Forbidden);
-                    return null; //valid or nah?
-                                 //todo
+                    return null; // todo: see if this works right
                 }
 
                 string trimmedNickname = request.Nickname.Trim();
@@ -156,12 +159,12 @@ namespace Boggle
                 {
                     SetStatus(Forbidden);
                     return null;
-                    //todo?
+                    // todo: what else needs to be done here?
                 }
 
                 string token = UserTokenGenerator();
 
-                //Get a unique token
+                // Get a unique token
                 while (Users.ContainsKey(token))
                 {
                     token = UserTokenGenerator();
@@ -175,6 +178,34 @@ namespace Boggle
                 SetStatus(Created);
                 return response;
             }
+        }
+
+        /// <summary>
+        /// Generates a new, unique user token
+        /// </summary>
+        private string UserTokenGenerator()
+        {
+            Random rand = new Random();
+            string token = "";
+
+            do
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        token = token + rand.Next(10);
+                    }
+
+                    //Every iteration but the last 
+                    if (i != 3)
+                    {
+                        token = token + "-";
+                    }
+                }
+            } while (Users.ContainsKey(token));
+
+            return token;
         }
 
         /// <summary>
@@ -206,14 +237,6 @@ namespace Boggle
             throw new NotImplementedException();
         }
 
-                //Every iteration but the last 
-                if (i != 3)
-                {
-                    token = token + "-";
-                }
-            }
-
-            return token;
         /// <summary>
         /// Get the game status of game GameID
         /// 
@@ -227,41 +250,6 @@ namespace Boggle
         public HttpStatusCode GetGameStatus(string GameID, bool brief)
         {
             throw new NotImplementedException();
-        }
-
-
-
-        /// <summary>
-        /// Demo.  You can delete this.
-        /// </summary>
-        public string WordAtIndex(int n)
-        {
-            if (n < 0)
-            {
-                SetStatus(Forbidden);
-                return null;
-            }
-
-            string line;
-            using (StreamReader file = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dictionary.txt"))
-            {
-                while ((line = file.ReadLine()) != null)
-                {
-                    if (n == 0) break;
-                    n--;
-                }
-            }
-
-            if (n == 0)
-            {
-                SetStatus(OK);
-                return line;
-            }
-            else
-            {
-                SetStatus(Forbidden);
-                return null;
-            }
         }
     }
 

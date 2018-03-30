@@ -69,10 +69,10 @@ namespace Boggle
         /// <summary>
         /// Initializes a new game with one player
         /// </summary>
-        public BoggleGame(string letters, string playerName, string userToken, int requestedTime, string gameID)
+        public BoggleGame(string letters, User player, int requestedTime, string gameID)
         {
             Board = new BoggleBoard(letters);
-            Player1 = new Player(playerName, userToken, requestedTime);
+            Player1 = new Player(player, requestedTime);
             GameID = gameID;
 
             Status = GameStatus.Pending;
@@ -82,9 +82,9 @@ namespace Boggle
         /// Adds the second player into the game and starts the game. The Time limit of the game is set to the 
         /// overage of the two times requested by the players
         /// </summary>
-        public void AddSecondPlayer(string playerName, string userToken, int requestedTime)
+        public void AddSecondPlayer(User player, int requestedTime)
         {
-            Player2 = new Player(playerName, userToken, requestedTime);
+            Player2 = new Player(player, requestedTime);
             TimeLimit = (Player1.RequestedTime + Player2.RequestedTime) / 2;
 
             timer = new Timer(1000);
@@ -101,7 +101,7 @@ namespace Boggle
         /// If game is no longer active, throws GameNotActiveException.
         /// If a player with userToken is not in the game, throws PlayerNotInGameException.
         /// </summary>
-        public int PlayWord(string userToken, string word)
+        public int PlayWord(Player player, string word)
         {
             Refresh();
 
@@ -110,21 +110,7 @@ namespace Boggle
                 throw new GameNotActiveException();
             }
 
-            Player player;
             int wordScore;
-
-            if (userToken == Player1.UserToken)
-            {
-                player = Player1;
-            }
-            else if (userToken == Player2.UserToken)
-            {
-                player = Player2;
-            }
-            else // there is no Player with userToken in this game
-            {
-                throw new PlayerNotInGameException();
-            }
 
             if (Board.CanBeFormed(word))
             {
@@ -242,15 +228,7 @@ namespace Boggle
     /// </summary>
     public class Player
     {
-        /// <summary>
-        /// Represents the nickname of the player
-        /// </summary>
-        public string Nickname { get; private set; }
-
-        /// <summary>
-        /// UserToken of the player 
-        /// </summary>
-        public string UserToken { get; private set; }
+        public User User { get; private set; }
 
         /// <summary>
         /// How much time the player requested
@@ -276,10 +254,11 @@ namespace Boggle
         /// Creates a new player struct with score set to 0, words and ScoreIncrements as empty lists, and Nickname as nickname
         /// </summary>
         /// <param name="nickname"></param>
-        public Player(string nickname, string userToken, int requestedTime)
+        public Player(User me, int requestedTime)
         {
-            Nickname = nickname;
-            UserToken = userToken;
+            //Nickname = nickname;
+            //UserToken = userToken;
+            User = me;
             RequestedTime = requestedTime;
 
             Score = 0;
@@ -305,7 +284,6 @@ namespace Boggle
     /// </summary>
     public class PlayerNotInGameException : Exception
     {
-
         /// <summary>
         /// Constructor that merely makes the exception
         /// </summary>

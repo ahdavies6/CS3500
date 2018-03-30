@@ -16,14 +16,6 @@ namespace Boggle
         Stream API();
 
         /// <summary>
-        /// Returns the nth word from dictionary.txt.  If there is
-        /// no nth word, responds with code 403. This is a demo;
-        /// you can delete it.
-        /// </summary>
-        [WebGet(UriTemplate = "/word?index={n}")]
-        string WordAtIndex(int n);
-
-        /// <summary>
         /// Creates a user with nickname. 
         /// 
         /// If nickname is null, or is empty when trimmed, responds with status 403 (Forbidden). 
@@ -34,7 +26,7 @@ namespace Boggle
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/users")]
         UserTokenResponse RegisterUser(CreateUserRequest request);
-        HttpStatusCode RegisterUser(string nickname);
+        //HttpStatusCode RegisterUser(string nickname);
 
         /// <summary>
         /// Attempts to join a game with user userToken and timeLimit
@@ -56,8 +48,8 @@ namespace Boggle
         /// status 202 (Accepted).
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
-        HttpStatusCode JoinGame(string userToken, int timeLimit);
         GameIDResponse JoinGame(JoinRequest request);
+        //HttpStatusCode JoinGame(string userToken, int timeLimit);
 
         /// <summary>
         /// Cancels an active join request from user userToken.
@@ -68,8 +60,8 @@ namespace Boggle
         /// Otherwise, removes UserToken from the pending game and responds with status 200 (OK).
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games")]
-        HttpStatusCode CancelJoinRequest(string userToken);
         void CancelJoinRequest(CancelJoinRequest request);
+        //HttpStatusCode CancelJoinRequest(string userToken);
 
         /// <summary>
         /// Plays word under userToken in game GameID.
@@ -87,10 +79,9 @@ namespace Boggle
         /// Note: The word is not case sensitive.
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games/{GameID}")]
-        HttpStatusCode PlayWord(string userToken, string word, string GameID);
         ScoreResponse PlayWord(PlayWord wordRequest, string GameID);
+        //HttpStatusCode PlayWord(string userToken, string word, string GameID);
 
-        // todo: make sure having param "brief" be bool doesn't screw up UriTemplate
         /// <summary>
         /// Get the game status of game GameID
         /// 
@@ -102,7 +93,7 @@ namespace Boggle
         /// not case sensitive.
         /// </summary>
         [WebGet(UriTemplate = "/games/{GameID}?Brief={brief}")]
-        HttpStatusCode GetGameStatus(string GameID, bool brief);
         Status GetGameStatus(string GameID, string brief);
+        //HttpStatusCode GetGameStatus(string GameID, bool brief);
     }
 }
