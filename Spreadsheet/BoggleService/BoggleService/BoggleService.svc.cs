@@ -24,7 +24,7 @@ namespace Boggle
         /// Key: UserToken
         /// Value: Nickname
         /// </summary>
-        private static Dictionary<string, string> Users = new Dictionary<string, string>();
+        private static Dictionary<string, User> Users = new Dictionary<string, User>();
 
         /// <summary>
         /// Dictionary to represent the games in use
@@ -125,7 +125,8 @@ namespace Boggle
                     token = UserTokenGenerator();
                 }
 
-                Users.Add(token, trimmedNickname);
+                User user = new User(token, trimmedNickname);
+                Users.Add(token, user);
 
                 //response to the client
                 UserTokenResponse response = new UserTokenResponse();
@@ -158,17 +159,61 @@ namespace Boggle
         {
             lock (sync)
             {
-                // invalid usertoken -> forbidden
-                // 5 < timelimit < 120 not true -> forbidden
+                User player;
+                if (Users.ContainsKey(request.UserToken))
+                {
+                    player = Users[request.UserToken];
+                }
+                else
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                }
 
-                // usertoken in pending game -> conflict
+                int timeLimit;
+                if (Int32.TryParse(request.TimeLimit, out timeLimit))
+                {
+                    if (!(timeLimit >= 5 && timeLimit <= 120))
+                    {
+                        SetStatus(Forbidden);
+                        return null;
+                    }
+                }
+                else
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                }
 
-                // pending game -> put userID user in, return GameID; Created (status)
+                if (PendingGames.ContainsKey(request.UserToken))
+                {
+                    SetStatus(Conflict);
+                    return null;
+                }
 
-                // no pending game -> start one with userID
+                GameIDResponse response = new GameIDResponse();
+                if (PendingGames.Count > 0)
+                {
+                    BoggleGame game = PendingGames.GetEnumerator().Current.Value;
+                    
+                    game.AddSecondPlayer(player, timeLimit);
+                    PendingGames.Remove(request.UserToken);
+
+                    response.GameID = game.GameID;
+                    SetStatus(Created);
+                }
+                else
+                {
+                    BoggleGame newGame = new BoggleGame(player, timeLimit, GenerateGameID());
+
+                    PendingGames.Add(request.UserToken, newGame);
+
+                    response.GameID = newGame.GameID;
+                    SetStatus(Accepted);
+                }
+
+                return response;
             }
-
-            throw new NotImplementedException();
         }
 
         /// <summary>

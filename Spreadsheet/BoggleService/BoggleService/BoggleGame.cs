@@ -69,9 +69,9 @@ namespace Boggle
         /// <summary>
         /// Initializes a new game with one player
         /// </summary>
-        public BoggleGame(string letters, User player, int requestedTime, string gameID)
+        public BoggleGame(User player, int requestedTime, string gameID)
         {
-            Board = new BoggleBoard(letters);
+            Board = new BoggleBoard();
             Player1 = new Player(player, requestedTime);
             GameID = gameID;
 
@@ -312,8 +312,6 @@ namespace Boggle
         /// <param name="nickname"></param>
         public Player(User me, int requestedTime)
         {
-            //Nickname = nickname;
-            //UserToken = userToken;
             User = me;
             RequestedTime = requestedTime;
 
