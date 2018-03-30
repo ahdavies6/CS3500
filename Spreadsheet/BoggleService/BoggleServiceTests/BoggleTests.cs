@@ -4,6 +4,10 @@ using static System.Net.HttpStatusCode;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Dynamic;
+using System.Threading;
+using Boggle;
+using System.IO;
+using System.Collections.Generic;
 
 namespace Boggle
 {
@@ -65,8 +69,9 @@ namespace Boggle
             IISAgent.Stop();
         }
 
-         private RestTestClient client = new RestTestClient("http://localhost:60000/BoggleService.svc/");
-        //private RestTestClient client = new RestTestClient("http://ice.eng.utah.edu/BoggleService.svc/");
+        //private RestTestClient client = new RestTestClient("http://localhost:60000/BoggleService.svc/");
+        private RestTestClient client = new RestTestClient("http://ice.eng.utah.edu/BoggleService.svc/");
+
         [TestMethod]
         public void Generate3UsersNormal()
         {
@@ -254,6 +259,179 @@ namespace Boggle
             data.UserToken = p2token;
             r = client.DoPutAsync("games", data).Result;
             Assert.AreEqual(Forbidden, r.Status);
+
+            //Resets server so p1 has cancelled request
+            //p1 canceling request
+            data = new ExpandoObject();
+            data.UserToken = p1token;
+            r = client.DoPutAsync("games", data).Result;
+            Assert.AreEqual(OK, r.Status);
+        }
+
+        [TestMethod]
+        public void TestPlayWordErrors()
+        {
+            dynamic data = new ExpandoObject();
+            data.Nickname = "p1";
+            Response r = client.DoPostAsync("users", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            string p1token = (string)r.Data.UserToken;
+
+            data = new ExpandoObject();
+            data.Nickname = "p2";
+            r = client.DoPostAsync("users", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            string p2token = (string)r.Data.UserToken;
+
+            //add p1
+            data = new ExpandoObject();
+            data.UserToken = p1token;
+            data.TimeLimit = 10;
+            r = client.DoPostAsync("games", data).Result;
+            Assert.AreEqual(Accepted, r.Status);
+            string gid = (string)r.Data.GameID;
+
+            //add p2
+            data = new ExpandoObject();
+            data.UserToken = p2token;
+            data.TimeLimit = 10;
+            r = client.DoPostAsync("games", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            Assert.AreEqual(gid, (string)r.Data.GameID);
+
+            //Null word
+            data = new ExpandoObject();
+            data.UserToken = p1token;
+            data.Word = null;
+            r = client.DoPutAsync("games/" + gid, data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+
+            //trimmed empty word
+            data = new ExpandoObject();
+            data.UserToken = p1token;
+            data.Word = "    ";
+            r = client.DoPutAsync("games/" + gid, data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+
+            // empty word
+            data = new ExpandoObject();
+            data.UserToken = p1token;
+            data.Word = "    ";
+            r = client.DoPutAsync("games/" + gid, data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+
+            //Someone not in the game
+            data = new ExpandoObject();
+            data.UserToken = "I_am_not_a_player";
+            data.Word = "word";
+            r = client.DoPutAsync("games/" + gid, data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+
+            Thread.Sleep(10000);
+
+            //Expired game
+            data = new ExpandoObject();
+            data.UserToken = p1token;
+            data.Word = "word";
+            r = client.DoPutAsync("games/" + gid, data).Result;
+            Assert.AreEqual(Conflict, r.Status);
+
+        }
+
+        [TestMethod]
+        public void PlayWordValid()
+        {
+            dynamic data = new ExpandoObject();
+            data.Nickname = "p1";
+            Response r = client.DoPostAsync("users", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            string p1token = (string)r.Data.UserToken;
+
+            data = new ExpandoObject();
+            data.Nickname = "p2";
+            r = client.DoPostAsync("users", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            string p2token = (string)r.Data.UserToken;
+
+            //add p1
+            data = new ExpandoObject();
+            data.UserToken = p1token;
+            data.TimeLimit = 15;
+            r = client.DoPostAsync("games", data).Result;
+            Assert.AreEqual(Accepted, r.Status);
+            string gid = (string)r.Data.GameID;
+
+            //add p2
+            data = new ExpandoObject();
+            data.UserToken = p2token;
+            data.TimeLimit = 15;
+            r = client.DoPostAsync("games", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            Assert.AreEqual(gid, (string)r.Data.GameID);
+
+            //Get the board to form words
+            r = client.DoGetAsync("games/" + gid).Result;
+            Assert.AreEqual(OK, r.Status);
+            BoggleBoard board = new BoggleBoard((string)r.Data.Board);
+            Dictionary<int, LinkedList<string>> validwords = new Dictionary<int, LinkedList<string>>();
+
+            //Find valid words
+            using (StreamReader reader = new StreamReader("dictionary.txt"))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    if (board.CanBeFormed(line))
+                    {
+                        if (!validwords.ContainsKey(line.Length))
+                        {
+                            validwords.Add(line.Length, new LinkedList<string>());
+                        }
+
+                        validwords[line.Length].AddLast(line);
+
+                    }
+                }
+            }
+
+            //test each scoring method
+            foreach (int key in validwords.Keys)
+            {
+                data = new ExpandoObject();
+                data.UserToken = p1token;
+                data.Word = validwords[key].First.Value;
+                r = client.DoPutAsync("games/" + gid, data).Result;
+                Assert.AreEqual(OK, r.Status);
+                if (key < 3)
+                {
+                    Assert.AreEqual(0, (int)r.Data.Score);
+                }
+                else if (key == 3 || key == 4)
+                {
+                    Assert.AreEqual(1, (int)r.Data.Score);
+                }
+                else if (key == 5 || key == 6)
+                {
+                    Assert.AreEqual(key - 3, (int)r.Data.Score);
+                }
+                else if (key == 7)
+                {
+                    Assert.AreEqual(5, (int)r.Data.Score);
+                }
+                else if (key > 7)
+                {
+                    Assert.AreEqual(11, (int)r.Data.Score);
+                }
+
+            }
+
+            //Test an -1 score word
+            data = new ExpandoObject();
+            data.UserToken = p1token;
+            data.Word = "invalidword0";
+            r = client.DoPutAsync("games/" + gid, data).Result;
+            Assert.AreEqual(OK, r.Status);
+            Assert.AreEqual(-1, (int)r.Data.Score);
         }
     }
 
