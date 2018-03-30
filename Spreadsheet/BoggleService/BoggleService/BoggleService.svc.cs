@@ -42,7 +42,7 @@ namespace Boggle
             }
 
             string line;
-            using (StreamReader file = new System.IO.StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dictionary.txt"))
+            using (StreamReader file = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dictionary.txt"))
             {
                 while ((line = file.ReadLine()) != null)
                 {
