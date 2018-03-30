@@ -32,33 +32,33 @@ namespace Boggle
         /// Responds with status 201 (Created). 
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/users")]
-        dynamic RegisterUser(CreateUserRequest request);
+        UserTokenResponse RegisterUser(CreateUserRequest request);
 
         /// <summary>
         /// Joins a game for the given R
         // todo commments
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
-        dynamic JoinGame(JoinRequest request);
+        GameIDResponse JoinGame(JoinRequest request);
 
         /// <summary>
         /// Canel Join request
         // todo commments
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games")]
-        dynamic CancelJoinRequest(CancelJoinRequest request);
+        void CancelJoinRequest(CancelJoinRequest request);
 
         /// <summary>
         /// Request to play word
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games/{GameID}")]
-        dynamic PlayWord(PlayWord wordRequest, string GameID);
+        ScoreResponse PlayWord(PlayWord wordRequest, string GameID);
 
         /// <summary>
         /// Get the game status
         // todo commments
         /// </summary>
         [WebGet(UriTemplate = "/games/{GameID}?Brief={brief}")]
-        dynamic GetGameStatus(string GameID, string brief);
+        Status GetGameStatus(string GameID, string brief);
     }
 }

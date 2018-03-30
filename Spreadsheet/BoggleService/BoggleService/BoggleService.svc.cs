@@ -30,30 +30,32 @@ namespace Boggle
             return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
         }
 
-        public dynamic CancelJoinRequest(CancelJoinRequest request)
+        public void CancelJoinRequest(CancelJoinRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public dynamic GetGameStatus(string GameID, string brief)
+        public Status GetGameStatus(string GameID, string brief)
         {
             throw new NotImplementedException();
         }
 
-        public dynamic JoinGame(JoinRequest request)
+        public GameIDResponse JoinGame(JoinRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public dynamic PlayWord(PlayWord wordRequest, string GameID)
+        public ScoreResponse PlayWord(PlayWord wordRequest, string GameID)
         {
             throw new NotImplementedException();
         }
 
-        public dynamic RegisterUser(CreateUserRequest request)
+        public UserTokenResponse RegisterUser(CreateUserRequest request)
         {
             throw new NotImplementedException();
         }
+
+
 
         /// <summary>
         /// Demo.  You can delete this.
