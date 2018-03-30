@@ -13,6 +13,15 @@ namespace Boggle
     /// </summary>
     public class BoggleGame
     {
+
+        /// <summary>
+        /// Represents all of the valid words possible
+        /// 
+        /// NOTE: You might have to remove this if the memory overhead is too large and it crashes, this is something to test
+        /// against the tests i wrote
+        /// </summary>
+        public static ISet<string> DicationaryWords;
+
         /// <summary>
         /// The board model provided by Joe Zachary
         /// </summary>
@@ -43,6 +52,8 @@ namespace Boggle
         /// </summary>
         public int TimeLimit { get; private set; }
 
+        /*
+         * See notes in AddSecondPlayer
         /// <summary>
         /// Will refresh the game each second
         /// </summary>
@@ -51,7 +62,13 @@ namespace Boggle
         /// <summary>
         /// Keeps track of the time since the game began
         /// </summary>
-        private Stopwatch stopwatch;
+        private Stopwatch stopwatch;*/
+
+
+        /// <summary>
+        /// keeps track of when the game started
+        /// </summary>
+        private DateTime Start;
 
         /// <summary>
         /// How much time is left in the game
@@ -60,7 +77,9 @@ namespace Boggle
         {
             get
             {
-                int timeLeft = TimeLimit - (int)stopwatch.ElapsedMilliseconds;
+                //int timeLeft = TimeLimit - (int)stopwatch.ElapsedMilliseconds;
+
+                int timeLeft = (int)(Start.AddSeconds(TimeLimit) - DateTime.UtcNow).TotalSeconds;
 
                 if (timeLeft > 0)
                 {
@@ -94,11 +113,44 @@ namespace Boggle
             Player2 = new Player(player, requestedTime);
             TimeLimit = (Player1.RequestedTime + Player2.RequestedTime) / 2;
 
-            timer = new Timer(1000);
-            timer.Elapsed += (object sender, ElapsedEventArgs e) => { Refresh(); };
-            stopwatch = new Stopwatch();
+            //I also added this hashset that hold all the dictionary words, it should make looking up words faster 
+            //but there might be too much memory used 
+            //Thats why i kept it static 
+            if (DicationaryWords == null)
+            {
+                DicationaryWords = new HashSet<string>();
+                GenerateDictionary();
+            }
+
+            //see note below
+            Start = DateTime.UtcNow;
+
+            //I removed this since having it run every second might be too much overhead? We can just have it refresh before 
+            // any operation is done to check if the status is still active. 
+            //using stopwatch and timer spawns 3 threads just for timing and updating status, this should update just the same but without the overhead, especially when more games are added
+            //using DateTime is how joe does it in piazza so i just kept that version
+            //if this logic doesnt make senes text me and ill try to explain better
+            //timer = new Timer(1000);
+            //timer.Elapsed += (object sender, ElapsedEventArgs e) => { Refresh(); };
+            //stopwatch = new Stopwatch();
 
             Status = GameStatus.Active;
+        }
+
+        /// <summary>
+        /// Helper method that generates the static dictionary
+        /// </summary>
+        private void GenerateDictionary()
+        {
+            using (StreamReader file = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dicationary.txt"))
+            {
+                string currLine;
+                while ((currLine = file.ReadLine()) != null)
+                {
+                    DicationaryWords.Add(currLine.ToUpper());
+
+                }
+            }
         }
 
         /// <summary>
@@ -154,6 +206,7 @@ namespace Boggle
             return wordScore;
         }
 
+
         /// <summary>
         /// If game is still active, adds a word to the game (under user), scores it, adds it (and
         /// its score) to player's data, and returns the score.
@@ -163,6 +216,7 @@ namespace Boggle
         /// </summary>
         public int PlayWord(User user, string word)
         {
+
             int wordScore;
 
             if (Player1.User == user)
@@ -266,7 +320,8 @@ namespace Boggle
         /// </summary>
         private bool IsValidWord(string word)
         {
-            word = word.ToUpper();
+            return DicationaryWords.Contains(word.ToUpper());
+            /*
             using (StreamReader file = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dicationary.txt"))
             {
                 string currLine;
@@ -280,7 +335,7 @@ namespace Boggle
             }
 
             //Case no dictionary word matches with the word param
-            return false;
+            return false;*/
         }
 
         /// <summary>
@@ -292,8 +347,8 @@ namespace Boggle
             {
                 Status = GameStatus.Completed;
 
-                timer = null;
-                stopwatch = null;
+                //timer = null;
+                //stopwatch = null;
             }
         }
     }

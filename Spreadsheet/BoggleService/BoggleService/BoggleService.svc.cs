@@ -34,7 +34,7 @@ namespace Boggle
         /// Contains both active and completed games but NOT pending games
         /// </summary>
         private static Dictionary<string, BoggleGame> Games = new Dictionary<string, BoggleGame>();
-        
+
         /// <summary>
         /// Lock object for server threading.
         /// </summary>
@@ -67,19 +67,8 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Generates a new, unique UserToken.
-        /// </summary>
-        /// <returns></returns>
-        private string GenerateNewToken()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Registers new user
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
         public UserTokenResponse RegisterUser(CreateUserRequest request)
         {
             lock (sync)
@@ -110,8 +99,10 @@ namespace Boggle
                 Users.Add(token, user);
 
                 //response to the client
-                UserTokenResponse response = new UserTokenResponse();
-                response.UserToken = token;
+                UserTokenResponse response = new UserTokenResponse
+                {
+                    UserToken = token
+                };
                 SetStatus(Created);
                 return response;
             }
@@ -151,16 +142,8 @@ namespace Boggle
                     return null;
                 }
 
-                int timeLimit;
-                if (Int32.TryParse(request.TimeLimit, out timeLimit))
-                {
-                    if (!(timeLimit >= 5 && timeLimit <= 120))
-                    {
-                        SetStatus(Forbidden);
-                        return null;
-                    }
-                }
-                else
+
+                if (!(request.TimeLimit >= 5 && request.TimeLimit <= 120))
                 {
                     SetStatus(Forbidden);
                     return null;
@@ -175,12 +158,16 @@ namespace Boggle
                 GameIDResponse response = new GameIDResponse();
                 if (PendingGames.Count > 0)
                 {
-                    var games = PendingGames.GetEnumerator();
-                    games.MoveNext();
-                    BoggleGame game = games.Current.Value;
+                    string currkey = null;
+                    BoggleGame game = null;
+                    foreach (string key in PendingGames.Keys)
+                    {
+                        currkey = key;
+                        game = PendingGames[key];
+                    }
 
-                    game.AddSecondPlayer(player, timeLimit);
-                    PendingGames.Remove(request.UserToken);
+                    game.AddSecondPlayer(player, request.TimeLimit);
+                    PendingGames.Remove(currkey);
 
                     Games.Add(game.GameID, game);
 
@@ -189,7 +176,7 @@ namespace Boggle
                 }
                 else
                 {
-                    BoggleGame newGame = new BoggleGame(player, timeLimit, GenerateGameID());
+                    BoggleGame newGame = new BoggleGame(player, request.TimeLimit, GenerateGameID());
 
                     PendingGames.Add(request.UserToken, newGame);
 
@@ -202,20 +189,27 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Creates a user with nickname. 
+        /// Cancels an active join request from user userToken.
         /// 
-        /// If nickname is null, or is empty when trimmed, responds with status 403 (Forbidden). 
+        /// If UserToken is invalid or is not a player in the pending game, responds with status
+        /// 403 (Forbidden).
         /// 
-        /// Otherwise, creates a new user with a unique UserToken and the trimmed nickname.
-        /// The returned UserToken should be used to identify the user in subsequent requests.
-        /// Responds with status 201 (Created). 
+        /// Otherwise, removes UserToken from the pending game and responds with status 200 (OK).
         /// </summary>
         public void CancelJoinRequest(CancelJoinRequest request)
         {
             lock (sync)
             {
-                PendingGames.Remove(request.UserToken);
-                SetStatus(OK);
+                if (request.UserToken is null || !PendingGames.ContainsKey(request.UserToken))
+                {
+                    SetStatus(Forbidden);
+                }
+                else
+                {
+                    PendingGames.Remove(request.UserToken);
+                    NumberOfGames--;
+                    SetStatus(OK);
+                }
             }
         }
 
@@ -276,31 +270,11 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Generates a new, unique user token
+        /// Generates a new, unique user token that is a Guid
         /// </summary>
         private string UserTokenGenerator()
         {
-            Random rand = new Random();
-            string token = "";
-
-            do
-            {
-                for (int i = 0; i < 4; i++)
-                {
-                    for (int j = 0; j < 4; j++)
-                    {
-                        token = token + rand.Next(10);
-                    }
-
-                    //Every iteration but the last 
-                    if (i != 3)
-                    {
-                        token = token + "-";
-                    }
-                }
-            } while (Users.ContainsKey(token));
-
-            return token;
+            return Guid.NewGuid().ToString();
         }
 
         /// <summary>
@@ -322,9 +296,9 @@ namespace Boggle
         /// on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are
         /// not case sensitive.
         /// </summary>
-        public IStatus GetGameStatus(string gameID, string brief)
+        public IStatus GetGameStatus(string GameID, string brief)
         {
-            if (PendingGames.ContainsKey(gameID))
+            if (PendingGames.ContainsKey(GameID))
             {
                 StateResponse response = new StateResponse();
                 response.GameState = GameStatus.Pending;
@@ -332,9 +306,9 @@ namespace Boggle
                 SetStatus(OK);
                 return response;
             }
-            else if (Games.ContainsKey(gameID))
+            else if (Games.ContainsKey(GameID))
             {
-                BoggleGame game = Games[gameID];
+                BoggleGame game = Games[GameID];
 
                 FullStatusResponse response = new FullStatusResponse();
 
