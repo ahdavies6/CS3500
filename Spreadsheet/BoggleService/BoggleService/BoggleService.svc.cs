@@ -67,19 +67,8 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Generates a new, unique UserToken.
-        /// </summary>
-        /// <returns></returns>
-        private string GenerateNewToken()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Registers new user
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
         public UserTokenResponse RegisterUser(CreateUserRequest request)
         {
             lock (sync)
@@ -203,20 +192,27 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Creates a user with nickname. 
+        /// Cancels an active join request from user userToken.
         /// 
-        /// If nickname is null, or is empty when trimmed, responds with status 403 (Forbidden). 
+        /// If UserToken is invalid or is not a player in the pending game, responds with status
+        /// 403 (Forbidden).
         /// 
-        /// Otherwise, creates a new user with a unique UserToken and the trimmed nickname.
-        /// The returned UserToken should be used to identify the user in subsequent requests.
-        /// Responds with status 201 (Created). 
+        /// Otherwise, removes UserToken from the pending game and responds with status 200 (OK).
         /// </summary>
         public void CancelJoinRequest(CancelJoinRequest request)
         {
             lock (sync)
             {
-                PendingGames.Remove(request.UserToken);
-                SetStatus(OK);
+                if(request.UserToken is null || !PendingGames.ContainsKey(request.UserToken) )
+                {
+                    SetStatus(Forbidden);
+                }
+                else
+                {
+                    PendingGames.Remove(request.UserToken);
+                    NumberOfGames--;
+                    SetStatus(OK); 
+                }
             }
         }
 
@@ -277,31 +273,11 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Generates a new, unique user token
+        /// Generates a new, unique user token that is a Guid
         /// </summary>
         private string UserTokenGenerator()
         {
-            Random rand = new Random();
-            string token = "";
-
-            do
-            {
-                for (int i = 0; i < 4; i++)
-                {
-                    for (int j = 0; j < 4; j++)
-                    {
-                        token = token + rand.Next(10);
-                    }
-
-                    //Every iteration but the last 
-                    if (i != 3)
-                    {
-                        token = token + "-";
-                    }
-                }
-            } while (Users.ContainsKey(token));
-
-            return token;
+            return Guid.NewGuid().ToString();
         }
 
         /// <summary>
