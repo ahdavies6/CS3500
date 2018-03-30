@@ -323,9 +323,9 @@ namespace Boggle
         /// on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are
         /// not case sensitive.
         /// </summary>
-        public IStatus GetGameStatus(string gameID, string brief)
+        public IStatus GetGameStatus(string GameID, string brief)
         {
-            if (PendingGames.ContainsKey(gameID))
+            if (PendingGames.ContainsKey(GameID))
             {
                 StateResponse response = new StateResponse();
                 response.GameState = GameStatus.Pending;
@@ -333,9 +333,9 @@ namespace Boggle
                 SetStatus(OK);
                 return response;
             }
-            else if (Games.ContainsKey(gameID))
+            else if (Games.ContainsKey(GameID))
             {
-                BoggleGame game = Games[gameID];
+                BoggleGame game = Games[GameID];
 
                 FullStatusResponse response = new FullStatusResponse();
 

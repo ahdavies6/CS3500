@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static System.Net.HttpStatusCode;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using System.Dynamic;
 
 namespace Boggle
 {
@@ -65,22 +66,42 @@ namespace Boggle
 
         private RestTestClient client = new RestTestClient("http://localhost:60000/BoggleService.svc/");
 
-        /// <summary>
-        /// Note that DoGetAsync (and the other similar methods) returns a Response object, which contains
-        /// the response Stats and the deserialized JSON response (if any).  See RestTestClient.cs
-        /// for details.
-        /// </summary>
         [TestMethod]
-        public void TestMethod1()
+        public void Generate3UsersNormal()
         {
-            Response r = client.DoGetAsync("word?index={0}", "-5").Result;
+            dynamic data = new ExpandoObject();
+            data.Nickname = "p1";
+            Response r = client.DoPostAsync("users", data).Result;
+            Assert.AreEqual(Created, r.Status);
+
+            data = new ExpandoObject();
+            data.Nickname = "p2";
+            r = client.DoPostAsync("users", data).Result;
+            Assert.AreEqual(Created, r.Status);
+
+            data = new ExpandoObject();
+            data.Nickname = "p3";
+            r = client.DoPostAsync("users", data).Result;
+            Assert.AreEqual(Created, r.Status);
+        }
+
+        [TestMethod]
+        public void TestForbiddenNames()
+        {
+            dynamic data = new ExpandoObject();
+            data.Nickname = null;
+            Response r = client.DoPostAsync("users", data).Result;
             Assert.AreEqual(Forbidden, r.Status);
 
-            r = client.DoGetAsync("word?index={0}", "5").Result;
-            Assert.AreEqual(OK, r.Status);
+            data = new ExpandoObject();
+            data.Nickname = "";
+            r = client.DoPostAsync("users", data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
 
-            string word = (string) r.Data;
-            Assert.AreEqual("AAL", word);
+            data = new ExpandoObject();
+            data.Nickname = "     ";
+            r = client.DoPostAsync("users", data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
         }
     }
 }
