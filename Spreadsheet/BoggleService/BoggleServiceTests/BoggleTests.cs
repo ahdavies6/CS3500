@@ -74,16 +74,21 @@ namespace Boggle
             data.Nickname = "p1";
             Response r = client.DoPostAsync("users", data).Result;
             Assert.AreEqual(Created, r.Status);
+            Assert.IsNotNull(r.Data.UserToken);
 
             data = new ExpandoObject();
             data.Nickname = "p2";
             r = client.DoPostAsync("users", data).Result;
             Assert.AreEqual(Created, r.Status);
+            Assert.IsNotNull(r.Data.UserToken);
+
 
             data = new ExpandoObject();
             data.Nickname = "p3";
             r = client.DoPostAsync("users", data).Result;
             Assert.AreEqual(Created, r.Status);
+            Assert.IsNotNull(r.Data.UserToken);
+
         }
 
         [TestMethod]
@@ -202,8 +207,7 @@ namespace Boggle
             data.TimeLimit = 25;
             r = client.DoPostAsync("games", data).Result;
             Assert.AreEqual(Accepted, r.Status);
-            //Doesnt work with joes, his GiD resets
-            //Assert.AreNotEqual(gid, (string)r.Data.GameID);
+            Assert.AreEqual(gid, (string)r.Data.GameID);
             gid = (string)r.Data.GameID;
 
             //p1 joining the new game
