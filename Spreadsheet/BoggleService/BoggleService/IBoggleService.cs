@@ -26,7 +26,6 @@ namespace Boggle
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/users")]
         UserTokenResponse RegisterUser(CreateUserRequest request);
-        //HttpStatusCode RegisterUser(string nickname);
 
         /// <summary>
         /// Attempts to join a game with user userToken and timeLimit
@@ -49,7 +48,6 @@ namespace Boggle
         /// </summary>
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
         GameIDResponse JoinGame(JoinRequest request);
-        //HttpStatusCode JoinGame(string userToken, int timeLimit);
 
         /// <summary>
         /// Cancels an active join request from user userToken.
@@ -61,7 +59,6 @@ namespace Boggle
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games")]
         void CancelJoinRequest(CancelJoinRequest request);
-        //HttpStatusCode CancelJoinRequest(string userToken);
 
         /// <summary>
         /// Plays word under userToken in game GameID.
@@ -80,7 +77,6 @@ namespace Boggle
         /// </summary>
         [WebInvoke(Method = "PUT", UriTemplate = "/games/{GameID}")]
         ScoreResponse PlayWord(PlayWord wordRequest, string GameID);
-        //HttpStatusCode PlayWord(string userToken, string word, string GameID);
 
         /// <summary>
         /// Get the game status of game GameID
@@ -94,6 +90,5 @@ namespace Boggle
         /// </summary>
         [WebGet(UriTemplate = "/games/{GameID}?Brief={brief}")]
         Status GetGameStatus(string GameID, string brief);
-        //HttpStatusCode GetGameStatus(string GameID, bool brief);
     }
 }

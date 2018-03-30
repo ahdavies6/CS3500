@@ -75,7 +75,6 @@ namespace Boggle
         /// The returned UserToken should be used to identify the user in subsequent requests.
         /// Responds with status 201 (Created). 
         /// </summary>
-        //public HttpStatusCode RegisterUser(string nickname)
         public void CancelJoinRequest(CancelJoinRequest request)
         {
             lock (sync)
@@ -104,7 +103,6 @@ namespace Boggle
             throw new NotImplementedException();
         }
 
-        // todo: implement this!
         /// <summary>
         /// Generates a new, unique UserToken.
         /// </summary>
@@ -133,12 +131,17 @@ namespace Boggle
         /// the pending game's requested time limit. Returns the pending game's GameID. Responds with
         /// status 202 (Accepted).
         /// </summary>
-        //public HttpStatusCode JoinGame(string userToken, int timeLimit)
         public GameIDResponse JoinGame(JoinRequest request)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Plays word
+        /// </summary>
+        /// <param name="wordRequest"></param>
+        /// <param name="GameID"></param>
+        /// <returns></returns>
         public ScoreResponse PlayWord(PlayWord wordRequest, string GameID)
         {
             throw new NotImplementedException();

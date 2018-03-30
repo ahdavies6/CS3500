@@ -99,9 +99,8 @@ namespace Boggle
         /// its score) to player's data, and returns the score.
         /// 
         /// If game is no longer active, throws GameNotActiveException.
-        /// If a player with userToken is not in the game, throws PlayerNotInGameException.
         /// </summary>
-        public int PlayWord(Player player, string word)
+        private int PlayWord(Player player, string word)
         {
             Refresh();
 
@@ -122,6 +121,60 @@ namespace Boggle
             }
 
             player.AddWord(word, wordScore);
+            return wordScore;
+        }
+
+        /// <summary>
+        /// If game is still active, adds a word to the game (under user), scores it, adds it (and
+        /// its score) to player's data, and returns the score.
+        /// 
+        /// If game is no longer active, throws GameNotActiveException.
+        /// If user is not in this game, throws PlayerNotInGameException.
+        /// </summary>
+        public int PlayWord(User user, string word)
+        {
+            int wordScore;
+
+            if (Player1.User == user)
+            {
+                wordScore = PlayWord(Player1, word);
+            }
+            else if (Player2.User == user)
+            {
+                wordScore = PlayWord(Player2, word);
+            }
+            else
+            {
+                throw new PlayerNotInGameException();
+            }
+
+            return wordScore;
+        }
+
+        /// <summary>
+        /// If game is still active, adds a word to the game (under user with ID userToken), scores it,
+        /// adds it (and its score) to player's data, and returns the score.
+        /// 
+        /// If game is no longer active, throws GameNotActiveException.
+        /// If user is not in this game, throws PlayerNotInGameException.
+        /// </summary>
+        public int PlayWord(string userToken, string word)
+        {
+            int wordScore;
+
+            if (Player1.User.UserToken == userToken)
+            {
+                wordScore = PlayWord(Player1, word);
+            }
+            else if (Player2.User.UserToken == userToken)
+            {
+                wordScore = PlayWord(Player2, word);
+            }
+            else
+            {
+                throw new PlayerNotInGameException();
+            }
+
             return wordScore;
         }
 
@@ -228,6 +281,9 @@ namespace Boggle
     /// </summary>
     public class Player
     {
+        /// <summary>
+        /// The user who is this player
+        /// </summary>
         public User User { get; private set; }
 
         /// <summary>
