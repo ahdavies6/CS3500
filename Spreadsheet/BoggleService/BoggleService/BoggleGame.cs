@@ -159,6 +159,11 @@ namespace Boggle
             WordScores = new List<int>();
         }
 
+        /// <summary>
+        /// Adds word and wordScore to this player's data.
+        /// </summary>
+        /// <param name="word"></param>
+        /// <param name="wordScore"></param>
         public void AddWord(string word, int wordScore)
         {
             Words.Add(word);
