@@ -67,25 +67,6 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Returns the status of game with ID gameID
-        /// </summary>
-        public Status GetGameStatus(string gameID, string brief)
-        {
-            //if (nickname == null || nickname.Trim() == null)
-            //{
-            //    return HttpStatusCode.Forbidden;
-            //}
-            //else
-            //{
-            //    User newUser = new User(nickname.Trim(), GenerateNewToken());
-            //    users.Add(newUser);
-            //    return HttpStatusCode.Created;
-            //}
-
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Generates a new, unique UserToken.
         /// </summary>
         /// <returns></returns>
@@ -198,6 +179,8 @@ namespace Boggle
                     
                     game.AddSecondPlayer(player, timeLimit);
                     PendingGames.Remove(request.UserToken);
+
+                    Games.Add(game.GameID, game);
 
                     response.GameID = game.GameID;
                     SetStatus(Created);
@@ -328,26 +311,6 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Plays word under userToken in game GameID.
-        /// 
-        /// If Word is null or empty when trimmed, or if GameID or UserToken is missing or invalid,
-        /// or if UserToken is not a player in the game identified by GameID, responds with
-        /// response code 403 (Forbidden).
-        /// 
-        /// Otherwise, if the game state is anything other than "active", responds with response code
-        /// 409 (Conflict).
-        /// 
-        /// Otherwise, records the trimmed Word as being played by UserToken in the game identified by
-        /// GameID. Returns the score for Word in the context of the game (e.g. if Word has been played
-        /// before the score is zero). Responds with status 200 (OK).
-        /// Note: The word is not case sensitive.
-        /// </summary>
-        public HttpStatusCode PlayWord(string userToken, string word, string GameID)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Get the game status of game GameID
         /// 
         /// If GameID is invalid, responds with status 403 (Forbidden).
@@ -357,7 +320,7 @@ namespace Boggle
         /// on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are
         /// not case sensitive.
         /// </summary>
-        public HttpStatusCode GetGameStatus(string GameID, bool brief)
+        public Status GetGameStatus(string GameID, string brief)
         {
             throw new NotImplementedException();
         }
