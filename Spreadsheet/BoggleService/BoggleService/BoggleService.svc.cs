@@ -67,24 +67,6 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Creates a user with nickname. 
-        /// 
-        /// If nickname is null, or is empty when trimmed, responds with status 403 (Forbidden). 
-        /// 
-        /// Otherwise, creates a new user with a unique UserToken and the trimmed nickname.
-        /// The returned UserToken should be used to identify the user in subsequent requests.
-        /// Responds with status 201 (Created). 
-        /// </summary>
-        public void CancelJoinRequest(CancelJoinRequest request)
-        {
-            lock (sync)
-            {
-                PendingGames.Remove(request.UserToken);
-                SetStatus(OK);
-            }
-        }
-
-        /// <summary>
         /// Returns the status of game with ID gameID
         /// </summary>
         public Status GetGameStatus(string gameID, string brief)
@@ -108,41 +90,6 @@ namespace Boggle
         /// </summary>
         /// <returns></returns>
         private string GenerateNewToken()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Attempts to join a game with user userToken and timeLimit
-        /// 
-        /// If UserToken is invalid, TimeLimit is less than 5, or TimeLimit is over 120, responds
-        /// with status 403 (Forbidden).
-        /// 
-        /// Otherwise, if UserToken is already a player in the pending game, responds with status
-        /// 409 (Conflict).
-        /// 
-        /// Otherwise, if there is already one player in the pending game, adds UserToken as the
-        /// second player. The pending game becomes active and a new pending game with no players
-        /// is created. The active game's time limit is the integer average of the time limits
-        /// requested by the two players. Returns the new active game's GameID (which should be the
-        /// same as the old pending game's GameID). Responds with status 201 (Created).
-        /// 
-        /// Otherwise, adds UserToken as the first player of the pending game, and the TimeLimit as
-        /// the pending game's requested time limit. Returns the pending game's GameID. Responds with
-        /// status 202 (Accepted).
-        /// </summary>
-        public GameIDResponse JoinGame(JoinRequest request)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Plays word to game gameID
-        /// </summary>
-        /// <param name="wordRequest"></param>
-        /// <param name="gameID"></param>
-        /// <returns></returns>
-        public ScoreResponse PlayWord(PlayWord wordRequest, string gameID)
         {
             throw new NotImplementedException();
         }
@@ -186,6 +133,71 @@ namespace Boggle
                 SetStatus(Created);
                 return response;
             }
+        }
+
+        /// <summary>
+        /// Attempts to join a game with user userToken and timeLimit
+        /// 
+        /// If UserToken is invalid, TimeLimit is less than 5, or TimeLimit is over 120, responds
+        /// with status 403 (Forbidden).
+        /// 
+        /// Otherwise, if UserToken is already a player in the pending game, responds with status
+        /// 409 (Conflict).
+        /// 
+        /// Otherwise, if there is already one player in the pending game, adds UserToken as the
+        /// second player. The pending game becomes active and a new pending game with no players
+        /// is created. The active game's time limit is the integer average of the time limits
+        /// requested by the two players. Returns the new active game's GameID (which should be the
+        /// same as the old pending game's GameID). Responds with status 201 (Created).
+        /// 
+        /// Otherwise, adds UserToken as the first player of the pending game, and the TimeLimit as
+        /// the pending game's requested time limit. Returns the pending game's GameID. Responds with
+        /// status 202 (Accepted).
+        /// </summary>
+        public GameIDResponse JoinGame(JoinRequest request)
+        {
+            lock (sync)
+            {
+                // invalid usertoken -> forbidden
+                // 5 < timelimit < 120 not true -> forbidden
+
+                // usertoken in pending game -> conflict
+
+                // pending game -> put userID user in, return GameID; Created (status)
+
+                // no pending game -> start one with userID
+            }
+
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Creates a user with nickname. 
+        /// 
+        /// If nickname is null, or is empty when trimmed, responds with status 403 (Forbidden). 
+        /// 
+        /// Otherwise, creates a new user with a unique UserToken and the trimmed nickname.
+        /// The returned UserToken should be used to identify the user in subsequent requests.
+        /// Responds with status 201 (Created). 
+        /// </summary>
+        public void CancelJoinRequest(CancelJoinRequest request)
+        {
+            lock (sync)
+            {
+                PendingGames.Remove(request.UserToken);
+                SetStatus(OK);
+            }
+        }
+
+        /// <summary>
+        /// Plays word to game gameID
+        /// </summary>
+        /// <param name="wordRequest"></param>
+        /// <param name="gameID"></param>
+        /// <returns></returns>
+        public ScoreResponse PlayWord(PlayWord wordRequest, string gameID)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
