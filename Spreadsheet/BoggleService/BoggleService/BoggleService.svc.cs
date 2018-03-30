@@ -9,6 +9,12 @@ namespace Boggle
 {
     public class BoggleService : IBoggleService
     {
+
+        private static Dictionary<string, BoggleGame> PendingGames = new Dictionary<string, BoggleGame>();
+        private static Dictionary<string, string> Users = new Dictionary<string, string>();
+        private static Dictionary<string, BoggleGame> Games = new Dictionary<string, BoggleGame>();
+        private static object sync = new object();
+
         /// <summary>
         /// The most recent call to SetStatus determines the response code used when
         /// an http response is sent.
@@ -32,7 +38,11 @@ namespace Boggle
 
         public void CancelJoinRequest(CancelJoinRequest request)
         {
-            throw new NotImplementedException();
+            lock (sync)
+            {
+                PendingGames.Remove(request.UserToken);
+                SetStatus(OK);
+            }
         }
 
         public Status GetGameStatus(string GameID, string brief)
@@ -42,7 +52,7 @@ namespace Boggle
 
         public GameIDResponse JoinGame(JoinRequest request)
         {
-            throw new NotImplementedException();
+            throw new ArgumentException();
         }
 
         public ScoreResponse PlayWord(PlayWord wordRequest, string GameID)
@@ -52,7 +62,62 @@ namespace Boggle
 
         public UserTokenResponse RegisterUser(CreateUserRequest request)
         {
-            throw new NotImplementedException();
+            lock (sync)
+            {
+                if (request.Nickname is null)
+                {
+                    SetStatus(Forbidden);
+                    return null; //valid or nah?
+                                 //todo
+                }
+
+                string trimmedNickname = request.Nickname.Trim();
+                if (trimmedNickname.Length == 0 || trimmedNickname.Length > 50)
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                    //todo?
+                }
+
+                string token = UserTokenGenerator();
+
+                //Get a unique token
+                while (Users.ContainsKey(token))
+                {
+                    token = UserTokenGenerator();
+                }
+
+                Users.Add(token, trimmedNickname);
+
+                //response to the client
+                UserTokenResponse response = new UserTokenResponse();
+                response.UserToken = token;
+                SetStatus(Created);
+                return response;
+            }
+        }
+
+        private string UserTokenGenerator()
+        {
+            Random rand = new Random();
+
+            string token = "";
+
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    token = token + rand.Next(10);
+                }
+
+                //Every iteration but the last 
+                if (i != 3)
+                {
+                    token = token + "-";
+                }
+            }
+
+            return token;
         }
 
 
