@@ -347,7 +347,7 @@ namespace Boggle
         /// </summary>
         private void Refresh()
         {
-            if (TimeLeft < 0)
+            if (TimeLeft == 0)
             {
                 Status = GameStatus.Completed;
 

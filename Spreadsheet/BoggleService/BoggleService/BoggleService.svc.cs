@@ -231,41 +231,50 @@ namespace Boggle
         {
             lock (sync)
             {
-                string trimmedWord = request.Word.Trim();
-
-                if (trimmedWord == null || trimmedWord == "" || trimmedWord.Length > 30)
+                if (request == null)
                 {
                     SetStatus(Forbidden);
                     return null;
                 }
 
-                if (!(Games.ContainsKey(gameID)))
+                string word = request.Word;
+                string uid = request.UserToken;
+
+                if (uid is null || (uid = uid.Trim()).Length == 0 || gameID is null || word is null || (word = word.Trim()).Length == 0 || word.Length > 30)
                 {
                     SetStatus(Forbidden);
                     return null;
                 }
 
-                User player = Games[gameID].GetUser(Users[request.UserToken]);
+                User curr;
+                BoggleGame game;
 
-                if (player == null)
+                if (!Users.TryGetValue(uid, out curr) || !Games.TryGetValue(gameID, out game))
                 {
                     SetStatus(Forbidden);
                     return null;
                 }
 
-                BoggleGame game = Games[gameID];
+                try
+                {
+                    ScoreResponse response = new ScoreResponse()
+                    {
+                        Score = game.PlayWord(curr, word)
+                    };
 
-                if (game.Status != GameStatus.Active)
+                    SetStatus(OK);
+                    return response;
+                }
+                catch (PlayerNotInGameException e)
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                }
+                catch (GameNotActiveException e)
                 {
                     SetStatus(Conflict);
                     return null;
                 }
-
-                ScoreResponse response = new ScoreResponse();
-                response.Score = game.PlayWord(player, request.Word);
-                SetStatus(OK);
-
-                return response;
             }
         }
 
