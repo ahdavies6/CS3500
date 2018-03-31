@@ -481,7 +481,7 @@ namespace Boggle
                 me = new Words();
             }
 
-            return words.Contains(word);
+            return words.Contains(word.ToUpper());
         }
     }
 
