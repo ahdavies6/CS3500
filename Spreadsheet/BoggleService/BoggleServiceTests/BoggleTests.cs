@@ -468,7 +468,7 @@ namespace Boggle
             string gid = (string)r.Data.GameID;
 
             //pending get status
-            r = client.DoGetAsync("games/" + gid).Result;
+            r = client.DoGetAsync("games/{0}?Brief=no", gid).Result;
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual("pending", (string)r.Data.GameState);
 

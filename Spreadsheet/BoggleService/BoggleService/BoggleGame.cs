@@ -47,7 +47,9 @@ namespace Boggle
         /// <summary>
         /// Represents the game status
         /// </summary>
-        public GameStatus Status;
+        private GameStatus Status;
+
+        public GameStatus GameState { get { Refresh(); return Status; } }
 
         /// <summary>
         /// The Time limit of the game. Does not change after the initial set

@@ -96,7 +96,7 @@ namespace Boggle
     /// <summary>
     /// An interface to label what data structures can come from a Status response
     /// </summary>
-    public interface IStatus
+    public class IStatus
     {
     }
 
@@ -105,17 +105,17 @@ namespace Boggle
     /// </summary>
     public class StateResponse : IStatus
     {
-        public GameStatus GameState { get; set; }
+        public string GameState { get; set; }
     }
 
     /// <summary>
     /// Class that represents the response from the server when get status is called
     /// </summary>
     [DataContract]
-    public class FullStatusResponse : IStatus
+    public class FullStatusResponse 
     {
         [DataMember]
-        public GameStatus GameState { get; set; }
+        public string GameState { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
         public string Board { get; set; }
@@ -136,17 +136,13 @@ namespace Boggle
     /// <summary>
     /// Class that represents each player in the game when sending a status
     /// </summary>
-    [DataContract]
     public class SerialPlayer
     {
-        [DataMember(EmitDefaultValue = false)]
         public string Nickname { get; set; }
 
-        [DataMember]
         public int Score { get; set; }
 
-        [DataMember(EmitDefaultValue = false)]
-        public ISet<WordEntry> WordsPlayed { get; set; }
+        public IList<WordEntry> WordsPlayed { get; set; }
     }
 
     /// <summary>

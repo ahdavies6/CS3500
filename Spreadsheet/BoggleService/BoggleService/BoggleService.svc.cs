@@ -76,7 +76,7 @@ namespace Boggle
                 if (request.Nickname is null)
                 {
                     SetStatus(Forbidden);
-                    return null; // todo: see if this works right
+                    return null; 
                 }
 
                 string trimmedNickname = request.Nickname.Trim();
@@ -84,7 +84,6 @@ namespace Boggle
                 {
                     SetStatus(Forbidden);
                     return null;
-                    // todo: what else needs to be done here?
                 }
 
                 string token = UserTokenGenerator();
@@ -95,7 +94,7 @@ namespace Boggle
                     token = UserTokenGenerator();
                 }
 
-                User user = new User(token, trimmedNickname);
+                User user = new User(trimmedNickname, token);
                 Users.Add(token, user);
 
                 //response to the client
@@ -156,7 +155,7 @@ namespace Boggle
                 }
 
                 GameIDResponse response = new GameIDResponse();
-                if (PendingGames.Count > 0)
+                if (PendingGames.Count != 0)
                 {
                     string currkey = null;
                     BoggleGame game = null;
@@ -164,6 +163,7 @@ namespace Boggle
                     {
                         currkey = key;
                         game = PendingGames[key];
+                        break;
                     }
 
                     game.AddSecondPlayer(player, request.TimeLimit);
@@ -305,61 +305,122 @@ namespace Boggle
         /// on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are
         /// not case sensitive.
         /// </summary>
-        public IStatus GetGameStatus(string GameID, string brief)
+        public FullStatusResponse GetGameStatus(string GameID, string brief)
         {
             lock (sync)
             {
-                if (PendingGames.ContainsKey(GameID))
-                {
-                    StateResponse response = new StateResponse();
-                    response.GameState = GameStatus.Pending;
+                //format brief 
+                if (brief is null) brief = "";
+                else brief = brief.ToLower();
 
-                    SetStatus(OK);
-                    return response;
+                //check pending games
+                //this should never be large by design
+                foreach (string key in PendingGames.Keys)
+                {
+                    if (PendingGames[key].GameID.Equals(GameID))
+                    {
+                        FullStatusResponse response = new FullStatusResponse();
+                        response.GameState = "pending";
+
+                        SetStatus(OK);
+                        return response;
+                    } 
                 }
-                else if (Games.ContainsKey(GameID))
+
+                if (Games.ContainsKey(GameID))
                 {
                     BoggleGame game = Games[GameID];
 
                     FullStatusResponse response = new FullStatusResponse();
 
-                    // non-player game data
-                    response.GameState = game.Status;
-                    response.Board = game.Board.ToString();
-                    response.TimeLimit = game.TimeLimit;
-                    response.TimeLeft = game.TimeLeft;
-
-                    // player1 game data
-                    SerialPlayer player1 = new SerialPlayer();
-                    player1.Nickname = game.Player1.User.Nickname;
-                    player1.Score = game.Player1.Score;
-
-                    HashSet<WordEntry> wordsPlayed1 = new HashSet<WordEntry>();
-                    for (int i = 0; i < game.Player1.Words.Count; i++)
+                    // active and brief 
+                    if (game.GameState == GameStatus.Active && brief.Equals("yes"))
                     {
-                        WordEntry wordEntry = new WordEntry();
-                        wordEntry.Word = game.Player1.Words[i];
-                        wordEntry.Score = game.Player1.WordScores[i];
+                        response.GameState = "active";
+                        response.TimeLeft = game.TimeLeft;
+                        response.Player1 = new SerialPlayer()
+                        {
+                            Score = game.Player1.Score
+                        };
+                        response.Player2 = new SerialPlayer()
+                        {
+                            Score = game.Player2.Score
+                        };
 
-                        wordsPlayed1.Add(wordEntry);
                     }
-                    player1.WordsPlayed = wordsPlayed1;
-
-                    // player 2 game data
-                    SerialPlayer player2 = new SerialPlayer();
-                    player2.Nickname = game.Player2.User.Nickname;
-                    player2.Score = game.Player2.Score;
-
-                    HashSet<WordEntry> wordsPlayed2 = new HashSet<WordEntry>();
-                    for (int i = 0; i < game.Player2.Words.Count; i++)
+                    //active not brief
+                    else if (game.GameState == GameStatus.Active && !brief.Equals("yes"))
                     {
-                        WordEntry wordEntry = new WordEntry();
-                        wordEntry.Word = game.Player2.Words[i];
-                        wordEntry.Score = game.Player2.WordScores[i];
-
-                        wordsPlayed2.Add(wordEntry);
+                        response.GameState = "active";
+                        response.Board = game.Board.ToString();
+                        response.TimeLimit = game.TimeLimit;
+                        response.TimeLeft = game.TimeLeft;
+                        response.Player1 = new SerialPlayer()
+                        {
+                            Nickname = game.Player1.User.Nickname,
+                            Score = game.Player1.Score
+                        };
+                        response.Player2 = new SerialPlayer()
+                        {
+                            Nickname = game.Player2.User.Nickname,
+                            Score = game.Player2.Score
+                        };
                     }
-                    player2.WordsPlayed = wordsPlayed2;
+                    //completed and brief
+                    else if (game.GameState == GameStatus.Completed && brief.Equals("yes"))
+                    {
+                        response.GameState = "completed";
+                        response.TimeLeft = 0;
+                        response.Player1 = new SerialPlayer()
+                        {
+                            Score = game.Player1.Score
+                        };
+                        response.Player2 = new SerialPlayer()
+                        {
+                            Score = game.Player2.Score
+                        };
+
+                    }
+                    //completed not brief
+                    else if (game.GameState == GameStatus.Completed && !brief.Equals("yes"))
+                    {
+                        response.GameState = "completed";
+                        response.Board = game.Board.ToString();
+                        response.TimeLimit = game.TimeLimit;
+                        response.TimeLeft = game.TimeLeft;
+                        response.Player1 = new SerialPlayer()
+                        {
+                            Nickname = game.Player1.User.Nickname,
+                            Score = game.Player1.Score,
+                            WordsPlayed = new List<WordEntry>()
+                        };
+                        response.Player2 = new SerialPlayer()
+                        {
+                            Nickname = game.Player2.User.Nickname,
+                            Score = game.Player2.Score,
+                            WordsPlayed = new List<WordEntry>()
+                        };
+
+                        //add all words of 1
+                        for (int i = 0; i < game.Player1.Words.Count; i++)
+                        {
+                            response.Player1.WordsPlayed.Add(new WordEntry()
+                            {
+                                Word = game.Player1.Words[i],
+                                Score = game.Player1.WordScores[i]
+                            });
+                        }
+
+                        //add all words of 2
+                        for (int i = 0; i < game.Player2.Words.Count; i++)
+                        {
+                            response.Player2.WordsPlayed.Add(new WordEntry()
+                            {
+                                Word = game.Player2.Words[i],
+                                Score = game.Player2.WordScores[i]
+                            });
+                        }
+                    }
 
                     SetStatus(OK);
                     return response;
@@ -367,7 +428,7 @@ namespace Boggle
                 else
                 {
                     SetStatus(Forbidden);
-                    return null;
+                   return null;
                 }
             }
         }
