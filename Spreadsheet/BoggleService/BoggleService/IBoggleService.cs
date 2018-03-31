@@ -10,12 +10,6 @@ namespace Boggle
     public interface IBoggleService
     {
         /// <summary>
-        /// Sends back index.html as the response body.
-        /// </summary>
-        [WebGet(UriTemplate = "/api")]
-        Stream API();
-
-        /// <summary>
         /// Creates a user with nickname. 
         /// 
         /// If nickname is null, or is empty when trimmed, responds with status 403 (Forbidden). 
@@ -90,13 +84,5 @@ namespace Boggle
         /// </summary>
         [WebGet(UriTemplate = "/games/{GameID}?Brief={brief}")]
         FullStatusResponse GetGameStatus(string GameID, string brief);
-
-
-        // original:
-        //[WebGet(UriTemplate = "/games/{GameID}?Brief={brief}")]
-        // minimalist (breaks it):
-        //[WebGet(UriTemplate = "/games/{GameID}")]
-        // redux:
-        //[WebInvoke(Method = "GET", UriTemplate = "/games/{GameID}?Brief={brief}")]
     }
 }

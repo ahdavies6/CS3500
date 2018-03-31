@@ -76,7 +76,6 @@ namespace Boggle
         public string UserToken { get; set; }
     }
 
-
     /// <summary>
     /// Sends back the score produced by a play word request
     /// </summary>
@@ -98,7 +97,7 @@ namespace Boggle
     /// </summary>
     public class IStatus
     {
- 
+        // instantiators define things here
     }
 
     /// <summary>
@@ -148,8 +147,6 @@ namespace Boggle
 
         [DataMember(EmitDefaultValue = false)]
         public SerialPlayer Player2 { get; set; }
-
-
     }
 
     /// <summary>

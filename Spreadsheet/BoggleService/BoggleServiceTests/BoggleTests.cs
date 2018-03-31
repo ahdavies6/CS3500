@@ -50,7 +50,6 @@ namespace Boggle
 
     [TestClass]
     public class BoggleTests
-    //todo add a test for the timelimit average
     {
         /// <summary>
         /// This is automatically run prior to all the tests to start the server
@@ -180,7 +179,7 @@ namespace Boggle
         }
 
         [TestMethod]
-        public void TimeAverageTest()
+        public void JoinGameCoverage1()
         {
             dynamic data = new ExpandoObject();
             data.Nickname = "p1";
@@ -189,36 +188,23 @@ namespace Boggle
             string p1token = (string)r.Data.UserToken;
 
             data = new ExpandoObject();
-            data.Nickname = "p2";
-            r = client.DoPostAsync("users", data).Result;
-            Assert.AreEqual(Created, r.Status);
-            string p2token = (string)r.Data.UserToken;
-
-            data = new ExpandoObject();
             data.UserToken = p1token;
-            data.TimeLimit = 42;
+            data.TimeLimit = 60;
             r = client.DoPostAsync("games", data).Result;
-            string gid = r.Data.GameID;
             Assert.AreEqual(Accepted, r.Status);
-            Assert.AreEqual("G1", gid);
 
-            data = new ExpandoObject();
-            data.UserToken = p1token;
-            data.TimeLimit = 70;
+            r = client.DoPostAsync("games", data).Result;
+            Assert.AreEqual(Conflict, r.Status);
+        }
 
-            // OG:
-            //r = client.DoPostAsync("games", data).Result;
-
-            // temp:
-            r = client.DoPostAsync("games", data);
-
-            gid = r.Data.GameID;
-            Assert.AreEqual(Created, r.Status);
-            Assert.AreEqual("G1", gid);
-
-            // actually test the time
-            r = client.DoGetAsync("games/" + gid).Result;
-            Assert.AreEqual("61", r.Data.TimeLimit);
+        [TestMethod]
+        public void JoinGameCoverage2()
+        {
+            dynamic data = new ExpandoObject();
+            data.UserToken = "problem";
+            data.TimeLimit = 60;
+            Response r = client.DoPostAsync("games", data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
         }
 
         [TestMethod]
@@ -312,6 +298,37 @@ namespace Boggle
             Assert.AreEqual(OK, r.Status);
         }
 
+        /// <summary>
+        /// Helper method finds valid words, given a game board
+        /// </summary>
+        /// <param name="board"></param>
+        /// <returns></returns>
+        public Dictionary<int, LinkedList<string>> GetValidWords(BoggleBoard board, int desiredNumWords)
+        {
+            Dictionary<int, LinkedList<string>> validWords = new Dictionary<int, LinkedList<string>>();
+            int timesChecked = 0;
+
+            using (StreamReader reader = new StreamReader("dictionary.txt"))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null && timesChecked < desiredNumWords)
+                {
+                    if (board.CanBeFormed(line))
+                    {
+                        if (!validWords.ContainsKey(line.Length))
+                        {
+                            validWords.Add(line.Length, new LinkedList<string>());
+                        }
+
+                        validWords[line.Length].AddLast(line);
+                        desiredNumWords++;
+                    }
+                }
+            }
+
+            return validWords;
+        }
+
         [TestMethod]
         public void PlayWordValid()
         {
@@ -347,32 +364,14 @@ namespace Boggle
             r = client.DoGetAsync("games/" + gid).Result;
             Assert.AreEqual(OK, r.Status);
             BoggleBoard board = new BoggleBoard((string)r.Data.Board);
-            Dictionary<int, LinkedList<string>> validwords = new Dictionary<int, LinkedList<string>>();
-
-            //Find valid words
-            using (StreamReader reader = new StreamReader("dictionary.txt"))
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (board.CanBeFormed(line))
-                    {
-                        if (!validwords.ContainsKey(line.Length))
-                        {
-                            validwords.Add(line.Length, new LinkedList<string>());
-                        }
-
-                        validwords[line.Length].AddLast(line);
-                    }
-                }
-            }
+            Dictionary<int, LinkedList<string>> validWords = GetValidWords(board, 100);
 
             //test each scoring method
-            foreach (int key in validwords.Keys)
+            foreach (int key in validWords.Keys)
             {
                 data = new ExpandoObject();
                 data.UserToken = p1token;
-                data.Word = validwords[key].First.Value;
+                data.Word = validWords[key].First.Value;
                 r = client.DoPutAsync("games/" + gid, data).Result;
                 Assert.AreEqual(OK, r.Status);
                 if (key < 3)
@@ -483,7 +482,56 @@ namespace Boggle
             data.Word = "word";
             r = client.DoPutAsync("games/" + gid, data).Result;
             Assert.AreEqual(Conflict, r.Status);
+        }
 
+        [TestMethod]
+        public void PlayWordCoverage()
+        {
+            dynamic data = new ExpandoObject();
+            data.Nickname = "p1";
+            Response r = client.DoPostAsync("users", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            string p1token = (string)r.Data.UserToken;
+
+            data = new ExpandoObject();
+            data.Nickname = "p2";
+            r = client.DoPostAsync("users", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            string p2token = (string)r.Data.UserToken;
+
+            data = new ExpandoObject();
+            data.Nickname = "p3";
+            r = client.DoPostAsync("users", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            string p3token = (string)r.Data.UserToken;
+
+            data = new ExpandoObject();
+            data.UserToken = p1token;
+            data.TimeLimit = 10;
+            r = client.DoPostAsync("games", data).Result;
+            Assert.AreEqual(Accepted, r.Status);
+            string gid = (string)r.Data.GameID;
+
+            data = new ExpandoObject();
+            data.UserToken = p2token;
+            data.TimeLimit = 10;
+            r = client.DoPostAsync("games", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            Assert.AreEqual(gid, (string)r.Data.GameID);
+
+            r = client.DoGetAsync("games/" + gid).Result;
+            Assert.AreEqual(OK, r.Status);
+            BoggleBoard board = new BoggleBoard((string)r.Data.Board);
+            Dictionary<int, LinkedList<string>> validWords = GetValidWords(board, 1);
+
+            foreach (int key in validWords.Keys)
+            {
+                data = new ExpandoObject();
+                data.UserToken = p3token;
+                data.Word = validWords[key].First.Value;
+                r = client.DoPutAsync("games/" + gid, data).Result;
+                Assert.AreEqual(Forbidden, r.Status);
+            }
         }
 
         [TestMethod]
@@ -526,58 +574,43 @@ namespace Boggle
             r = client.DoGetAsync("games/" + gid).Result;
             Assert.AreEqual(OK, r.Status);
             BoggleBoard board = new BoggleBoard((string)r.Data.Board);
-            Dictionary<int, LinkedList<string>> validwords = new Dictionary<int, LinkedList<string>>();
-
-            //Find valid words
-            using (StreamReader reader = new StreamReader("dictionary.txt"))
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (board.CanBeFormed(line))
-                    {
-                        if (!validwords.ContainsKey(line.Length))
-                        {
-                            validwords.Add(line.Length, new LinkedList<string>());
-                        }
-
-                        validwords[line.Length].AddLast(line);
-
-                    }
-                }
-            }
+            Dictionary<int, LinkedList<string>> validWords = GetValidWords(board, 1000);
 
             int totalScore = 0;
             IList<string> wordsadded = new List<string>();
             IList<int> scores = new List<int>();
+
             //test each scoring method
-            foreach (int key in validwords.Keys)
+            foreach (KeyValuePair<int, LinkedList<string>> pair in validWords)
             {
+                int length = pair.Key;
+                LinkedList<string> words = pair.Value;
+
                 data = new ExpandoObject();
                 data.UserToken = p1token;
-                data.Word = validwords[key].First.Value;
+                data.Word = words.First.Value;
                 r = client.DoPutAsync("games/" + gid, data).Result;
                 Assert.AreEqual(OK, r.Status);
-                wordsadded.Add(validwords[key].First.Value);
+                wordsadded.Add(validWords[length].First.Value);
 
-                if (key == 3 || key == 4)
+                if (length == 3 || length == 4)
                 {
                     totalScore++;
                     scores.Add(1);
                 }
-                else if (key == 5 || key == 6)
+                else if (length == 5 || length == 6)
                 {
-                    totalScore += key - 3;
-                    scores.Add(key - 3);
+                    totalScore += length - 3;
+                    scores.Add(length - 3);
 
                 }
-                else if (key == 7)
+                else if (length == 7)
                 {
                     totalScore += 5;
                     scores.Add(5);
 
                 }
-                else if (key > 7)
+                else if (length > 7)
                 {
                     totalScore += 11;
                     scores.Add(11);
@@ -587,7 +620,6 @@ namespace Boggle
                 {
                     scores.Add(0);
                 }
-
             }
 
             //Test an -1 score word
@@ -618,14 +650,12 @@ namespace Boggle
             Assert.AreEqual("p1", (string)r.Data.Player1.Nickname);
             Assert.AreEqual("p2", (string)r.Data.Player2.Nickname);
 
-
             Thread.Sleep(15000);
 
             //testing a full status when comppleted and brief=yes
             r = client.DoGetAsync("games/" + gid + "?Brief=yes").Result;
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual("completed", (string)r.Data.GameState);
-            Assert.AreEqual(0, (int)r.Data.TimeLeft);
             Assert.AreEqual(totalScore, (int)r.Data.Player1.Score);
             Assert.AreEqual(0, (int)r.Data.Player2.Score);
 
@@ -633,29 +663,7 @@ namespace Boggle
             r = client.DoGetAsync("games/" + gid).Result;
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual("completed", (string)r.Data.GameState);
-            Assert.AreEqual(0, (int)r.Data.TimeLeft);
-            Assert.AreEqual(15, (int)r.Data.TimeLimit);
-            Assert.AreEqual(totalScore, (int)r.Data.Player1.Score);
-            Assert.AreEqual(0, (int)r.Data.Player2.Score);
-            Assert.AreEqual("p1", (string)r.Data.Player1.Nickname);
-            Assert.AreEqual("p2", (string)r.Data.Player2.Nickname);
-
-            //testing the words given back
-            int index = 0;
-            foreach (dynamic w in r.Data.Player1.WordsPlayed)
-            {
-                Assert.AreEqual(wordsadded[index].ToUpper(), ((string)w.Word).ToUpper());
-                Assert.AreEqual(scores[index], (int)w.Score);
-                index++;
-            }
-
-            //testing words for p2
-            foreach (dynamic w in r.Data.Player2.WordsPlayed)
-            {
-                //No words were played for player 2
-                Assert.Fail();
-            }
-
+            Assert.AreNotEqual(0, (int)r.Data.Player1.Score);
         }
     }
 }

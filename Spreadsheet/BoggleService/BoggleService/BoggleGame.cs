@@ -8,22 +8,11 @@ using System.Web;
 
 namespace Boggle
 {
-    // todo: remove all the commented out code in here
-
     /// <summary>
     /// Class that represents a single BoggleGame
     /// </summary>
     public class BoggleGame
     {
-        // todo: remove deprecated
-        ///// <summary>
-        ///// Represents all of the valid words possible
-        ///// 
-        ///// NOTE: You might have to remove this if the memory overhead is too large and it crashes, this is something to test
-        ///// against the tests i wrote
-        ///// </summary>
-        //public static ISet<string> DictionaryWords;
-
         /// <summary>
         /// The board model provided by Joe Zachary
         /// </summary>
@@ -58,18 +47,6 @@ namespace Boggle
         /// The Time limit of the game. Does not change after the initial set
         /// </summary>
         public int TimeLimit { get; private set; }
-
-        /*
-         * See notes in AddSecondPlayer
-        /// <summary>
-        /// Will refresh the game each second
-        /// </summary>
-        private Timer timer;
-
-        /// <summary>
-        /// Keeps track of the time since the game began
-        /// </summary>
-        private Stopwatch stopwatch;*/
 
         /// <summary>
         /// keeps track of when the game started
@@ -118,56 +95,15 @@ namespace Boggle
         {
             Player2 = new Player(player, requestedTime);
             TimeLimit = (Player1.RequestedTime + Player2.RequestedTime) / 2;
-
-            // todo: remove deprecated
-            ////I also added this hashset that hold all the dictionary words, it should make looking up words faster 
-            ////but there might be too much memory used 
-            ////Thats why i kept it static 
-            //if (DictionaryWords == null)
-            //{
-            //    DictionaryWords = new HashSet<string>();
-            //    GenerateDictionary();
-            //}
-
-            //see note below
             Start = DateTime.UtcNow;
-
-            //I removed this since having it run every second might be too much overhead? We can just have it refresh before 
-            // any operation is done to check if the status is still active. 
-            //using stopwatch and timer spawns 3 threads just for timing and updating status, this should update just the same
-            //but without the overhead, especially when more games are added
-            //using DateTime is how joe does it in piazza so i just kept that version
-            //if this logic doesnt make senes text me and ill try to explain better
-            //timer = new Timer(1000);
-            //timer.Elapsed += (object sender, ElapsedEventArgs e) => { Refresh(); };
-            //stopwatch = new Stopwatch();
-
             Status = GameStatus.Active;
         }
-
-        // todo: remove deprecated
-        ///// <summary>
-        ///// Helper method that generates the static dictionary
-        ///// </summary>
-        //private void GenerateDictionary()
-        //{
-        //    using (StreamReader file = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dicationary.txt"))
-        //    {
-        //        string currLine;
-        //        while ((currLine = file.ReadLine()) != null)
-        //        {
-        //            DictionaryWords.Add(currLine.ToUpper());
-        //        }
-        //    }
-        //}
 
         /// <summary>
         /// If this game contains user player, returns them
         /// 
         /// Otherwise, returns null
         /// </summary>
-        /// <param name="player"></param>
-        /// <returns></returns>
         public User GetUser(User player)
         {
             if (Player1.User == player)
@@ -241,7 +177,6 @@ namespace Boggle
             return wordScore;
         }
 
-
         /// <summary>
         /// Given a word, it scores it given that it is a valid word. Follows these guidlines from PS8:
         /// 
@@ -296,9 +231,6 @@ namespace Boggle
             if (TimeLeft == 0)
             {
                 Status = GameStatus.Completed;
-
-                //timer = null;
-                //stopwatch = null;
             }
         }
     }

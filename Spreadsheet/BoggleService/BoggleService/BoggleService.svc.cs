@@ -56,17 +56,6 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Returns a Stream version of index.html.
-        /// </summary>
-        /// <returns></returns>
-        public Stream API()
-        {
-            SetStatus(OK);
-            WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
-            return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
-        }
-
-        /// <summary>
         /// Registers new user
         /// </summary>
         public UserTokenResponse RegisterUser(CreateUserRequest request)
@@ -87,12 +76,6 @@ namespace Boggle
                 }
 
                 string token = UserTokenGenerator();
-
-                // Get a unique token
-                while (Users.ContainsKey(token))
-                {
-                    token = UserTokenGenerator();
-                }
 
                 User user = new User(trimmedNickname, token);
                 Users.Add(token, user);
@@ -231,12 +214,6 @@ namespace Boggle
         {
             lock (sync)
             {
-                if (request == null)
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
-
                 string word = request.Word;
                 string uid = request.UserToken;
 
@@ -319,8 +296,10 @@ namespace Boggle
                 {
                     if (PendingGames[key].GameID.Equals(GameID))
                     {
-                        FullStatusResponse response = new FullStatusResponse();
-                        response.GameState = "pending";
+                        FullStatusResponse response = new FullStatusResponse
+                        {
+                            GameState = "pending"
+                        };
 
                         SetStatus(OK);
                         return response;
@@ -330,7 +309,6 @@ namespace Boggle
                 if (Games.ContainsKey(GameID))
                 {
                     BoggleGame game = Games[GameID];
-
                     FullStatusResponse response = new FullStatusResponse();
 
                     // active and brief 
@@ -387,7 +365,7 @@ namespace Boggle
                         response.GameState = "completed";
                         response.Board = game.Board.ToString();
                         response.TimeLimit = game.TimeLimit;
-                        response.TimeLeft = game.TimeLeft;
+                        response.TimeLeft = 0;
                         response.Player1 = new SerialPlayer()
                         {
                             Nickname = game.Player1.User.Nickname,
@@ -428,7 +406,7 @@ namespace Boggle
                 else
                 {
                     SetStatus(Forbidden);
-                   return null;
+                    return null;
                 }
             }
         }
