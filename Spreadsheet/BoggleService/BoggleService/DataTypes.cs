@@ -98,14 +98,32 @@ namespace Boggle
     /// </summary>
     public class IStatus
     {
+ 
     }
 
     /// <summary>
     /// Class for when status just needs to send "pending"
     /// </summary>
+    [DataContract]
     public class StateResponse : IStatus
     {
+        [DataMember]
         public string GameState { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string Board { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public int TimeLimit { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public int TimeLeft { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public SerialPlayer Player1 { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public SerialPlayer Player2 { get; set; }
     }
 
     /// <summary>
@@ -123,25 +141,30 @@ namespace Boggle
         [DataMember(EmitDefaultValue = false)]
         public int TimeLimit { get; set; }
 
-        [DataMember]
         public int TimeLeft { get; set; }
 
-        [DataMember]
+        [DataMember(EmitDefaultValue = false)]
         public SerialPlayer Player1 { get; set; }
 
-        [DataMember]
+        [DataMember(EmitDefaultValue = false)]
         public SerialPlayer Player2 { get; set; }
+
+
     }
 
     /// <summary>
     /// Class that represents each player in the game when sending a status
     /// </summary>
+    [DataContract]
     public class SerialPlayer
     {
+        [DataMember(EmitDefaultValue = false)]
         public string Nickname { get; set; }
 
+        [DataMember]
         public int Score { get; set; }
 
+        [DataMember(EmitDefaultValue = false)]
         public IList<WordEntry> WordsPlayed { get; set; }
     }
 

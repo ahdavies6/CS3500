@@ -241,32 +241,6 @@ namespace Boggle
             return wordScore;
         }
 
-        ///// <summary>
-        ///// If game is still active, adds a word to the game (under user with ID userToken), scores it,
-        ///// adds it (and its score) to player's data, and returns the score.
-        ///// 
-        ///// If game is no longer active, throws GameNotActiveException.
-        ///// If user is not in this game, throws PlayerNotInGameException.
-        ///// </summary>
-        //public int PlayWord(string userToken, string word)
-        //{
-        //    int wordScore;
-
-        //    if (Player1.User.UserToken == userToken)
-        //    {
-        //        wordScore = PlayWord(Player1, word);
-        //    }
-        //    else if (Player2.User.UserToken == userToken)
-        //    {
-        //        wordScore = PlayWord(Player2, word);
-        //    }
-        //    else
-        //    {
-        //        throw new PlayerNotInGameException();
-        //    }
-
-        //    return wordScore;
-        //}
 
         /// <summary>
         /// Given a word, it scores it given that it is a valid word. Follows these guidlines from PS8:
@@ -284,10 +258,6 @@ namespace Boggle
         private int ScoreWord(string word, Player currentPlayer)
         {
             if (word.Length < 3 || currentPlayer.Words.Contains(word.ToLower()))
-            {
-                return 0;
-            }
-            else if (currentPlayer.Words.Contains(word))
             {
                 return 0;
             }
@@ -317,32 +287,6 @@ namespace Boggle
                 return -1;
             }
         }
-
-        // todo: remove deprecated
-        ///// <summary>
-        ///// Checks if the param word is a valid word within dictionary.txt
-        ///// 
-        ///// Method is case insensitive
-        ///// </summary>
-        //private bool IsValidWord(string word)
-        //{
-        //    return DictionaryWords.Contains(word.ToUpper());
-        //    /*
-        //    using (StreamReader file = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dicationary.txt"))
-        //    {
-        //        string currLine;
-        //        while ((currLine = file.ReadLine()) != null)
-        //        {
-        //            if (word.Equals(currLine))
-        //            {
-        //                return true;
-        //            }
-        //        }
-        //    }
-
-        //    //Case no dictionary word matches with the word param
-        //    return false;*/
-        //}
 
         /// <summary>
         /// Ends the game once the time has run out

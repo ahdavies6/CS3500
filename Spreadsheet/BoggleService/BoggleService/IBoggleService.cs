@@ -91,6 +91,7 @@ namespace Boggle
         [WebGet(UriTemplate = "/games/{GameID}?Brief={brief}")]
         FullStatusResponse GetGameStatus(string GameID, string brief);
 
+
         // original:
         //[WebGet(UriTemplate = "/games/{GameID}?Brief={brief}")]
         // minimalist (breaks it):
