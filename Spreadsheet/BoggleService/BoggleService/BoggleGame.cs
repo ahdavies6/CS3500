@@ -49,6 +49,9 @@ namespace Boggle
         /// </summary>
         private GameStatus Status;
 
+        /// <summary>
+        /// Returns whatever the current game state is
+        /// </summary>
         public GameStatus GameState { get { Refresh(); return Status; } }
 
         /// <summary>
@@ -67,7 +70,6 @@ namespace Boggle
         /// Keeps track of the time since the game began
         /// </summary>
         private Stopwatch stopwatch;*/
-
 
         /// <summary>
         /// keeps track of when the game started
@@ -212,7 +214,6 @@ namespace Boggle
             return wordScore;
         }
 
-
         /// <summary>
         /// If game is still active, adds a word to the game (under user), scores it, adds it (and
         /// its score) to player's data, and returns the score.
@@ -222,7 +223,6 @@ namespace Boggle
         /// </summary>
         public int PlayWord(User user, string word)
         {
-
             int wordScore;
 
             if (Player1.User == user)
