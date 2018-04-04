@@ -119,7 +119,7 @@ namespace Boggle
         /// The response code and the response object is returned if the request was 
         /// successful; just the response code is returned if the request was unsuccessful.
         /// </summary>
-        public async Task<Response> DoPutAsync(dynamic data, string url)
+        public async Task<Response> DoPutAsync(string url, dynamic data)
         {
             using (HttpClient client = CreateClient())
             {
