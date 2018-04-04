@@ -62,7 +62,6 @@ namespace ServerGrader
             }
         }
 
-
         /// <summary>
         /// Given a board configuration, returns all the valid words.
         /// </summary>
