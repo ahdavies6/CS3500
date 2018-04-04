@@ -139,7 +139,8 @@ namespace Boggle
 
         [DataMember(EmitDefaultValue = false)]
         public int TimeLimit { get; set; }
-
+        
+        [DataMember]
         public int TimeLeft { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
