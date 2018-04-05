@@ -5,6 +5,7 @@ using System.Net;
 using System.ServiceModel.Web;
 using System.Net.Http;
 using static System.Net.HttpStatusCode;
+using System.Configuration;
 
 namespace Boggle
 {
@@ -46,6 +47,34 @@ namespace Boggle
         /// </summary>
         private static int NumberOfGames = 0;
 
+        // The connection string to the DB
+        private static string BoggleDB;
+
+        static BoggleService()
+        {
+            // Saves the connection string for the database.  A connection string contains the
+            // information necessary to connect with the database server.  When you create a
+            // DB, there is generally a way to obtain the connection string.  From the Server
+            // Explorer pane, obtain the properties of DB to see the connection string.
+
+            // The connection string of my ToDoDB.mdf shows as
+            //
+            //    Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="C:\Users\zachary\Source\CS 3500 S16\examples\ToDoList\ToDoListDB\App_Data\ToDoDB.mdf";Integrated Security=True
+            //
+            //Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\BoggleDB.mdf;Integrated Security=True
+
+            // Unfortunately, this is absolute pathname on my computer, which means that it
+            // won't work if the solution is moved.  Fortunately, it can be shorted to
+            //
+            //    Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="|DataDirectory|\ToDoDB.mdf";Integrated Security=True
+            //
+            // You should shorten yours this way as well.
+            //
+            // Rather than build the connection string into the program, I store it in the Web.config
+            // file where it can be easily found and changed.  You should do that too.
+            BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
+        }
+
         /// <summary>
         /// The most recent call to SetStatus determines the response code used when
         /// an http response is sent.
@@ -65,7 +94,7 @@ namespace Boggle
                 if (request.Nickname is null)
                 {
                     SetStatus(Forbidden);
-                    return null; 
+                    return null;
                 }
 
                 string trimmedNickname = request.Nickname.Trim();
@@ -303,7 +332,7 @@ namespace Boggle
 
                         SetStatus(OK);
                         return response;
-                    } 
+                    }
                 }
 
                 if (Games.ContainsKey(GameID))
