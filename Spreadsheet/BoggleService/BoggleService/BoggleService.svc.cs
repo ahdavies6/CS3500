@@ -540,9 +540,9 @@ namespace Boggle
                                 response.Board = (string)reader["Board"];
                                 response.TimeLimit = (int)reader["TimeLimit"];
 
-                                // todo: get their names
-                                //response.Player1.Nickname = "temp1";
-                                //response.Player2.Nickname = "temp2";
+                                // todo: make sure that nested database searching like these don't cause problems
+                                response.Player1.Nickname = GetPlayerNickname(p1ID);
+                                response.Player2.Nickname = GetPlayerNickname(p2ID);
 
                                 // not brief, active response
                                 if (response.GameState == "active")
@@ -694,6 +694,11 @@ namespace Boggle
             //}
         }
 
+        /// <summary>
+        /// Private helper method returns an IList of word entries (which are words paired with
+        /// what they scored) given a player and a game. Out int score is the total score for
+        /// that player, that game.
+        /// </summary>
         private IList<WordEntry> GetPlayerScores(string gameID, string userID, out int score)
         {
             // open connection to database
@@ -730,6 +735,41 @@ namespace Boggle
                         }
 
                         return words;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Private helper method returns a player's Nickname, given their UserID
+        /// </summary>
+        private string GetPlayerNickname(string userID)
+        {
+            // open connection to database
+            using (SqlConnection connection = new SqlConnection(BoggleDB))
+            {
+                connection.Open();
+
+                // execute all commands within a single transaction
+                using (SqlTransaction transaction = connection.BeginTransaction())
+                {
+                    // get the PlayerID
+                    using (SqlCommand command = new SqlCommand("select Nickname from Users where UserID = @UserID",
+                        connection, transaction))
+                    {
+                        command.Parameters.AddWithValue("@UserID", userID);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            string nickname = null;
+
+                            while (reader.Read())
+                            {
+                                nickname = (string)reader["Nickname"];
+                            }
+
+                            return nickname;
+                        }
                     }
                 }
             }
