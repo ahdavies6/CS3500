@@ -47,8 +47,15 @@ namespace Boggle
         /// </summary>
         private static int NumberOfGames = 0;
 
-        // The connection string to the DB
+        /// <summary>
+        /// The connection string to the DB
+        /// </summary>
         private static string BoggleDB;
+
+        /// <summary>
+        /// String that indicates where the dictionary.txt is
+        /// </summary>
+        private static string DictionaryLocation;
 
         static BoggleService()
         {
@@ -73,6 +80,8 @@ namespace Boggle
             // Rather than build the connection string into the program, I store it in the Web.config
             // file where it can be easily found and changed.  You should do that too.
             BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
+
+            DictionaryLocation = AppDomain.CurrentDomain.BaseDirectory + "dictionary.txt";
         }
 
         /// <summary>
