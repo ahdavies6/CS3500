@@ -491,8 +491,9 @@ namespace Boggle
                                 // if the game only has one player, it's pending
                                 if (reader["Player2"] == null)
                                 {
-                                    SetStatus(OK);
                                     response.GameState = "pending";
+
+                                    SetStatus(OK);
                                     return response;
                                 }
 
@@ -501,35 +502,62 @@ namespace Boggle
                                 // todo: figure out how to implement this with datetime
                                 // if (time has run out)
                                 {
+                                    response.GameState = "completed";
                                     response.TimeLeft = 0;
                                 }
                                 //else
                                 {
+                                    response.GameState = "active";
                                     // response.TimeLeft = datetime bit
                                 }
 
+                                // brief active & inactive data
+
+                                string p1ID = (string)reader["Player1"];
                                 // todo: make sure that nested database searching like this doesn't cause problems
-                                int score;
-                                SerialPlayer player1 = new SerialPlayer
-                                {
-                                    WordsPlayed = GetPlayerScores(gameID, userID, out score),
-                                    Score = score
-                                };
+                                IList<WordEntry> p1Words = GetPlayerScores(gameID, p1ID, out int p1Score);
+                                SerialPlayer player1 = new SerialPlayer { Score = p1Score };
                                 response.Player1 = player1;
 
-                                SerialPlayer player2 = new SerialPlayer
-                                {
-                                    WordsPlayed = GetPlayerScores(gameID, userID, out score),
-                                    Score = score
-                                };
+                                string p2ID = (string)reader["Player2"];
+                                // todo: make sure that nested database searching like this doesn't cause problems
+                                IList<WordEntry> p2Words = GetPlayerScores(gameID, p2ID, out int p2Score);
+                                SerialPlayer player2 = new SerialPlayer { Score = p2Score };
                                 response.Player2 = player2;
 
+                                // brief active & inactive response
+                                if (brief)
+                                {
+                                    response.Player1 = player1;
+                                    response.Player2 = player2;
 
-                                // return it if brief
+                                    SetStatus(OK);
+                                    return response;
+                                }
 
-                                // add the stuff for 
+                                // not brief, active data
 
-                                // add the rest; return
+                                response.Board = (string)reader["Board"];
+                                response.TimeLimit = (int)reader["TimeLimit"];
+
+                                // todo: get their names
+                                //response.Player1.Nickname = "temp1";
+                                //response.Player2.Nickname = "temp2";
+
+                                // not brief, active response
+                                if (response.GameState == "active")
+                                {
+                                    SetStatus(OK);
+                                    return response;
+                                }
+
+                                // not brief, completed data
+                                response.Player1.WordsPlayed = p1Words;
+                                response.Player2.WordsPlayed = p2Words;
+
+                                // not brief, completed response
+                                SetStatus(OK);
+                                return response;
                             }
                         }
                     }
