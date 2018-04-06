@@ -1,0 +1,1 @@
+﻿insert into Games(Player1, TimeLimit) output inserted.GameID values('TESTTOKEN', 100) 
