@@ -486,10 +486,13 @@ namespace Boggle
                         return null;
                     }
 
+                    //Standardize words to lower case
+                    request.Word = request.Word.ToLower();
+
                     int score = ScoreWord(new BoggleBoard(board), request.Word);
 
                     //Check if the word has already been played by this player
-                    using (SqlCommand cmd = new SqlCommand("select Id from Words where Word = @Word and GameID = @GameID and Player = @Player", conn, trans))
+                    using (SqlCommand cmd = new SqlCommand("select * from Words where Word = @Word and GameID = @GameID and Player = @Player", conn, trans))
                     {
                         cmd.Parameters.AddWithValue("@Word", request.Word);
                         cmd.Parameters.AddWithValue("@GameID", gameID);
@@ -695,6 +698,7 @@ namespace Boggle
                             }
                             else if (completed == true)
                             {
+                                response.Player1.Score = p1score;
                                 response.Player1.WordsPlayed = p1words;
                             }
                             else if (completed == false)
@@ -734,6 +738,7 @@ namespace Boggle
                             else if (completed == true)
                             {
                                 response.Player2.WordsPlayed = p2words;
+                                response.Player2.Score = p2score;
                             }
                             else if (completed == false)
                             {
