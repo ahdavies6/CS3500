@@ -178,7 +178,9 @@ namespace Boggle
                 // execute all commands within a single transaction
                 using (SqlTransaction transaction = connection.BeginTransaction())
                 {
-                    string gameID = "";
+                    // todo: make sure GameID starts at 1, not 0
+                    // (otherwise, this should be changed, because this might actually end up as 0 when creating a game)
+                    int gameID = 0;
 
                     // find out whether there's a pending game
                     using (SqlCommand command = new SqlCommand("select GameID from Games where Player2 is null",
@@ -189,7 +191,7 @@ namespace Boggle
                         {
                             while (reader.Read())
                             {
-                                gameID = (string)reader["GameID"];
+                                gameID = (int)reader["GameID"];
                                 string player1 = (string)reader["Player1"];
 
                                 // averages the time between player1's requested time and this user's requested time
@@ -207,11 +209,12 @@ namespace Boggle
                     }
 
                     // gameID would have been reassigned if the previous command block found a pending game
-                    if (gameID == "") // create a new pending game
+                    // todo: make sure GameID starts at 1, not 0 (otherwise, this needs to be changed)
+                    if (gameID == 0) // create a new pending game
                     {
                         gameID = CreateNewGame(userID, timeLimit);
 
-                        if (gameID != "ERROR") // if creating the new game in the database was a success
+                        if (gameID != 0) // if creating the new game in the database was a success
                         {
                             SetStatus(Accepted);
                         }
@@ -241,7 +244,7 @@ namespace Boggle
         /// <summary>
         /// Creates a new pending game with userID; returns the primary key GameID for the new pending game
         /// </summary>
-        private string CreateNewGame(string userID, int requestedTime)
+        private int CreateNewGame(string userID, int requestedTime)
         {
             // open connection to database
             using (SqlConnection connection = new SqlConnection(BoggleDB))
@@ -261,18 +264,10 @@ namespace Boggle
 
                         // execute command, and get back the primary key (GameID)
                         // todo: make sure that this doesn't throw an exception if .ToString() doesn't work
-                        string gameID = command.ExecuteScalar().ToString();
+                        int gameID = (int)command.ExecuteScalar();
 
-                        // todo: change "null" to whatever ExecuteScalar returns if the command failed
-                        // (which well may be a null string)
-                        if (gameID != null)
-                        {
-                            return gameID;
-                        }
-                        else // the command failed, which should only happen if userID isn't registered
-                        {
-                            return "ERROR";
-                        }
+                        // todo: make sure that GameID starts at 1, not 0; otherwise, this needs to be changed
+                        return gameID;
                     }
                 }
             }
@@ -281,7 +276,7 @@ namespace Boggle
         /// <summary>
         /// Adds userID to the pending game gameID; returns whether this worked or not
         /// </summary>
-        private bool JoinPendingGame(string userID, string gameID, int timeLimit)
+        private bool JoinPendingGame(string userID, int gameID, int timeLimit)
         {
             // open connection to database
             using (SqlConnection connection = new SqlConnection(BoggleDB))
