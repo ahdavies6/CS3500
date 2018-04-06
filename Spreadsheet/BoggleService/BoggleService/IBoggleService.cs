@@ -6,6 +6,10 @@ using System.Net;
 
 namespace Boggle
 {
+    /// <summary>
+    /// Interface for BoggleService which requires inheritors to have methods pertaining to
+    /// what a good Boggle webserver should be able to do
+    /// </summary>
     [ServiceContract]
     public interface IBoggleService
     {

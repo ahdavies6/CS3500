@@ -4,6 +4,8 @@ using System;
 
 namespace Boggle
 {
+    // todo: consider removing all of this but GenerateBoggleBoard
+
     /// <summary>
     /// Represents a Boggle board.
     /// </summary>
@@ -13,7 +15,7 @@ namespace Boggle
         private char[,] board;
 
         // The 16 cubes that make up a standard Boggle Board
-        private string[] cubes =
+        private static string[] cubes =
             {
                 "LRYTTE",
                 "ANAEEG",
@@ -34,9 +36,20 @@ namespace Boggle
             };
 
         /// <summary>
-        /// Creates a randomly-generated BoggleBoard 
+        /// Creates a randomly-generated BoggleBoard from GenerateBoggleBoard
         /// </summary>
         public BoggleBoard()
+        {
+            string letters = GenerateBoggleBoard();
+
+            // Make the board
+            MakeBoard(letters);
+        }
+
+        /// <summary>
+        /// Generates a new, random boggle board string
+        /// </summary>
+        public static string GenerateBoggleBoard()
         {
             // Shuffle the cubes
             Random r = new Random();
@@ -56,8 +69,7 @@ namespace Boggle
                 letters += cubes[i][r.Next(6)];
             }
 
-            // Make the board
-            MakeBoard(letters);
+            return letters;
         }
 
         /// <summary>

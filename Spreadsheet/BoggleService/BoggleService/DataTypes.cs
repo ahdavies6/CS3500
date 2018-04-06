@@ -89,7 +89,7 @@ namespace Boggle
     /// </summary>
     public class GameIDResponse
     {
-        public string GameID { get; set; }
+        public int GameID { get; set; }
     }
 
     /// <summary>
