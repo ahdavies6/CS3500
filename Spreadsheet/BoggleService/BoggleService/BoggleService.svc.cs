@@ -6,6 +6,7 @@ using System.ServiceModel.Web;
 using System.Net.Http;
 using static System.Net.HttpStatusCode;
 using System.Configuration;
+using System.Data.SqlClient;
 
 namespace Boggle
 {
@@ -149,64 +150,90 @@ namespace Boggle
         /// </summary>
         public GameIDResponse JoinGame(JoinRequest request)
         {
-            lock (sync)
+            // make sure TimeLimit is within the expected bounds
+            if (!(request.TimeLimit >= 5 && request.TimeLimit <= 120))
             {
-                User player;
-                if (Users.ContainsKey(request.UserToken))
-                {
-                    player = Users[request.UserToken];
-                }
-                else
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
-
-
-                if (!(request.TimeLimit >= 5 && request.TimeLimit <= 120))
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
-
-                if (PendingGames.ContainsKey(request.UserToken))
-                {
-                    SetStatus(Conflict);
-                    return null;
-                }
-
-                GameIDResponse response = new GameIDResponse();
-                if (PendingGames.Count != 0)
-                {
-                    string currkey = null;
-                    BoggleGame game = null;
-                    foreach (string key in PendingGames.Keys)
-                    {
-                        currkey = key;
-                        game = PendingGames[key];
-                        break;
-                    }
-
-                    game.AddSecondPlayer(player, request.TimeLimit);
-                    PendingGames.Remove(currkey);
-
-                    Games.Add(game.GameID, game);
-
-                    response.GameID = game.GameID;
-                    SetStatus(Created);
-                }
-                else
-                {
-                    BoggleGame newGame = new BoggleGame(player, request.TimeLimit, GenerateGameID());
-
-                    PendingGames.Add(request.UserToken, newGame);
-
-                    response.GameID = newGame.GameID;
-                    SetStatus(Accepted);
-                }
-
-                return response;
+                SetStatus(Forbidden);
+                return null;
             }
+
+            // make sure UserToken is within the expected bounds
+            if (request.UserToken == null || request.UserToken.Trim().Length == 0 ||
+                request.UserToken.Trim().Length > 36)
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
+
+            // open connection to database
+            using (SqlConnection connection = new SqlConnection(BoggleDB))
+            {
+                connection.Open();
+
+                // execute all commands within a single transaction
+                using (SqlTransaction transaction = connection.BeginTransaction())
+                {
+                    // TODO: COMPLETE THIS
+                    // the command to attempt to join a game
+                    using (SqlCommand command = new SqlCommand("select "))
+                    {
+
+
+                        // first (non-exception) case: no pending games
+
+                        // second (non-exception) case: pending game
+                    }
+                }
+            }
+
+            User player;
+            if (Users.ContainsKey(request.UserToken))
+            {
+                player = Users[request.UserToken];
+            }
+            else
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
+
+            if (PendingGames.ContainsKey(request.UserToken))
+            {
+                SetStatus(Conflict);
+                return null;
+            }
+
+            GameIDResponse response = new GameIDResponse();
+            if (PendingGames.Count != 0)
+            {
+                string currkey = null;
+                BoggleGame game = null;
+                foreach (string key in PendingGames.Keys)
+                {
+                    currkey = key;
+                    game = PendingGames[key];
+                    break;
+                }
+
+                game.AddSecondPlayer(player, request.TimeLimit);
+                PendingGames.Remove(currkey);
+
+                Games.Add(game.GameID, game);
+
+                response.GameID = game.GameID;
+                SetStatus(Created);
+            }
+            else
+            {
+                BoggleGame newGame = new BoggleGame(player, request.TimeLimit, GenerateGameID());
+
+                PendingGames.Add(request.UserToken, newGame);
+
+                response.GameID = newGame.GameID;
+                SetStatus(Accepted);
+            }
+
+            return response;
         }
 
         /// <summary>
