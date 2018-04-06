@@ -106,7 +106,7 @@ namespace Boggle
         public UserTokenResponse RegisterUser(CreateUserRequest request)
         {
 
-            if (request.Nickname is null || (request.Nickname = request.Nickname.Trim()).Length == 0)
+            if (request is null || request.Nickname is null || (request.Nickname = request.Nickname.Trim()).Length == 0)
             {
                 SetStatus(Forbidden);
                 return null;
@@ -115,10 +115,9 @@ namespace Boggle
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 conn.Open();
-
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    using (SqlCommand cmd = new SqlCommand("insert into Users(UserID, Nickname) values(@UserID, @Nickname)"))
+                    using (SqlCommand cmd = new SqlCommand("insert into Users(UserID, Nickname) values(@UserID, @Nickname)", conn, trans))
                     {
                         string uid = Guid.NewGuid().ToString();
 
@@ -140,7 +139,6 @@ namespace Boggle
                         {
                             UserToken = uid
                         };
-
                     }
                 }
             }
@@ -237,17 +235,32 @@ namespace Boggle
         /// </summary>
         public void CancelJoinRequest(CancelJoinRequest request)
         {
-            lock (sync)
+
+            if (request is null || request.UserToken is null || (request.UserToken = request.UserToken.Trim()).Length == 0)
             {
-                if (request.UserToken is null || !PendingGames.ContainsKey(request.UserToken))
+                SetStatus(Forbidden);
+                return;
+            }
+
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
+            {
+                using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    SetStatus(Forbidden);
-                }
-                else
-                {
-                    PendingGames.Remove(request.UserToken);
-                    NumberOfGames--;
-                    SetStatus(OK);
+                    using (SqlCommand cmd = new SqlCommand("delete from Games where Player1 = @Player1Token", conn, trans))
+                    {
+                        cmd.Parameters.AddWithValue("@Player1Token", request.UserToken);
+
+                        if (cmd.ExecuteNonQuery() == 0)
+                        {
+                            SetStatus(Forbidden);
+                        }
+                        else
+                        {
+                            SetStatus(OK);
+                        }
+
+                        trans.Commit();
+                    }
                 }
             }
         }
