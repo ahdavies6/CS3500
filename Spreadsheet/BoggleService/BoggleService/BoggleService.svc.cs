@@ -54,9 +54,9 @@ namespace Boggle
         private static string BoggleDB;
 
         /// <summary>
-        /// String that indicates where the dictionary.txt is
+        /// Dictionary of valid words
         /// </summary>
-        private static string DictionaryLocation;
+        private static HashSet<string> Dict;
 
         static BoggleService()
         {
@@ -82,7 +82,16 @@ namespace Boggle
             // file where it can be easily found and changed.  You should do that too.
             BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
 
-            DictionaryLocation = AppDomain.CurrentDomain.BaseDirectory + "dictionary.txt";
+            Dict = new HashSet<string>();
+
+            using (StreamReader file = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dictionary.txt"))
+            {
+                string currLine;
+                while ((currLine = file.ReadLine()) != null)
+                {
+                    Dict.Add(currLine.ToLower());
+                }
+            };
         }
 
         /// <summary>
@@ -281,56 +290,154 @@ namespace Boggle
         /// </summary>
         public ScoreResponse PlayWord(PlayWord request, string gameID)
         {
-            lock (sync)
+
+            //null and length checks
+            if (gameID is null || request is null || request.UserToken is null || (request.UserToken = request.UserToken.Trim()).Length == 0
+                || request.Word is null || (request.Word = request.Word.Trim()).Length == 0 || request.Word.Length > 30)
             {
-                string word = request.Word;
-                string uid = request.UserToken;
+                SetStatus(Forbidden);
+            }
 
-                if (uid is null || (uid = uid.Trim()).Length == 0 || gameID is null || word is null || (word = word.Trim()).Length == 0 || word.Length > 30)
+            //values used when doing the query then insert into words
+            string player1, player2, board;
+            int timeLimit;
+            DateTime? startTime;
+
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
+            {
+                using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    SetStatus(Forbidden);
-                    return null;
-                }
-
-                User curr;
-                BoggleGame game;
-
-                if (!Users.TryGetValue(uid, out curr) || !Games.TryGetValue(gameID, out game))
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
-
-                try
-                {
-                    ScoreResponse response = new ScoreResponse()
+                    using (SqlCommand cmd = new SqlCommand("select GameID, Player1, Player2, Board, TimeLimit, StartTime where GameID = @GameID", conn, trans))
                     {
-                        Score = game.PlayWord(curr, word)
-                    };
+                        cmd.Parameters.AddWithValue("@GameID", gameID);
 
-                    SetStatus(OK);
-                    return response;
-                }
-                catch (PlayerNotInGameException e)
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
-                catch (GameNotActiveException e)
-                {
-                    SetStatus(Conflict);
-                    return null;
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            //Game doesnt exist
+                            if (!reader.HasRows)
+                            {
+                                SetStatus(Forbidden);
+                                reader.Close();
+                                trans.Commit();
+                                return null;
+                            }
+
+                            //only one row 
+                            reader.Read();
+                            player1 = (string)reader["Player1"];
+                            player2 = reader["Player2"]?.ToString();
+                            board = (string)reader["Board"];
+                            timeLimit = (int)reader["TimeLimit"];
+                            startTime = (DateTime?)reader["StartTime"];
+                        }
+                    }
+
+                    //any indicator that the game is pending
+                    if (player2 is null || startTime is null || board is null || startTime is null)
+                    {
+                        SetStatus(Conflict);
+                        trans.Commit();
+                        return null;
+                    }
+
+                    //Checks if the player is in the game
+                    if (!(player1.Equals(request.UserToken) || player2.Equals(request.UserToken)))
+                    {
+                        SetStatus(Forbidden);
+                        trans.Commit();
+                        return null;
+                    }
+
+                    //check if the game is compeleted
+                    if((startTime?.AddSeconds(timeLimit) - DateTime.UtcNow)?.TotalMilliseconds < 0)
+                    {
+                        SetStatus(Conflict);
+                        trans.Commit();
+                        return null;
+                    }
+
+                    int score = ScoreWord(new BoggleBoard(board), request.Word);
+
+                    //Check if the word has already been played by this player
+                    using (SqlCommand cmd = new SqlCommand("select Id from Words where Word = @Word and GameID = @GameID and Player = @Player", conn, trans))
+                    {
+                        cmd.Parameters.AddWithValue("@Word", request.Word);
+                        cmd.Parameters.AddWithValue("@GameID", gameID);
+                        cmd.Parameters.AddWithValue("@Player", request.UserToken);
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                score = 0;
+                            }
+                        }
+                    }
+
+                    //add the new word
+                    using (SqlCommand cmd = new SqlCommand("insert into Words (Word, GameID, Player, Score) values(@Word, @GameID, @Player, @Score", conn, trans))
+                    {
+                        cmd.Parameters.AddWithValue("@Word", request.Word);
+                        cmd.Parameters.AddWithValue("@GameID", gameID);
+                        cmd.Parameters.AddWithValue("@Player", request.UserToken);
+                        cmd.Parameters.AddWithValue("@Score", score);
+
+                        if (cmd.ExecuteNonQuery() != 1)
+                        {
+                            throw new Exception("Query failed unexpectedly");
+                        }
+
+                        trans.Commit();
+
+                        SetStatus(OK);
+                        return new ScoreResponse() { Score = score };
+
+                    }
+
                 }
             }
         }
 
         /// <summary>
-        /// Generates a new, unique user token that is a Guid
+        /// Given a word and a boggle board, scores it as if it was being played for the first time
         /// </summary>
-        private string UserTokenGenerator()
+        /// <param name="bg"></param>
+        /// <param name="word"></param>
+        /// <returns></returns>
+        private int ScoreWord(BoggleBoard bg, string word)
         {
-            return Guid.NewGuid().ToString();
+            if (word.Length < 3)
+            {
+                return 0;
+            }
+            else if (bg.CanBeFormed(word) && Dict.Contains(word.ToLower()))
+            {
+                int leng = word.Length;
+
+                if (leng == 3 || leng == 4)
+                {
+                    return 1;
+                }
+                else if (leng == 5 || leng == 6)
+                {
+                    return leng - 3;
+                }
+                else if (leng == 7)
+                {
+                    return 5;
+                }
+                else
+                {
+                    return 11;
+                }
+            }
+            else
+            {
+                return -1;
+            }
         }
+
+
 
         /// <summary>
         /// Increments the number of games and creates a unique GameID
@@ -481,56 +588,6 @@ namespace Boggle
         }
     }
 
-    /// <summary>
-    /// Singleton class allows checking whether a word is valid
-    /// </summary>
-    public class Words
-    {
-        /// <summary>
-        /// Singleton self
-        /// </summary>
-        private static Words me;
-
-        /// <summary>
-        /// All the valid words
-        /// </summary>
-        private static ISet<string> words;
-
-        /// <summary>
-        /// Singleton constructor
-        /// 
-        /// Passes in all the words from dictionary.txt to words field
-        /// </summary>
-        private Words()
-        {
-            if (me == null)
-            {
-                words = new HashSet<string>();
-
-                using (StreamReader file = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dictionary.txt"))
-                {
-                    string currLine;
-                    while ((currLine = file.ReadLine()) != null)
-                    {
-                        words.Add(currLine.ToUpper());
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Checks whether word is a valid dictionary word
-        /// </summary>
-        public static bool IsValidWord(string word)
-        {
-            if (me == null)
-            {
-                me = new Words();
-            }
-
-            return words.Contains(word.ToUpper());
-        }
-    }
 
     public class User
     {

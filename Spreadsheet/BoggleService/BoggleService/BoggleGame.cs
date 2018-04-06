@@ -196,7 +196,7 @@ namespace Boggle
             {
                 return 0;
             }
-            else if (this.Board.CanBeFormed(word) && Words.IsValidWord(word))
+            else if (this.Board.CanBeFormed(word)) //&& Words.IsValidWord(word))
             {
                 int leng = word.Length;
 
