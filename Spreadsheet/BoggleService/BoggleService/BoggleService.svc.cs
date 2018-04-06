@@ -169,7 +169,6 @@ namespace Boggle
                 return null;
             }
 
-            // todo: check whether userToken is in users. if so, set forbidden and return null
             // open connection to database
             using (SqlConnection connection = new SqlConnection(BoggleDB))
             {
@@ -263,7 +262,6 @@ namespace Boggle
                         command.Parameters.AddWithValue("@TimeLimit", requestedTime);
 
                         // execute command, and get back the primary key (GameID)
-                        // todo: make sure that this doesn't throw an exception if .ToString() doesn't work
                         int gameID = (int)command.ExecuteScalar();
 
                         // todo: make sure that GameID starts at 1, not 0; otherwise, this needs to be changed
