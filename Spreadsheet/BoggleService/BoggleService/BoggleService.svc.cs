@@ -677,9 +677,8 @@ namespace Boggle
                             IList<WordEntry> p1words = new List<WordEntry>();
                             int p1score = 0;
 
-                            while (reader.HasRows)
+                            while (reader.Read())
                             {
-                                reader.Read();
                                 int s = (int)reader["Score"];
                                 p1words.Add(new WordEntry()
                                 {
@@ -716,9 +715,8 @@ namespace Boggle
                             IList<WordEntry> p2words = new List<WordEntry>();
                             int p2score = 0;
 
-                            while (reader.HasRows)
+                            while (reader.Read())
                             {
-                                reader.Read();
                                 int s = (int)reader["Score"];
                                 p2words.Add(new WordEntry()
                                 {
