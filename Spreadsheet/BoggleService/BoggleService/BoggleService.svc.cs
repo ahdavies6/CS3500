@@ -379,7 +379,7 @@ namespace Boggle
                 conn.Open();
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    using (SqlCommand cmd = new SqlCommand("delete from Games where Player1 = @Player1Token", conn, trans))
+                    using (SqlCommand cmd = new SqlCommand("delete from Games where Player1 = @Player1Token and Player2 is null", conn, trans))
                     {
                         cmd.Parameters.AddWithValue("@Player1Token", request.UserToken);
 
@@ -657,6 +657,7 @@ namespace Boggle
                                 if (!briefbool)
                                 {
                                     response.Board = board;
+                                    response.TimeLimit = limit;
                                 }
 
                                 p1id = (string)reader["Player1"];
