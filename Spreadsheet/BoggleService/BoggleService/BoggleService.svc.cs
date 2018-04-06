@@ -6,6 +6,7 @@ using System.ServiceModel.Web;
 using System.Net.Http;
 using static System.Net.HttpStatusCode;
 using System.Configuration;
+using System.Data.SqlClient;
 
 namespace Boggle
 {
@@ -94,37 +95,54 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Registers new user
+        /// Creates a user with nickname. 
+        /// 
+        /// If nickname is null, or is empty when trimmed, responds with status 403 (Forbidden). 
+        /// 
+        /// Otherwise, creates a new user with a unique UserToken and the trimmed nickname.
+        /// The returned UserToken should be used to identify the user in subsequent requests.
+        /// Responds with status 201 (Created). 
         /// </summary>
         public UserTokenResponse RegisterUser(CreateUserRequest request)
         {
-            lock (sync)
+
+            if (request.Nickname is null || (request.Nickname = request.Nickname.Trim()).Length == 0)
             {
-                if (request.Nickname is null)
+                SetStatus(Forbidden);
+                return null;
+            }
+
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
+            {
+                conn.Open();
+
+                using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    SetStatus(Forbidden);
-                    return null;
+                    using (SqlCommand cmd = new SqlCommand("insert into Users(UserID, Nickname) values(@UserID, @Nickname)"))
+                    {
+                        string uid = Guid.NewGuid().ToString();
+
+                        cmd.Parameters.AddWithValue("@UserID", uid);
+                        cmd.Parameters.AddWithValue("@Nickname", request.Nickname);
+
+                        //try to do the insert 
+                        if (cmd.ExecuteNonQuery() != 1)
+                        {
+                            throw new Exception("Query failed unexpectedly");
+                        }
+
+                        //Commit
+                        trans.Commit();
+
+                        //Returning values
+                        SetStatus(Created);
+                        return new UserTokenResponse()
+                        {
+                            UserToken = uid
+                        };
+
+                    }
                 }
-
-                string trimmedNickname = request.Nickname.Trim();
-                if (trimmedNickname.Length == 0 || trimmedNickname.Length > 50)
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
-
-                string token = UserTokenGenerator();
-
-                User user = new User(trimmedNickname, token);
-                Users.Add(token, user);
-
-                //response to the client
-                UserTokenResponse response = new UserTokenResponse
-                {
-                    UserToken = token
-                };
-                SetStatus(Created);
-                return response;
             }
         }
 
