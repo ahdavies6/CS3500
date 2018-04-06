@@ -139,32 +139,37 @@ namespace Boggle
         /// 409 (Conflict).
         /// 
         /// Otherwise, if there is already one player in the pending game, adds UserToken as the
-        /// second player. The pending game becomes active and a new pending game with no players
-        /// is created. The active game's time limit is the integer average of the time limits
-        /// requested by the two players. Returns the new active game's GameID (which should be the
-        /// same as the old pending game's GameID). Responds with status 201 (Created).
+        /// second player. The pending game becomes active. The active game's time limit is the integer
+        /// average of the time limits requested by the two players. Returns the new active game's
+        /// GameID (which should be the same as the old pending game's GameID). Responds with
+        /// status 201 (Created).
         /// 
-        /// Otherwise, adds UserToken as the first player of the pending game, and the TimeLimit as
+        /// Otherwise, adds UserToken as the first player of a new pending game, and the TimeLimit as
         /// the pending game's requested time limit. Returns the pending game's GameID. Responds with
         /// status 202 (Accepted).
         /// </summary>
         public GameIDResponse JoinGame(JoinRequest request)
         {
+            int timeLimit = request.TimeLimit;
+
             // make sure TimeLimit is within the expected bounds
-            if (!(request.TimeLimit >= 5 && request.TimeLimit <= 120))
+            if (!(timeLimit >= 5 && timeLimit <= 120))
             {
                 SetStatus(Forbidden);
                 return null;
             }
+
+            // the UserID that'll be used throughout this method
+            string userID = request.UserToken.Trim();
 
             // make sure UserToken is within the expected bounds
-            if (request.UserToken == null || request.UserToken.Trim().Length == 0 ||
-                request.UserToken.Trim().Length > 36)
+            if (userID == null || userID.Length == 0 || userID.Length > 36)
             {
                 SetStatus(Forbidden);
                 return null;
             }
 
+            // todo: check whether userToken is in users. if so, set forbidden and return null
             // open connection to database
             using (SqlConnection connection = new SqlConnection(BoggleDB))
             {
@@ -173,67 +178,143 @@ namespace Boggle
                 // execute all commands within a single transaction
                 using (SqlTransaction transaction = connection.BeginTransaction())
                 {
-                    // TODO: COMPLETE THIS
-                    // the command to attempt to join a game
-                    using (SqlCommand command = new SqlCommand("select "))
+                    string gameID = "";
+
+                    // find out whether there's a pending game
+                    using (SqlCommand command = new SqlCommand("select GameID from Games where Player2 is null",
+                        connection, transaction))
                     {
+                        // the reader that will determine whether there's a pending game, and if so, what its gameID is
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                gameID = (string)reader["GameID"];
+                                string player1 = (string)reader["Player1"];
 
+                                // averages the time between player1's requested time and this user's requested time
+                                int player1RequestedTime = (int)reader["TimeLimit"];
+                                timeLimit = (timeLimit + player1RequestedTime) / 2;
 
-                        // first (non-exception) case: no pending games
+                                // player is already searching for a game
+                                if (player1 == userID)
+                                {
+                                    SetStatus(Conflict);
+                                    return null;
+                                }
+                            }
+                        }
+                    }
 
-                        // second (non-exception) case: pending game
+                    // gameID would have been reassigned if the previous command block found a pending game
+                    if (gameID == "") // create a new pending game
+                    {
+                        gameID = CreateNewGame(userID, timeLimit);
+
+                        if (gameID != "ERROR") // if creating the new game in the database was a success
+                        {
+                            SetStatus(Accepted);
+                        }
+                        else // adding the new game failed, which means that userID isn't registered
+                        {
+                            SetStatus(Forbidden);
+                        }
+                    }
+                    else // join the pending game
+                    {
+                        // recall that gameID and timeLimit were modified by the previous command block
+                        if (JoinPendingGame(userID, gameID, timeLimit)) // success
+                        {
+                            SetStatus(Created);
+                        }
+                        else // joining the game failed, which means that userID isn't registered
+                        {
+                            SetStatus(Forbidden);
+                        }
+                    }
+
+                    return new GameIDResponse { GameID = gameID };
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates a new pending game with userID; returns the primary key GameID for the new pending game
+        /// </summary>
+        private string CreateNewGame(string userID, int requestedTime)
+        {
+            // open connection to database
+            using (SqlConnection connection = new SqlConnection(BoggleDB))
+            {
+                connection.Open();
+
+                // execute all commands within a single transaction
+                using (SqlTransaction transaction = connection.BeginTransaction())
+                {
+                    // todo: make sure this command (especially the part(s) in parenthesis) does what you think it does
+                    using (SqlCommand command = new SqlCommand(
+                        //"insert into Games (Player1) output inserted.GameID values(@Player1)", connection, transaction))
+                        "insert into Games Player1 values(@Player1, @TimeLimit)", connection, transaction))
+                    {
+                        command.Parameters.AddWithValue("@Player1", userID);
+                        command.Parameters.AddWithValue("@TimeLimit", requestedTime);
+
+                        // execute command, and get back the primary key (GameID)
+                        // todo: make sure that this doesn't throw an exception if .ToString() doesn't work
+                        string gameID = command.ExecuteScalar().ToString();
+
+                        // todo: change "null" to whatever ExecuteScalar returns if the command failed
+                        // (which well may be a null string)
+                        if (gameID != null)
+                        {
+                            return gameID;
+                        }
+                        else // the command failed, which should only happen if userID isn't registered
+                        {
+                            return "ERROR";
+                        }
                     }
                 }
             }
+        }
 
-            User player;
-            if (Users.ContainsKey(request.UserToken))
+        /// <summary>
+        /// Adds userID to the pending game gameID; returns whether this worked or not
+        /// </summary>
+        private bool JoinPendingGame(string userID, string gameID, int timeLimit)
+        {
+            // open connection to database
+            using (SqlConnection connection = new SqlConnection(BoggleDB))
             {
-                player = Users[request.UserToken];
-            }
-            else
-            {
-                SetStatus(Forbidden);
-                return null;
-            }
+                connection.Open();
 
-            if (PendingGames.ContainsKey(request.UserToken))
-            {
-                SetStatus(Conflict);
-                return null;
-            }
-
-            GameIDResponse response = new GameIDResponse();
-            if (PendingGames.Count != 0)
-            {
-                string currkey = null;
-                BoggleGame game = null;
-                foreach (string key in PendingGames.Keys)
+                // execute all commands within a single transaction
+                using (SqlTransaction transaction = connection.BeginTransaction())
                 {
-                    currkey = key;
-                    game = PendingGames[key];
-                    break;
+                    // todo: make sure this command (especially the part in parenthesis) does what you think it does
+                    //Games(Player2, Board, TimeLimit, StartTime)
+                    using (SqlCommand command = new SqlCommand("update Games set (Player2, Board, TimeLimit, StartTime)=" +
+                        "(@Player2, @Board, @TimeLimit, @StartTime) where GameID = @GameID", connection, transaction))
+                    {
+                        command.Parameters.AddWithValue("@Player2", userID);
+                        command.Parameters.AddWithValue("@Board", BoggleBoard.GenerateBoggleBoard());
+                        command.Parameters.AddWithValue("@TimeLimit", timeLimit);
+                        command.Parameters.AddWithValue("@StartTime", timeLimit);
+                        command.Parameters.AddWithValue("@GameID", gameID);
+
+                        int numRowsModified = command.ExecuteNonQuery();
+
+                        if (numRowsModified != 0) // the command was a success
+                        {
+                            return true;
+                        }
+                        else // the command failed, which should only happen when the userID isn't registered
+                        {
+                            return false;
+                        }
+                    }
                 }
-
-                game.AddSecondPlayer(player, request.TimeLimit);
-                PendingGames.Remove(currkey);
-
-                Games.Add(game.GameID, game);
-
-                response.GameID = game.GameID;
-                SetStatus(Created);
             }
-            else
-            {
-                BoggleGame newGame = new BoggleGame(player, request.TimeLimit, GenerateGameID());
-
-                PendingGames.Add(request.UserToken, newGame);
-
-                response.GameID = newGame.GameID;
-                SetStatus(Accepted);
-            }
-
-            return response;
         }
 
         /// <summary>
