@@ -10,54 +10,64 @@ using System.Data.SqlClient;
 
 namespace Boggle
 {
+    // todo: remove all deprecated code once database has been fully implemented
+    /// <summary>
+    /// Boggle game server that keeps track of user data, game data, and serves it up as necessary
+    /// for a Boggle game client to receive. Also allows users to interact with the server as necessary
+    /// to create "accounts" and play the game against other users.
+    /// </summary>
     public class BoggleService : IBoggleService
     {
-        /// <summary>
-        /// Keeps track of all users
-        /// Key: UserToken
-        /// Value: Nickname
-        /// </summary>
-        private static Dictionary<string, User> Users = new Dictionary<string, User>();
+        ///// <summary>
+        ///// Keeps track of all users
+        ///// Key: UserToken
+        ///// Value: Nickname
+        ///// </summary>
+        //private static Dictionary<string, User> Users = new Dictionary<string, User>();
+
+        ///// <summary>
+        ///// Dictionary to represent the games in use
+        ///// Key: GameID (gotten from when the game is created). It is a property in BoggleGame
+        ///// Value: BoggleGame game 
+        ///// 
+        ///// Contains both active and completed games but NOT pending games
+        ///// </summary>
+        //private static Dictionary<string, BoggleGame> Games = new Dictionary<string, BoggleGame>();
+
+        ///// <summary>
+        ///// Keeps track of any pending games, should only be one but kept as a dictionary in case requests get large 
+        ///// Dicationary key: string GameID
+        ///// Dicationary Value: BoggleGame 
+        ///// 
+        ///// Once a second player is found, the game is removed and then moved into the games dictionary
+        ///// </summary>
+        //private static Dictionary<string, BoggleGame> PendingGames = new Dictionary<string, BoggleGame>();
+
+        ///// <summary>
+        ///// Lock object for server threading.
+        ///// </summary>
+        //private static object sync = new object();
+
+        ///// <summary>
+        ///// Value that keeps track of the amount of games created when the server was created.
+        ///// Used to make GameIDs
+        ///// </summary>
+        //private static int NumberOfGames = 0;
 
         /// <summary>
-        /// Dictionary to represent the games in use
-        /// Key: GameID (gotten from when the game is created). It is a property in BoggleGame
-        /// Value: BoggleGame game 
-        /// 
-        /// Contains both active and completed games but NOT pending games
-        /// </summary>
-        private static Dictionary<string, BoggleGame> Games = new Dictionary<string, BoggleGame>();
-
-        /// <summary>
-        /// Keeps track of any pending games, should only be one but kept as a dictionary in case requests get large 
-        /// Dicationary key: string GameID
-        /// Dicationary Value: BoggleGame 
-        /// 
-        /// Once a second player is found, the game is removed and then moved into the games dictionary
-        /// </summary>
-        private static Dictionary<string, BoggleGame> PendingGames = new Dictionary<string, BoggleGame>();
-
-        /// <summary>
-        /// Lock object for server threading.
-        /// </summary>
-        private static object sync = new object();
-
-        /// <summary>
-        /// Value that keeps track of the amount of games created when the server was created.
-        /// Used to make GameIDs
-        /// </summary>
-        private static int NumberOfGames = 0;
-
-        /// <summary>
-        /// The connection string to the DB
+        /// The connection string to the database that contains all of the server's data
         /// </summary>
         private static string BoggleDB;
 
         /// <summary>
-        /// String that indicates where the dictionary.txt is
+        /// String that indicates where the dictionary.txt is, which contains all of the valid English
+        /// words playable in a Boggle game.
         /// </summary>
         private static string DictionaryLocation;
 
+        /// <summary>
+        /// Saves the database's connection string and the dictionary's filepath
+        /// </summary>
         static BoggleService()
         {
             // Saves the connection string for the database.  A connection string contains the
@@ -99,34 +109,36 @@ namespace Boggle
         /// </summary>
         public UserTokenResponse RegisterUser(CreateUserRequest request)
         {
-            lock (sync)
-            {
-                if (request.Nickname is null)
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
+            //lock (sync)
+            //{
+            //    if (request.Nickname is null)
+            //    {
+            //        SetStatus(Forbidden);
+            //        return null;
+            //    }
 
-                string trimmedNickname = request.Nickname.Trim();
-                if (trimmedNickname.Length == 0 || trimmedNickname.Length > 50)
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
+            //    string trimmedNickname = request.Nickname.Trim();
+            //    if (trimmedNickname.Length == 0 || trimmedNickname.Length > 50)
+            //    {
+            //        SetStatus(Forbidden);
+            //        return null;
+            //    }
 
-                string token = UserTokenGenerator();
+            //    string token = UserTokenGenerator();
 
-                User user = new User(trimmedNickname, token);
-                Users.Add(token, user);
+            //    User user = new User(trimmedNickname, token);
+            //    Users.Add(token, user);
 
-                //response to the client
-                UserTokenResponse response = new UserTokenResponse
-                {
-                    UserToken = token
-                };
-                SetStatus(Created);
-                return response;
-            }
+            //    response to the client
+            //    UserTokenResponse response = new UserTokenResponse
+            //    {
+            //        UserToken = token
+            //    };
+            //    SetStatus(Created);
+            //    return response;
+            //}
+
+            return new UserTokenResponse();
         }
 
         /// <summary>
@@ -241,7 +253,9 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Creates a new pending game with userID; returns the primary key GameID for the new pending game
+        /// Helper method for JoinGame.
+        /// Creates a new pending game with userID, and returns the primary key GameID for the
+        /// new pending game.
         /// </summary>
         private int CreateNewGame(string userID, int requestedTime)
         {
@@ -272,7 +286,8 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Adds userID to the pending game gameID; returns whether this worked or not
+        /// Helper method for JoinGame.
+        /// Adds userID to the pending game gameID, and returns whether this worked or not.
         /// </summary>
         private bool JoinPendingGame(string userID, int gameID, int timeLimit)
         {
@@ -320,19 +335,19 @@ namespace Boggle
         /// </summary>
         public void CancelJoinRequest(CancelJoinRequest request)
         {
-            lock (sync)
-            {
-                if (request.UserToken is null || !PendingGames.ContainsKey(request.UserToken))
-                {
-                    SetStatus(Forbidden);
-                }
-                else
-                {
-                    PendingGames.Remove(request.UserToken);
-                    NumberOfGames--;
-                    SetStatus(OK);
-                }
-            }
+            //lock (sync)
+            //{
+            //    if (request.UserToken is null || !PendingGames.ContainsKey(request.UserToken))
+            //    {
+            //        SetStatus(Forbidden);
+            //    }
+            //    else
+            //    {
+            //        PendingGames.Remove(request.UserToken);
+            //        NumberOfGames--;
+            //        SetStatus(OK);
+            //    }
+            //}
         }
 
         /// <summary>
@@ -351,65 +366,67 @@ namespace Boggle
         /// </summary>
         public ScoreResponse PlayWord(PlayWord request, string gameID)
         {
-            lock (sync)
-            {
-                string word = request.Word;
-                string uid = request.UserToken;
+            //lock (sync)
+            //{
+            //    string word = request.Word;
+            //    string uid = request.UserToken;
 
-                if (uid is null || (uid = uid.Trim()).Length == 0 || gameID is null || word is null || (word = word.Trim()).Length == 0 || word.Length > 30)
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
+            //    if (uid is null || (uid = uid.Trim()).Length == 0 || gameID is null || word is null || (word = word.Trim()).Length == 0 || word.Length > 30)
+            //    {
+            //        SetStatus(Forbidden);
+            //        return null;
+            //    }
 
-                User curr;
-                BoggleGame game;
+            //    User curr;
+            //    BoggleGame game;
 
-                if (!Users.TryGetValue(uid, out curr) || !Games.TryGetValue(gameID, out game))
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
+            //    if (!Users.TryGetValue(uid, out curr) || !Games.TryGetValue(gameID, out game))
+            //    {
+            //        SetStatus(Forbidden);
+            //        return null;
+            //    }
 
-                try
-                {
-                    ScoreResponse response = new ScoreResponse()
-                    {
-                        Score = game.PlayWord(curr, word)
-                    };
+            //    try
+            //    {
+            //        ScoreResponse response = new ScoreResponse()
+            //        {
+            //            Score = game.PlayWord(curr, word)
+            //        };
 
-                    SetStatus(OK);
-                    return response;
-                }
-                catch (PlayerNotInGameException e)
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
-                catch (GameNotActiveException e)
-                {
-                    SetStatus(Conflict);
-                    return null;
-                }
-            }
+            //        SetStatus(OK);
+            //        return response;
+            //    }
+            //    catch (PlayerNotInGameException e)
+            //    {
+            //        SetStatus(Forbidden);
+            //        return null;
+            //    }
+            //    catch (GameNotActiveException e)
+            //    {
+            //        SetStatus(Conflict);
+            //        return null;
+            //    }
+            //}
+
+            return new ScoreResponse();
         }
 
-        /// <summary>
-        /// Generates a new, unique user token that is a Guid
-        /// </summary>
-        private string UserTokenGenerator()
-        {
-            return Guid.NewGuid().ToString();
-        }
+        ///// <summary>
+        ///// Generates a new, unique user token that is a Guid
+        ///// </summary>
+        //private string UserTokenGenerator()
+        //{
+        //    return Guid.NewGuid().ToString();
+        //}
 
-        /// <summary>
-        /// Increments the number of games and creates a unique GameID
-        /// </summary>
-        private string GenerateGameID()
-        {
-            NumberOfGames++;
-            return "G" + NumberOfGames;
-        }
+        ///// <summary>
+        ///// Increments the number of games and creates a unique GameID
+        ///// </summary>
+        //private string GenerateGameID()
+        //{
+        //    NumberOfGames++;
+        //    return "G" + NumberOfGames;
+        //}
 
         /// <summary>
         /// Get the game status of game GameID
@@ -423,134 +440,137 @@ namespace Boggle
         /// </summary>
         public FullStatusResponse GetGameStatus(string GameID, string brief)
         {
-            lock (sync)
-            {
-                //format brief 
-                if (brief is null) brief = "";
-                else brief = brief.ToLower();
+            //lock (sync)
+            //{
+            //    //format brief 
+            //    if (brief is null) brief = "";
+            //    else brief = brief.ToLower();
 
-                //check pending games
-                //this should never be large by design
-                foreach (string key in PendingGames.Keys)
-                {
-                    if (PendingGames[key].GameID.Equals(GameID))
-                    {
-                        FullStatusResponse response = new FullStatusResponse
-                        {
-                            GameState = "pending"
-                        };
+            //    //check pending games
+            //    //this should never be large by design
+            //    foreach (string key in PendingGames.Keys)
+            //    {
+            //        if (PendingGames[key].GameID.Equals(GameID))
+            //        {
+            //            FullStatusResponse response = new FullStatusResponse
+            //            {
+            //                GameState = "pending"
+            //            };
 
-                        SetStatus(OK);
-                        return response;
-                    }
-                }
+            //            SetStatus(OK);
+            //            return response;
+            //        }
+            //    }
 
-                if (Games.ContainsKey(GameID))
-                {
-                    BoggleGame game = Games[GameID];
-                    FullStatusResponse response = new FullStatusResponse();
+            //    if (Games.ContainsKey(GameID))
+            //    {
+            //        BoggleGame game = Games[GameID];
+            //        FullStatusResponse response = new FullStatusResponse();
 
-                    // active and brief 
-                    if (game.GameState == GameStatus.Active && brief.Equals("yes"))
-                    {
-                        response.GameState = "active";
-                        response.TimeLeft = game.TimeLeft;
-                        response.Player1 = new SerialPlayer()
-                        {
-                            Score = game.Player1.Score
-                        };
-                        response.Player2 = new SerialPlayer()
-                        {
-                            Score = game.Player2.Score
-                        };
+            //        // active and brief 
+            //        if (game.GameState == GameStatus.Active && brief.Equals("yes"))
+            //        {
+            //            response.GameState = "active";
+            //            response.TimeLeft = game.TimeLeft;
+            //            response.Player1 = new SerialPlayer()
+            //            {
+            //                Score = game.Player1.Score
+            //            };
+            //            response.Player2 = new SerialPlayer()
+            //            {
+            //                Score = game.Player2.Score
+            //            };
 
-                    }
-                    //active not brief
-                    else if (game.GameState == GameStatus.Active && !brief.Equals("yes"))
-                    {
-                        response.GameState = "active";
-                        response.Board = game.Board.ToString();
-                        response.TimeLimit = game.TimeLimit;
-                        response.TimeLeft = game.TimeLeft;
-                        response.Player1 = new SerialPlayer()
-                        {
-                            Nickname = game.Player1.User.Nickname,
-                            Score = game.Player1.Score
-                        };
-                        response.Player2 = new SerialPlayer()
-                        {
-                            Nickname = game.Player2.User.Nickname,
-                            Score = game.Player2.Score
-                        };
-                    }
-                    //completed and brief
-                    else if (game.GameState == GameStatus.Completed && brief.Equals("yes"))
-                    {
-                        response.GameState = "completed";
-                        response.TimeLeft = 0;
-                        response.Player1 = new SerialPlayer()
-                        {
-                            Score = game.Player1.Score
-                        };
-                        response.Player2 = new SerialPlayer()
-                        {
-                            Score = game.Player2.Score
-                        };
+            //        }
+            //        //active not brief
+            //        else if (game.GameState == GameStatus.Active && !brief.Equals("yes"))
+            //        {
+            //            response.GameState = "active";
+            //            response.Board = game.Board.ToString();
+            //            response.TimeLimit = game.TimeLimit;
+            //            response.TimeLeft = game.TimeLeft;
+            //            response.Player1 = new SerialPlayer()
+            //            {
+            //                Nickname = game.Player1.User.Nickname,
+            //                Score = game.Player1.Score
+            //            };
+            //            response.Player2 = new SerialPlayer()
+            //            {
+            //                Nickname = game.Player2.User.Nickname,
+            //                Score = game.Player2.Score
+            //            };
+            //        }
+            //        //completed and brief
+            //        else if (game.GameState == GameStatus.Completed && brief.Equals("yes"))
+            //        {
+            //            response.GameState = "completed";
+            //            response.TimeLeft = 0;
+            //            response.Player1 = new SerialPlayer()
+            //            {
+            //                Score = game.Player1.Score
+            //            };
+            //            response.Player2 = new SerialPlayer()
+            //            {
+            //                Score = game.Player2.Score
+            //            };
 
-                    }
-                    //completed not brief
-                    else if (game.GameState == GameStatus.Completed && !brief.Equals("yes"))
-                    {
-                        response.GameState = "completed";
-                        response.Board = game.Board.ToString();
-                        response.TimeLimit = game.TimeLimit;
-                        response.TimeLeft = 0;
-                        response.Player1 = new SerialPlayer()
-                        {
-                            Nickname = game.Player1.User.Nickname,
-                            Score = game.Player1.Score,
-                            WordsPlayed = new List<WordEntry>()
-                        };
-                        response.Player2 = new SerialPlayer()
-                        {
-                            Nickname = game.Player2.User.Nickname,
-                            Score = game.Player2.Score,
-                            WordsPlayed = new List<WordEntry>()
-                        };
+            //        }
+            //        //completed not brief
+            //        else if (game.GameState == GameStatus.Completed && !brief.Equals("yes"))
+            //        {
+            //            response.GameState = "completed";
+            //            response.Board = game.Board.ToString();
+            //            response.TimeLimit = game.TimeLimit;
+            //            response.TimeLeft = 0;
+            //            response.Player1 = new SerialPlayer()
+            //            {
+            //                Nickname = game.Player1.User.Nickname,
+            //                Score = game.Player1.Score,
+            //                WordsPlayed = new List<WordEntry>()
+            //            };
+            //            response.Player2 = new SerialPlayer()
+            //            {
+            //                Nickname = game.Player2.User.Nickname,
+            //                Score = game.Player2.Score,
+            //                WordsPlayed = new List<WordEntry>()
+            //            };
 
-                        //add all words of 1
-                        for (int i = 0; i < game.Player1.Words.Count; i++)
-                        {
-                            response.Player1.WordsPlayed.Add(new WordEntry()
-                            {
-                                Word = game.Player1.Words[i],
-                                Score = game.Player1.WordScores[i]
-                            });
-                        }
+            //            //add all words of 1
+            //            for (int i = 0; i < game.Player1.Words.Count; i++)
+            //            {
+            //                response.Player1.WordsPlayed.Add(new WordEntry()
+            //                {
+            //                    Word = game.Player1.Words[i],
+            //                    Score = game.Player1.WordScores[i]
+            //                });
+            //            }
 
-                        //add all words of 2
-                        for (int i = 0; i < game.Player2.Words.Count; i++)
-                        {
-                            response.Player2.WordsPlayed.Add(new WordEntry()
-                            {
-                                Word = game.Player2.Words[i],
-                                Score = game.Player2.WordScores[i]
-                            });
-                        }
-                    }
+            //            //add all words of 2
+            //            for (int i = 0; i < game.Player2.Words.Count; i++)
+            //            {
+            //                response.Player2.WordsPlayed.Add(new WordEntry()
+            //                {
+            //                    Word = game.Player2.Words[i],
+            //                    Score = game.Player2.WordScores[i]
+            //                });
+            //            }
+            //        }
 
-                    SetStatus(OK);
-                    return response;
-                }
-                else
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
-            }
+            //        SetStatus(OK);
+            //        return response;
+            //    }
+            //    else
+            //    {
+            //        SetStatus(Forbidden);
+            //        return null;
+            //    }
+            //}
+
+            return new FullStatusResponse();
         }
     }
 
+    // todo: delete this?
     /// <summary>
     /// Singleton class allows checking whether a word is valid
     /// </summary>
@@ -602,6 +622,10 @@ namespace Boggle
         }
     }
 
+    // todo: delete this?
+    /// <summary>
+    /// Contains information about a registered user
+    /// </summary>
     public class User
     {
         /// <summary>
