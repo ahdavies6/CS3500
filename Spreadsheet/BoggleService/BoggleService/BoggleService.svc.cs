@@ -301,8 +301,8 @@ namespace Boggle
                 {
                     // todo: make sure this command (especially the part in parenthesis) does what you think it does
                     //Games(Player2, Board, TimeLimit, StartTime)
-                    using (SqlCommand command = new SqlCommand("update Games set (Player2, Board, TimeLimit, StartTime)=" +
-                        "(@Player2, @Board, @TimeLimit, @StartTime) where GameID = @GameID", connection, transaction))
+                    using (SqlCommand command = new SqlCommand("update Games set (Player2, Board, TimeLimit, StartTime)" +
+                        " = (@Player2, @Board, @TimeLimit, @StartTime) where GameID = @GameID", connection, transaction))
                     {
                         command.Parameters.AddWithValue("@Player2", userID);
                         command.Parameters.AddWithValue("@Board", BoggleBoard.GenerateBoggleBoard());
@@ -429,17 +429,116 @@ namespace Boggle
         //}
 
         /// <summary>
-        /// Get the game status of game GameID
+        /// Returns the game status of game GameID
         /// 
         /// If GameID is invalid, responds with status 403 (Forbidden).
-        /// 
         /// Otherwise, returns information about the game named by GameID as illustrated below. Note that
         /// the information returned depends on whether "Brief=yes" was included as a parameter as well as
         /// on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are
         /// not case sensitive.
         /// </summary>
-        public FullStatusResponse GetGameStatus(string GameID, string brief)
+        public FullStatusResponse GetGameStatus(string gameID, string brief)
         {
+            // see private GetGameStatus below for full implementation
+            // this is only a wrapper method that makes the private method simpler
+
+            if (brief.ToLower() == "yes")
+            {
+                return GetGameStatus(gameID, true);
+            }
+            else
+            {
+                return GetGameStatus(gameID, false);
+            }
+        }
+
+        /// <summary>
+        /// Returns the game status of game GameID.
+        /// 
+        /// If GameID is invalid, responds with status 403 (Forbidden).
+        /// Otherwise, returns information about the game named by GameID as illustrated below. Note that
+        /// the information returned depends on whether brief was included as a parameter as well as
+        /// on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are
+        /// not case sensitive.
+        /// </summary>
+        private FullStatusResponse GetGameStatus(string gameID, bool brief)
+        {
+            // open connection to database
+            using (SqlConnection connection = new SqlConnection(BoggleDB))
+            {
+                connection.Open();
+
+                // execute all commands within a single transaction
+                using (SqlTransaction transaction = connection.BeginTransaction())
+                {
+                    // figures out the GameState and records it
+                    using (SqlCommand command = new SqlCommand("select * from Games where GameID = @GameID", connection, transaction))
+                    {
+                        // read the information the command returned
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (!reader.HasRows) // gameID wasn't in the database
+                            {
+                                SetStatus(Forbidden);
+                                return null;
+                            }
+
+                            while (reader.Read())
+                            {
+                                FullStatusResponse response = new FullStatusResponse();
+
+                                // todo: see if this actually returns "null" for an empty column
+                                // if the game only has one player, it's pending
+                                if (reader["Player2"] == null)
+                                {
+                                    SetStatus(OK);
+                                    response.GameState = "pending";
+                                    return response;
+                                }
+
+                                // add the stuff for brief & active/inactive (it's the same stuff)
+
+                                // todo: figure out how to implement this with datetime
+                                // if (time has run out)
+                                {
+                                    response.TimeLeft = 0;
+                                }
+                                //else
+                                {
+                                    // response.TimeLeft = datetime bit
+                                }
+
+                                // todo: make sure that nested database searching like this doesn't cause problems
+                                int score;
+                                SerialPlayer player1 = new SerialPlayer
+                                {
+                                    WordsPlayed = GetPlayerScores(gameID, userID, out score),
+                                    Score = score
+                                };
+                                response.Player1 = player1;
+
+                                SerialPlayer player2 = new SerialPlayer
+                                {
+                                    WordsPlayed = GetPlayerScores(gameID, userID, out score),
+                                    Score = score
+                                };
+                                response.Player2 = player2;
+
+
+                                // return it if brief
+
+                                // add the stuff for 
+
+                                // add the rest; return
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new FullStatusResponse();
+
+            // deprecated code:
             //lock (sync)
             //{
             //    //format brief 
@@ -565,8 +664,47 @@ namespace Boggle
             //        return null;
             //    }
             //}
+        }
 
-            return new FullStatusResponse();
+        private IList<WordEntry> GetPlayerScores(string gameID, string userID, out int score)
+        {
+            // open connection to database
+            using (SqlConnection connection = new SqlConnection(BoggleDB))
+            {
+                connection.Open();
+
+                // execute all commands within a single transaction
+                using (SqlTransaction transaction = connection.BeginTransaction())
+                {
+                    // get all of the word data for a given player
+                    using (SqlCommand command = new SqlCommand("select * from Words where (GameID, Player) " +
+                        "= (@GameID, @UserID)", connection, transaction))
+                    {
+                        command.Parameters.AddWithValue("@GameID", gameID);
+                        command.Parameters.AddWithValue("@UserID", userID);
+
+                        IList<WordEntry> words = new List<WordEntry>();
+                        score = 0;
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                WordEntry word = new WordEntry
+                                {
+                                    Word = (string)reader["Word"],
+                                    Score = (int)reader["Score"]
+                                };
+
+                                words.Add(word);
+                                score += (int)reader["Score"];
+                            }
+                        }
+
+                        return words;
+                    }
+                }
+            }
         }
     }
 
