@@ -142,7 +142,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BoggleBoard.cs" />
     <Compile Include="BoggleService.svc.cs">
       <DependentUpon>BoggleService.svc</DependentUpon>
     </Compile>

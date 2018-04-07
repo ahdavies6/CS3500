@@ -18,7 +18,6 @@ namespace Boggle
     /// </summary>
     public class BoggleService : IBoggleService
     {
-
         /// <summary>
         /// The connection string to the database that contains all of the server's data
         /// </summary>
@@ -34,7 +33,6 @@ namespace Boggle
         /// </summary>
         static BoggleService()
         {
-
             BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
 
             Dict = new HashSet<string>();
@@ -231,7 +229,7 @@ namespace Boggle
                         using (SqlCommand command = new SqlCommand("update Games set Player2 = @Player2, Board = @Board, TimeLimit = @TimeLimit, StartTime = @StartTime where GameID = @GameID", connection, transaction))
                         {
                             command.Parameters.AddWithValue("@Player2", userID);
-                            command.Parameters.AddWithValue("@Board", BoggleBoard.GenerateBoggleBoard());
+                            command.Parameters.AddWithValue("@Board", StaticBoard.GenerateBoggleBoard());
                             command.Parameters.AddWithValue("@TimeLimit", timeLimit);
                             command.Parameters.AddWithValue("@StartTime", DateTime.UtcNow);
                             command.Parameters.AddWithValue("@GameID", gameID);
@@ -262,7 +260,6 @@ namespace Boggle
                 }
             }
         }
-
 
         /// <summary>
         /// Cancels an active join request from user userToken.
@@ -322,7 +319,6 @@ namespace Boggle
         /// </summary>
         public ScoreResponse PlayWord(PlayWord request, string gameID)
         {
-
             //null and length checks
             if (gameID is null || request is null || request.UserToken is null || (request.UserToken = request.UserToken.Trim()).Length == 0
                 || request.Word is null || (request.Word = request.Word.Trim()).Length == 0 || request.Word.Length > 30)
@@ -397,7 +393,7 @@ namespace Boggle
                     //Standardize words to lower case
                     request.Word = request.Word.ToLower();
 
-                    int score = ScoreWord(new BoggleBoard(board), request.Word);
+                    int score = ScoreWord(board, request.Word);
 
                     //Check if the word has already been played by this player
                     using (SqlCommand cmd = new SqlCommand("select * from Words where Word = @Word and GameID = @GameID and Player = @Player", conn, trans))
@@ -444,10 +440,7 @@ namespace Boggle
         /// 
         /// Case insensitive.
         /// </summary>
-        /// <param name="bg"></param>
-        /// <param name="word"></param>
-        /// <returns></returns>
-        private int ScoreWord(BoggleBoard bg, string word)
+        private int ScoreWord(string boardString, string word)
         {
             //If the word is too small
             if (word.Length < 3)
@@ -455,7 +448,7 @@ namespace Boggle
                 return 0;
             }
             //Valid word scoring
-            else if (bg.CanBeFormed(word) && Dict.Contains(word.ToLower()))
+            else if (StaticBoard.CanBeFormed(boardString, word) && Dict.Contains(word.ToLower()))
             {
                 int leng = word.Length;
 
@@ -483,7 +476,6 @@ namespace Boggle
             }
         }
 
-
         /// <summary>
         /// Returns the game status of game GameID.
         /// 
@@ -495,9 +487,16 @@ namespace Boggle
         /// </summary>
         public FullStatusResponse GetGameStatus(string gameID, string brief)
         {
+            bool briefbool;
 
-            //Easy way to convert the brief request to a boolean
-            bool briefbool = brief.ToLower().Equals("yes");
+            if (brief != null)
+            {
+                briefbool = brief.ToLower().Equals("yes");
+            }
+            else
+            {
+                briefbool = false;
+            }
 
             //The db uses ints as the game keys, so try to make the gameID an int
             int id;
@@ -515,7 +514,6 @@ namespace Boggle
                 // execute all commands within a single transaction
                 using (SqlTransaction transaction = connection.BeginTransaction())
                 {
-
                     string p1id = "";
                     string p2id = "";
                     bool completed = false;
@@ -524,7 +522,6 @@ namespace Boggle
                     // figures out the GameState and records it
                     using (SqlCommand command = new SqlCommand("select * from Games where GameID = @GameID", connection, transaction))
                     {
-
                         command.Parameters.AddWithValue("@GameID", id);
 
                         // read the information the command returned
@@ -547,7 +544,6 @@ namespace Boggle
                                     return response;
                                 }
 
-
                                 response.Player1 = new SerialPlayer();
                                 response.Player2 = new SerialPlayer();
 
@@ -568,8 +564,8 @@ namespace Boggle
                                 else
                                 {
                                     completed = true;
-                                    response.TimeLeft = 0;
                                     response.GameState = "completed";
+                                    response.TimeLeft = 0;
                                 }
 
                                 //Nonbrief requests have the board and timelimit
@@ -719,5 +715,167 @@ namespace Boggle
         }
     }
 
+    /// <summary>
+    /// Contains helper static methods to perform various actions related to a Boggle game board.
+    /// </summary>
+    internal static class StaticBoard
+    {
+        /// <summary>
+        /// Generates a new, random boggle board string
+        /// </summary>
+        public static string GenerateBoggleBoard()
+        {
+            string[] cubes =
+            {
+                "LRYTTE",
+                "ANAEEG",
+                "AFPKFS",
+                "YLDEVR",
+                "VTHRWE",
+                "IDSYTT",
+                "XLDERI",
+                "ZNRNHL",
+                "EGHWNE",
+                "OATTOW",
+                "HCPOAS",
+                "OBBAOJ",
+                "SEOTIS",
+                "MTOICU",
+                "ENSIEU",
+                "NMIQHU"
+            };
+
+            // Shuffle the cubes
+            Random r = new Random();
+            for (int i = cubes.Length - 1; i >= 0; i--)
+            {
+                int j = r.Next(i + 1);
+                string temp = cubes[i];
+                cubes[i] = cubes[j];
+                cubes[j] = temp;
+            }
+
+            // Make a string by choosing one character at random
+            // frome each cube.
+            string letters = "";
+            for (int i = 0; i < cubes.Length; i++)
+            {
+                letters += cubes[i][r.Next(6)];
+            }
+
+            return letters;
+        }
+
+        /// <summary>
+        /// Reports whether the provided word can be formed by tracking through
+        /// this Boggle board as described in the rules of Boggle.  The method
+        /// is case-insensitive.
+        /// </summary>
+        public static bool CanBeFormed(string boardString, string word)
+        {
+            // Construct a temporary char array representing the board
+            char[,] board = new char[4, 4];
+            int index = 0;
+
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    board[i, j] = boardString[index++];
+                }
+            }
+
+            // Work in upper case
+            word = word.ToUpper();
+
+            // Mark every square on the board as unvisited.
+            bool[,] visited = new bool[4, 4];
+
+            // See if there is any starting point on the board from which
+            // the word can be formed.
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    if (CanBeFormed(board, word, i, j, visited))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // If no starting point worked, return false.
+            return false;
+        }
+
+        /// <summary>
+        /// Reports whether the provided word can be formed by tracking through
+        /// this Boggle board by beginning at location [i,j] and avoiding any
+        /// squares marked as visited.
+        /// </summary>
+        private static bool CanBeFormed(char[,] board, string word, int i, int j, bool[,] visited)
+        {
+            // If the word is empty, report success.
+            if (word.Length == 0)
+            {
+                return true;
+            }
+
+            // If an index is out of bounds, report failure.
+            if (i < 0 || i >= 4 || j < 0 || j >= 4)
+            {
+                return false;
+            }
+
+            // If this square has already been visited, report failure.
+            if (visited[i, j])
+            {
+                return false;
+            }
+
+            // If the first letter of the word doesn't match the letter on
+            // this square, report failure.  Otherwise, obtain the remainder
+            // of the word that we should match next.
+            // (Note that Q gets special treatment.)
+
+            char firstChar = word[0];
+            string rest = word.Substring(1);
+
+            if (firstChar != board[i, j])
+            {
+                return false;
+            }
+
+            if (firstChar == 'Q')
+            {
+                if (rest.Length == 0)
+                {
+                    return false;
+                }
+                if (rest[0] != 'U')
+                {
+                    return false;
+                }
+                rest = rest.Substring(1);
+            }
+
+            // Mark this square as visited.
+            visited[i, j] = true;
+
+            // Try to match the remainder of the word, beginning at a neighboring square.
+            if (CanBeFormed(board, rest, i - 1, j - 1, visited)) return true;
+            if (CanBeFormed(board, rest, i - 1, j, visited)) return true;
+            if (CanBeFormed(board, rest, i - 1, j + 1, visited)) return true;
+            if (CanBeFormed(board, rest, i, j - 1, visited)) return true;
+            if (CanBeFormed(board, rest, i, j + 1, visited)) return true;
+            if (CanBeFormed(board, rest, i + 1, j - 1, visited)) return true;
+            if (CanBeFormed(board, rest, i + 1, j, visited)) return true;
+            if (CanBeFormed(board, rest, i + 1, j + 1, visited)) return true;
+
+            // We failed.  Unmark this square and return false.
+            visited[i, j] = false;
+            return false;
+        }
+    }
 }
 
