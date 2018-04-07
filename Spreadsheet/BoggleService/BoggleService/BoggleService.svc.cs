@@ -11,7 +11,6 @@ using System.Data;
 
 namespace Boggle
 {
-    // todo: remove all deprecated code once database has been fully implemented
     /// <summary>
     /// Boggle game server that keeps track of user data, game data, and serves it up as necessary
     /// for a Boggle game client to receive. Also allows users to interact with the server as necessary
@@ -19,41 +18,6 @@ namespace Boggle
     /// </summary>
     public class BoggleService : IBoggleService
     {
-        ///// <summary>
-        ///// Keeps track of all users
-        ///// Key: UserToken
-        ///// Value: Nickname
-        ///// </summary>
-        //private static Dictionary<string, User> Users = new Dictionary<string, User>();
-
-        ///// <summary>
-        ///// Dictionary to represent the games in use
-        ///// Key: GameID (gotten from when the game is created). It is a property in BoggleGame
-        ///// Value: BoggleGame game 
-        ///// 
-        ///// Contains both active and completed games but NOT pending games
-        ///// </summary>
-        //private static Dictionary<string, BoggleGame> Games = new Dictionary<string, BoggleGame>();
-
-        ///// <summary>
-        ///// Keeps track of any pending games, should only be one but kept as a dictionary in case requests get large 
-        ///// Dicationary key: string GameID
-        ///// Dicationary Value: BoggleGame 
-        ///// 
-        ///// Once a second player is found, the game is removed and then moved into the games dictionary
-        ///// </summary>
-        //private static Dictionary<string, BoggleGame> PendingGames = new Dictionary<string, BoggleGame>();
-
-        ///// <summary>
-        ///// Lock object for server threading.
-        ///// </summary>
-        //private static object sync = new object();
-
-        ///// <summary>
-        ///// Value that keeps track of the amount of games created when the server was created.
-        ///// Used to make GameIDs
-        ///// </summary>
-        //private static int NumberOfGames = 0;
 
         /// <summary>
         /// The connection string to the database that contains all of the server's data
@@ -70,26 +34,7 @@ namespace Boggle
         /// </summary>
         static BoggleService()
         {
-            // Saves the connection string for the database.  A connection string contains the
-            // information necessary to connect with the database server.  When you create a
-            // DB, there is generally a way to obtain the connection string.  From the Server
-            // Explorer pane, obtain the properties of DB to see the connection string.
 
-            // The connection string of my ToDoDB.mdf shows as
-            //
-            //    Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="C:\Users\zachary\Source\CS 3500 S16\examples\ToDoList\ToDoListDB\App_Data\ToDoDB.mdf";Integrated Security=True
-            //
-            //Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\BoggleDB.mdf;Integrated Security=True
-
-            // Unfortunately, this is absolute pathname on my computer, which means that it
-            // won't work if the solution is moved.  Fortunately, it can be shorted to
-            //
-            //    Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="|DataDirectory|\ToDoDB.mdf";Integrated Security=True
-            //
-            // You should shorten yours this way as well.
-            //
-            // Rather than build the connection string into the program, I store it in the Web.config
-            // file where it can be easily found and changed.  You should do that too.
             BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
 
             Dict = new HashSet<string>();
@@ -124,13 +69,14 @@ namespace Boggle
         /// </summary>
         public UserTokenResponse RegisterUser(CreateUserRequest request)
         {
-
+            //null checks
             if (request is null || request.Nickname is null || (request.Nickname = request.Nickname.Trim()).Length == 0)
             {
                 SetStatus(Forbidden);
                 return null;
             }
 
+            //Insert the new user into 
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 conn.Open();
@@ -270,6 +216,7 @@ namespace Boggle
                                 gameID = (int)command.ExecuteScalar();
 
                             }
+                            //If an exception was thrown, a foreign key pair was violated
                             catch (SqlException)
                             {
                                 SetStatus(Forbidden);
@@ -291,11 +238,12 @@ namespace Boggle
 
                             try
                             {
-                                if (command.ExecuteNonQuery() != 0)
+                                if (command.ExecuteNonQuery() != 1)
                                 {
-                                    //throw new Exception("SQL query failed");
+                                    throw new Exception("SQL query failed");
                                 }
                             }
+                            //If Player2 is not a registered user
                             catch (SqlException)
                             {
                                 SetStatus(Forbidden);
@@ -315,47 +263,6 @@ namespace Boggle
             }
         }
 
-        /// <summary>
-        /// Helper method for JoinGame.
-        /// Creates a new pending game with userID, and returns the primary key GameID for the
-        /// new pending game.
-        /// </summary>
-        private int CreateNewGame(string userID, int requestedTime)
-        {
-            // open connection to database
-            using (SqlConnection connection = new SqlConnection(BoggleDB))
-            {
-                connection.Open();
-
-                // execute all commands within a single transaction
-                using (SqlTransaction transaction = connection.BeginTransaction())
-                {
-                    // todo: make sure this command (especially the part(s) in parenthesis) does what you think it does
-                    return 0;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Helper method for JoinGame.
-        /// Adds userID to the pending game gameID, and returns whether this worked or not.
-        /// </summary>
-        private bool JoinPendingGame(string userID, int gameID, int timeLimit)
-        {
-            // open connection to database
-            using (SqlConnection connection = new SqlConnection(BoggleDB))
-            {
-                connection.Open();
-
-                // execute all commands within a single transaction
-                using (SqlTransaction transaction = connection.BeginTransaction())
-                {
-                    // todo: make sure this command (especially the part in parenthesis) does what you think it does
-                    //Games(Player2, Board, TimeLimit, StartTime)
-                    return true;
-                }
-            }
-        }
 
         /// <summary>
         /// Cancels an active join request from user userToken.
@@ -383,6 +290,7 @@ namespace Boggle
                     {
                         cmd.Parameters.AddWithValue("@Player1Token", request.UserToken);
 
+                        //Checks if any lines were deleted. If none were deleted then UserToken  was not in any pending games
                         if (cmd.ExecuteNonQuery() == 0)
                         {
                             SetStatus(Forbidden);
@@ -532,19 +440,21 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Scores the passed word in the passed boggle board. It assumes the word has not been played before
+        /// Scores the passed word in the passed boggle board. It assumes the word has not been played before.
         /// 
-        /// Case insensitive
+        /// Case insensitive.
         /// </summary>
         /// <param name="bg"></param>
         /// <param name="word"></param>
         /// <returns></returns>
         private int ScoreWord(BoggleBoard bg, string word)
         {
+            //If the word is too small
             if (word.Length < 3)
             {
                 return 0;
             }
+            //Valid word scoring
             else if (bg.CanBeFormed(word) && Dict.Contains(word.ToLower()))
             {
                 int leng = word.Length;
@@ -566,6 +476,7 @@ namespace Boggle
                     return 11;
                 }
             }
+            //Invalid word that is longer is length 3
             else
             {
                 return -1;
@@ -585,12 +496,15 @@ namespace Boggle
         public FullStatusResponse GetGameStatus(string gameID, string brief)
         {
 
+            //Easy way to convert the brief request to a boolean
             bool briefbool = brief.ToLower().Equals("yes");
 
+            //The db uses ints as the game keys, so try to make the gameID an int
             int id;
             if (!int.TryParse(gameID, out id))
             {
                 SetStatus(Forbidden);
+                return null;
             }
 
             // open connection to database
@@ -624,7 +538,6 @@ namespace Boggle
 
                             while (reader.Read())
                             {
-                                // todo: see if this actually returns "null" for an empty column
                                 // if the game only has one player, it's pending
                                 if (DBNull.Value.Equals(reader["Player2"]))
                                 {
@@ -634,16 +547,18 @@ namespace Boggle
                                     return response;
                                 }
 
-                                // add the stuff for brief & active/inactive (it's the same stuff)
 
                                 response.Player1 = new SerialPlayer();
                                 response.Player2 = new SerialPlayer();
 
+                                //Grabbing info from the query
                                 DateTime start = (reader["StartTime"] as DateTime?).GetValueOrDefault();
                                 int limit = (reader["TimeLimit"] as int?).GetValueOrDefault();
                                 string board = (string)reader["Board"];
                                 completed = false;
                                 int timeleft = (int)(start.AddSeconds(limit) - DateTime.UtcNow).TotalSeconds;
+
+                                //Set the GameState and the timeleft
                                 if (timeleft > 0)
                                 {
                                     completed = false;
@@ -657,12 +572,14 @@ namespace Boggle
                                     response.GameState = "completed";
                                 }
 
+                                //Nonbrief requests have the board and timelimit
                                 if (!briefbool)
                                 {
                                     response.Board = board;
                                     response.TimeLimit = limit;
                                 }
 
+                                //Grabs the player ids
                                 p1id = (string)reader["Player1"];
                                 p2id = (string)reader["Player2"];
 
@@ -692,15 +609,18 @@ namespace Boggle
                                 p1score += s;
                             }
 
+                            //Brief requests only get the score
                             if (briefbool)
                             {
                                 response.Player1.Score = p1score;
                             }
+                            //If the game is completed, get words and score
                             else if (completed == true)
                             {
                                 response.Player1.Score = p1score;
                                 response.Player1.WordsPlayed = p1words;
                             }
+                            //If the game is active and brief is no, just give the score
                             else if (completed == false)
                             {
                                 response.Player1.Score = p1score;
@@ -731,15 +651,18 @@ namespace Boggle
                                 p2score += s;
                             }
 
+                            //Brief requests only get the score
                             if (briefbool)
                             {
                                 response.Player2.Score = p2score;
                             }
+                            //If the game is completed, get words and score
                             else if (completed == true)
                             {
                                 response.Player2.WordsPlayed = p2words;
                                 response.Player2.Score = p2score;
                             }
+                            //If the game is active and brief is no, just give the score
                             else if (completed == false)
                             {
                                 response.Player2.Score = p2score;
@@ -749,7 +672,7 @@ namespace Boggle
                     }
 
 
-                    //get p1 nickname
+                    //get p1 nickname if brief is no
                     if (!briefbool)
                     {
                         using (SqlCommand cmd = new SqlCommand("select * from Users where UserID = @id", connection, transaction))
@@ -769,7 +692,7 @@ namespace Boggle
                         }
                     }
 
-                    //get p2 nickname
+                    //get p2 nickname if brief is no
                     if (!briefbool)
                     {
                         using (SqlCommand cmd = new SqlCommand("select * from Users where UserID = @id", connection, transaction))
@@ -794,139 +717,7 @@ namespace Boggle
                 }
             }
         }
-
-        /*
-                               // brief active & inactive data
-
-                               string p1ID = (string)reader["Player1"];
-                               // todo: make sure that nested database searching like this doesn't cause problems
-                               IList<WordEntry> p1Words = GetPlayerScores(gameID, p1ID, out int p1Score);
-                               SerialPlayer player1 = new SerialPlayer { Score = p1Score };
-                               response.Player1 = player1;
-
-                               string p2ID = (string)reader["Player2"];
-                               // todo: make sure that nested database searching like this doesn't cause problems
-                               IList<WordEntry> p2Words = GetPlayerScores(gameID, p2ID, out int p2Score);
-                               SerialPlayer player2 = new SerialPlayer { Score = p2Score };
-                               response.Player2 = player2;
-
-                               // brief active & inactive response
-                               if (briefbool)
-                               {
-                                   response.Player1 = player1;
-                                   response.Player2 = player2;
-
-                                   SetStatus(OK);
-                                   return response;
-                               }
-
-                               // not brief, active data
-
-                               response.Board = (string)reader["Board"];
-                               response.TimeLimit = (int)reader["TimeLimit"];
-
-                               // todo: make sure that nested database searching like these don't cause problems
-                               response.Player1.Nickname = GetPlayerNickname(p1ID);
-                               response.Player2.Nickname = GetPlayerNickname(p2ID);
-
-                               // not brief, active response
-                               if (response.GameState == "active")
-                               {
-                                   SetStatus(OK);
-                                   return response;
-                               }
-
-                               // not brief, completed data
-                               response.Player1.WordsPlayed = p1Words;
-                               response.Player2.WordsPlayed = p2Words;
-
-                               // not brief, completed response
-                               SetStatus(OK);
-                               transaction.Commit();
-                               return response;
-                           }*/
-
-        /// <summary>
-        /// Private helper method returns an IList of word entries (which are words paired with
-        /// what they scored) given a player and a game. Out int score is the total score for
-        /// that player, that game.
-        /// </summary>
-        private IList<WordEntry> GetPlayerScores(string gameID, string userID, out int score)
-        {
-            // open connection to database
-            using (SqlConnection connection = new SqlConnection(BoggleDB))
-            {
-                connection.Open();
-
-                // execute all commands within a single transaction
-                using (SqlTransaction transaction = connection.BeginTransaction())
-                {
-                    // get all of the word data for a given player
-                    using (SqlCommand command = new SqlCommand("select * from Words where (GameID, Player) " +
-                        "= (@GameID, @UserID)", connection, transaction))
-                    {
-                        command.Parameters.AddWithValue("@GameID", gameID);
-                        command.Parameters.AddWithValue("@UserID", userID);
-
-                        IList<WordEntry> words = new List<WordEntry>();
-                        score = 0;
-
-                        using (SqlDataReader reader = command.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                WordEntry word = new WordEntry
-                                {
-                                    Word = (string)reader["Word"],
-                                    Score = (int)reader["Score"]
-                                };
-
-                                words.Add(word);
-                                score += (int)reader["Score"];
-                            }
-                        }
-
-                        return words;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Private helper method returns a player's Nickname, given their UserID
-        /// </summary>
-        private string GetPlayerNickname(string userID)
-        {
-            // open connection to database
-            using (SqlConnection connection = new SqlConnection(BoggleDB))
-            {
-                connection.Open();
-
-                // execute all commands within a single transaction
-                using (SqlTransaction transaction = connection.BeginTransaction())
-                {
-                    // get the PlayerID
-                    using (SqlCommand command = new SqlCommand("select Nickname from Users where UserID = @UserID",
-                        connection, transaction))
-                    {
-                        command.Parameters.AddWithValue("@UserID", userID);
-
-                        using (SqlDataReader reader = command.ExecuteReader())
-                        {
-                            string nickname = null;
-
-                            while (reader.Read())
-                            {
-                                nickname = (string)reader["Nickname"];
-                            }
-
-                            return nickname;
-                        }
-                    }
-                }
-            }
-        }
-
     }
 
 }
+
