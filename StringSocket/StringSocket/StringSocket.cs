@@ -88,6 +88,11 @@ namespace CustomNetworking
         private int pendingIndex = 0;
 
         /// <summary>
+        /// records whether a send is being attempted 
+        /// </summary>
+        private bool sendIsOngoing = false;
+
+        /// <summary>
         /// Object that syncs access when sending
         /// </summary>
         private readonly object sendSync = new object();
@@ -158,9 +163,42 @@ namespace CustomNetworking
                 outgoing.Append(s);
                 sendCallbacks.Enqueue(callback);
                 sendPayloads.Enqueue(payload);
+
+                if (!sendIsOngoing)
+                {
+                    sendIsOngoing = true;
+                    SendBytes();
+                }
             }
         }
 
+
+        /// <summary>
+        /// Sends bytes
+        /// </summary>
+        private void SendBytes()
+        {
+            //If we are dealing with bytes right now
+            if (pendingIndex < pendingBytes.Length)
+            {
+                socket.BeginSend(pendingBytes, pendingIndex, pendingBytes.Length - pendingIndex, SocketFlags.None, SOMECALLBACK, null);
+            }
+
+            //not sending bytes, so we start a byte send
+            else if (outgoing.Length > 0)
+            {
+                pendingBytes = encoding.GetBytes(outgoing.ToString());
+                pendingIndex = 0;
+                outgoing.Clear();
+                socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, SOMECALLBACK, null);
+            }
+
+            //nothing to send or being sent
+            else
+            {
+                sendIsOngoing = false;
+            }
+        }
 
         private void InvokeNextSendCallback(IAsyncResult result)
         {
