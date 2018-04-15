@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace CustomNetworking
 {
@@ -181,7 +182,7 @@ namespace CustomNetworking
             //If we are dealing with bytes right now
             if (pendingIndex < pendingBytes.Length)
             {
-                socket.BeginSend(pendingBytes, pendingIndex, pendingBytes.Length - pendingIndex, SocketFlags.None, SOMECALLBACK, null);
+                socket.BeginSend(pendingBytes, pendingIndex, pendingBytes.Length - pendingIndex, SocketFlags.None, BytesSent, null);
             }
 
             //not sending bytes, so we start a byte send
@@ -190,7 +191,7 @@ namespace CustomNetworking
                 pendingBytes = encoding.GetBytes(outgoing.ToString());
                 pendingIndex = 0;
                 outgoing.Clear();
-                socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, SOMECALLBACK, null);
+                socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, BytesSent, null);
             }
 
             //nothing to send or being sent
@@ -200,9 +201,25 @@ namespace CustomNetworking
             }
         }
 
-        private void InvokeNextSendCallback(IAsyncResult result)
+        private void BytesSent(IAsyncResult result)
         {
+            int numsent = socket.EndSend(result);
 
+            //lock sending
+            lock (sendSync)
+            {
+                pendingIndex += numsent;
+
+                //We sent all the bytes for the request
+                if (pendingIndex == pendingBytes.Length)
+                {
+                    object payload = sendPayloads.Dequeue();
+                    SendCallback callback = sendCallbacks.Dequeue();
+                    var t = Task.Run(() => callback(true, payload));
+                }
+
+                SendBytes();
+            }
         }
 
         /// <summary>
