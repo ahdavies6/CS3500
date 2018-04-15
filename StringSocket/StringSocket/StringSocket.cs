@@ -63,6 +63,16 @@ namespace CustomNetworking
         private Encoding encoding;
 
         /// <summary>
+        /// Used to build up the outgoing strings
+        /// </summary>
+        private StringBuilder outgoing;
+
+        /// <summary>
+        /// Object that syncs access when sending
+        /// </summary>
+        private readonly object sendSynch = new object();
+
+        /// <summary>
         /// Creates a StringSocket from a regular Socket, which should already be connected.  
         /// The read and write methods of the regular Socket must not be called after the
         /// StringSocket is created.  Otherwise, the StringSocket will not behave properly.  
@@ -73,6 +83,8 @@ namespace CustomNetworking
             socket = s;
             encoding = e;
             // TODO: Complete implementation of StringSocket
+
+            outgoing = new StringBuilder();
         }
 
         /// <summary>
