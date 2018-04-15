@@ -68,9 +68,29 @@ namespace CustomNetworking
         private StringBuilder outgoing;
 
         /// <summary>
+        /// List of callbacks that need to be called in a FIFO order
+        /// </summary>
+        private Queue<SendCallback> sendCallbacks;
+
+        /// <summary>
+        /// List of payloads for the callbacks given 
+        /// </summary>
+        private Queue<object> sendPayloads;
+
+        /// <summary>
+        /// Bytes that will be sent
+        /// </summary>
+        private byte[] pendingBytes = new byte[0];
+
+        /// <summary>
+        /// index of the leftmost byte whose send has not been completed
+        /// </summary>
+        private int pendingIndex = 0;
+
+        /// <summary>
         /// Object that syncs access when sending
         /// </summary>
-        private readonly object sendSynch = new object();
+        private readonly object sendSync = new object();
 
         /// <summary>
         /// Creates a StringSocket from a regular Socket, which should already be connected.  
@@ -85,6 +105,8 @@ namespace CustomNetworking
             // TODO: Complete implementation of StringSocket
 
             outgoing = new StringBuilder();
+            sendCallbacks = new Queue<SendCallback>();
+            sendPayloads = new Queue<object>();
         }
 
         /// <summary>
@@ -129,7 +151,20 @@ namespace CustomNetworking
         /// </summary>
         public void BeginSend(String s, SendCallback callback, object payload)
         {
+
             // TODO: Implement BeginSend
+            lock (sendSync)
+            {
+                outgoing.Append(s);
+                sendCallbacks.Enqueue(callback);
+                sendPayloads.Enqueue(payload);
+            }
+        }
+
+
+        private void InvokeNextSendCallback(IAsyncResult result)
+        {
+
         }
 
         /// <summary>
