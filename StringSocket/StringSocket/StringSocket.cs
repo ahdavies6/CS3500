@@ -57,10 +57,14 @@ namespace CustomNetworking
 
     public class StringSocket : IDisposable
     {
-        // Underlying socket
+        /// <summary>
+        /// Underlying socket
+        /// </summary>
         private Socket socket;
 
-        // Encoding used for sending and receiving
+        /// <summary>
+        /// Encoding used for sending and receiving
+        /// </summary>
         private Encoding encoding;
 
         /// <summary>
@@ -132,97 +136,6 @@ namespace CustomNetworking
         }
 
         /// <summary>
-        /// We can write a string to a StringSocket ss by doing
-        /// 
-        ///    ss.BeginSend("Hello world", callback, payload);
-        ///    
-        /// where callback is a SendCallback (see below) and payload is an arbitrary object.
-        /// This is a non-blocking, asynchronous operation.  When the StringSocket has 
-        /// successfully written the string to the underlying Socket it invokes the callback.  
-        /// The parameters to the callback are true and the payload.
-        /// 
-        /// If it is impossible to send because the underlying Socket has closed, the callback 
-        /// is invoked with false and the payload as parameters.
-        ///
-        /// This method is non-blocking.  This means that it does not wait until the string
-        /// has been sent before returning.  Instead, it arranges for the string to be sent
-        /// and then returns.  When the send is completed (at some time in the future), the
-        /// callback is called on another thread.
-        /// 
-        /// This method is thread safe.  This means that multiple threads can call BeginSend
-        /// on a shared socket without worrying around synchronization.  The implementation of
-        /// BeginSend must take care of synchronization instead.  On a given StringSocket, each
-        /// string arriving via a BeginSend method call must be sent (in its entirety) before
-        /// a later arriving string can be sent.
-        /// </summary>
-        public void BeginSend(String s, SendCallback callback, object payload)
-        {
-
-            // TODO: Implement BeginSend
-            lock (sendSync)
-            {
-                outgoing.Append(s);
-                sendCallbacks.Enqueue(callback);
-                sendPayloads.Enqueue(payload);
-
-                if (!sendIsOngoing)
-                {
-                    sendIsOngoing = true;
-                    SendBytes();
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Sends bytes
-        /// </summary>
-        private void SendBytes()
-        {
-            //If we are dealing with bytes right now
-            if (pendingIndex < pendingBytes.Length)
-            {
-                socket.BeginSend(pendingBytes, pendingIndex, pendingBytes.Length - pendingIndex, SocketFlags.None, BytesSent, null);
-            }
-
-            //not sending bytes, so we start a byte send
-            else if (outgoing.Length > 0)
-            {
-                pendingBytes = encoding.GetBytes(outgoing.ToString());
-                pendingIndex = 0;
-                outgoing.Clear();
-                socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, BytesSent, null);
-            }
-
-            //nothing to send or being sent
-            else
-            {
-                sendIsOngoing = false;
-            }
-        }
-
-        private void BytesSent(IAsyncResult result)
-        {
-            int numsent = socket.EndSend(result);
-
-            //lock sending
-            lock (sendSync)
-            {
-                pendingIndex += numsent;
-
-                //We sent all the bytes for the request
-                if (pendingIndex == pendingBytes.Length)
-                {
-                    object payload = sendPayloads.Dequeue();
-                    SendCallback callback = sendCallbacks.Dequeue();
-                    var t = Task.Run(() => callback(true, payload));
-                }
-
-                SendBytes();
-            }
-        }
-
-        /// <summary>
         /// We can read a string from the StringSocket by doing
         /// 
         ///     ss.BeginReceive(callback, payload)
@@ -263,6 +176,96 @@ namespace CustomNetworking
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
             // TODO: Implement BeginReceive
+        }
+
+        /// <summary>
+        /// We can write a string to a StringSocket ss by doing
+        /// 
+        ///    ss.BeginSend("Hello world", callback, payload);
+        ///    
+        /// where callback is a SendCallback (see below) and payload is an arbitrary object.
+        /// This is a non-blocking, asynchronous operation.  When the StringSocket has 
+        /// successfully written the string to the underlying Socket it invokes the callback.  
+        /// The parameters to the callback are true and the payload.
+        /// 
+        /// If it is impossible to send because the underlying Socket has closed, the callback 
+        /// is invoked with false and the payload as parameters.
+        ///
+        /// This method is non-blocking.  This means that it does not wait until the string
+        /// has been sent before returning.  Instead, it arranges for the string to be sent
+        /// and then returns.  When the send is completed (at some time in the future), the
+        /// callback is called on another thread.
+        /// 
+        /// This method is thread safe.  This means that multiple threads can call BeginSend
+        /// on a shared socket without worrying around synchronization.  The implementation of
+        /// BeginSend must take care of synchronization instead.  On a given StringSocket, each
+        /// string arriving via a BeginSend method call must be sent (in its entirety) before
+        /// a later arriving string can be sent.
+        /// </summary>
+        public void BeginSend(String s, SendCallback callback, object payload)
+        {
+            // TODO: Implement BeginSend
+            lock (sendSync)
+            {
+                outgoing.Append(s);
+                sendCallbacks.Enqueue(callback);
+                sendPayloads.Enqueue(payload);
+
+                if (!sendIsOngoing)
+                {
+                    sendIsOngoing = true;
+                    SendBytes();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sends bytes
+        /// </summary>
+        private void SendBytes()
+        {
+            //If we are dealing with bytes right now
+            if (pendingIndex < pendingBytes.Length)
+            {
+                socket.BeginSend(pendingBytes, pendingIndex, pendingBytes.Length - pendingIndex, SocketFlags.None, BytesSent, null);
+            }
+
+            //not sending bytes, so we start a byte send
+            else if (outgoing.Length > 0)
+            {
+                pendingBytes = encoding.GetBytes(outgoing.ToString());
+                pendingIndex = 0;
+                outgoing.Clear();
+                socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, BytesSent, null);
+            }
+
+            //nothing to send or being sent
+            else
+            {
+                sendIsOngoing = false;
+            }
+        }
+
+        // todo: doc comment
+        private void BytesSent(IAsyncResult result)
+        {
+            int numsent = socket.EndSend(result);
+
+            //lock sending
+            lock (sendSync)
+            {
+                pendingIndex += numsent;
+
+                //We sent all the bytes for the request
+                if (pendingIndex == pendingBytes.Length)
+                {
+                    object payload = sendPayloads.Dequeue();
+                    SendCallback callback = sendCallbacks.Dequeue();
+                    var t = Task.Run(() => callback(true, payload));
+                }
+
+                SendBytes();
+            }
         }
 
         /// <summary>
