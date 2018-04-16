@@ -122,6 +122,11 @@ namespace CustomNetworking
         private bool sendIsOngoing = false;
 
         /// <summary>
+        /// Object that syncs access when receiving
+        /// </summary>
+        private readonly object receiveSync = new object();
+
+        /// <summary>
         /// Object that syncs access when sending
         /// </summary>
         private readonly object sendSync = new object();
@@ -147,7 +152,7 @@ namespace CustomNetworking
             receivePayloads = new Queue<object>();
 
             // todo: should the final parameter be "null"?
-            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
+            //socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
         }
 
         /// <summary>
@@ -209,12 +214,17 @@ namespace CustomNetworking
             // TODO: Implement BeginReceive
 
             // enqueue callback and payload
+            receiveCallbacks.Enqueue(callback);
+            receivePayloads.Enqueue(payload);
 
             // todo: make sure this works
-            if (incomingBytes.Length > 0)
-            {
-                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
-            }
+            //if (incomingBytes.Length > 0)
+            //{
+            //socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
+            //}
+
+            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
+            int i = 5;
         }
 
         /// <summary>
@@ -224,26 +234,34 @@ namespace CustomNetworking
         {
             int bytesRead = socket.EndReceive(result);
 
-            if (bytesRead == 0) // socket has closed
+            lock (receiveSync)
             {
-                // todo: should we call Shutdown here too? If so, what's the mode?
-                Close();
-            }
-            else // socket open; something to send
-            {
-                Decoder d = encoding.GetDecoder();
-                int numChars = d.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
-                incoming.Append(incomingChars, 0, numChars);
-
-                // todo: stuff in the middle?
-
-                try
+                if (bytesRead == 0) // socket has closed
                 {
-                    socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
+                    // todo: should we call Shutdown here too? If so, what's the mode?
+                    Close();
                 }
-                catch (ObjectDisposedException) // todo: is this the right thing to catch?
+                else // socket open; something to send
                 {
-                    // we've read all of the incoming chars
+                    Decoder d = encoding.GetDecoder();
+                    int numChars = d.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
+                    incoming.Append(incomingChars, 0, numChars);
+
+                    // todo: stuff in the middle?
+
+                    try // ask for more data
+                    {
+                        socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
+                    }
+                    // todo: is this the right thing to catch?
+                    catch (ObjectDisposedException) // there is no more data
+                    {
+                        object payload = receivePayloads.Dequeue();
+                        ReceiveCallback callback = receiveCallbacks.Dequeue();
+                        
+                        // todo: see if the first parameter works
+                        Task.Run(() => callback(incoming.ToString(), payload));
+                    }
                 }
             }
         }
