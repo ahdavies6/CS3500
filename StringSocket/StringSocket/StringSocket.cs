@@ -18,14 +18,14 @@ namespace CustomNetworking
     public delegate void SendCallback(bool wasSent, object payload);
 
     /// <summary>
-    /// The type of delegate that is called when a receive has completed.
+    /// The type of delegate that is called when a StringSocket receive has completed.
     /// </summary>
-    public delegate void ReceiveCallback(String s, object payload);
+    public delegate void ReceiveCallback(string s, object payload);
 
     /// <summary> 
     /// A StringSocket is a wrapper around a Socket.  It provides methods that
     /// asynchronously read lines of text (strings terminated by newlines) and 
-    /// write strings. (As opposed to Sockets, which read and write raw bytes.)  
+    /// write strings (as opposed to Sockets, which read and write raw bytes).
     ///
     /// StringSockets are thread safe.  This means that two or more threads may
     /// invoke methods on a shared StringSocket without restriction.  The
@@ -54,7 +54,6 @@ namespace CustomNetworking
     /// failed in the attempt, it invokes the callback.  The parameters to the callback are
     /// a string and the payload.  The string is the requested string (with the newline removed).
     /// </summary>
-
     public class StringSocket : IDisposable
     {
         /// <summary>
@@ -68,9 +67,24 @@ namespace CustomNetworking
         private Encoding encoding;
 
         /// <summary>
+        /// Used to build incoming strings
+        /// </summary>
+        private StringBuilder incoming;
+
+        /// <summary>
         /// Used to build up the outgoing strings
         /// </summary>
         private StringBuilder outgoing;
+
+        /// <summary>
+        /// Callbacks for received requests
+        /// </summary>
+        private Queue<ReceiveCallback> receiveCallbacks;
+
+        /// <summary>
+        /// Payloads for received requests
+        /// </summary>
+        private Queue<object> receivePayloads;
 
         /// <summary>
         /// List of callbacks that need to be called in a FIFO order
@@ -81,6 +95,16 @@ namespace CustomNetworking
         /// List of payloads for the callbacks given 
         /// </summary>
         private Queue<object> sendPayloads;
+
+        /// <summary>
+        /// Bytes being received
+        /// </summary>
+        private byte[] incomingBytes = new byte[0];
+
+        /// <summary>
+        /// Received bytes, decoded into chars
+        /// </summary>
+        private char[] incomingChars = new char[0];
 
         /// <summary>
         /// Bytes that will be sent
@@ -117,6 +141,13 @@ namespace CustomNetworking
             outgoing = new StringBuilder();
             sendCallbacks = new Queue<SendCallback>();
             sendPayloads = new Queue<object>();
+
+            incoming = new StringBuilder();
+            receiveCallbacks = new Queue<ReceiveCallback>();
+            receivePayloads = new Queue<object>();
+
+            // todo: should the final parameter be "null"?
+            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
         }
 
         /// <summary>
@@ -176,6 +207,45 @@ namespace CustomNetworking
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
             // TODO: Implement BeginReceive
+
+            // enqueue callback and payload
+
+            // todo: make sure this works
+            if (incomingBytes.Length > 0)
+            {
+                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
+            }
+        }
+
+        /// <summary>
+        /// Called when some data has been received.
+        /// </summary>
+        private void ReceiveBytes(IAsyncResult result)
+        {
+            int bytesRead = socket.EndReceive(result);
+
+            if (bytesRead == 0) // socket has closed
+            {
+                // todo: should we call Shutdown here too? If so, what's the mode?
+                Close();
+            }
+            else // socket open; something to send
+            {
+                Decoder d = encoding.GetDecoder();
+                int numChars = d.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
+                incoming.Append(incomingChars, 0, numChars);
+
+                // todo: stuff in the middle?
+
+                try
+                {
+                    socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
+                }
+                catch (ObjectDisposedException) // todo: is this the right thing to catch?
+                {
+                    // we've read all of the incoming chars
+                }
+            }
         }
 
         /// <summary>
@@ -202,8 +272,9 @@ namespace CustomNetworking
         /// string arriving via a BeginSend method call must be sent (in its entirety) before
         /// a later arriving string can be sent.
         /// </summary>
-        public void BeginSend(String s, SendCallback callback, object payload)
+        public void BeginSend(string s, SendCallback callback, object payload)
         {
+            // todo: does this need to be locked, since Joe's doc comment calls this method thread safe?
             // TODO: Implement BeginSend
             lock (sendSync)
             {
