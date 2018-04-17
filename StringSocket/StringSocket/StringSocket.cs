@@ -72,11 +72,6 @@ namespace CustomNetworking
         private StringBuilder incoming;
 
         /// <summary>
-        /// Used to build up the outgoing strings
-        /// </summary>
-        private StringBuilder outgoing;
-
-        /// <summary>
         /// Callbacks for received requests
         /// </summary>
         private Queue<ReceiveCallback> receiveCallbacks;
@@ -95,6 +90,8 @@ namespace CustomNetworking
         /// List of payloads for the callbacks given 
         /// </summary>
         private Queue<object> sendPayloads;
+
+        private Queue<string> sendRequests;
 
         /// <summary>
         /// Bytes being received
@@ -153,7 +150,7 @@ namespace CustomNetworking
             encoding = e;
             // TODO: Complete implementation of StringSocket
 
-            outgoing = new StringBuilder();
+            sendRequests = new Queue<string>();
             sendCallbacks = new Queue<SendCallback>();
             sendPayloads = new Queue<object>();
 
@@ -313,7 +310,7 @@ namespace CustomNetworking
             // TODO: Implement BeginSend
             lock (sendSync)
             {
-                outgoing.Append(s);
+                sendRequests.Enqueue(s);
                 sendCallbacks.Enqueue(callback);
                 sendPayloads.Enqueue(payload);
 
@@ -337,11 +334,10 @@ namespace CustomNetworking
             }
 
             //not sending bytes, so we start a byte send
-            else if (outgoing.Length > 0)
+            else if (sendRequests.Count != 0)
             {
-                pendingBytes = encoding.GetBytes(outgoing.ToString());
+                pendingBytes = encoding.GetBytes(sendRequests.Dequeue());
                 pendingIndex = 0;
-                outgoing.Clear();
                 socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, BytesSent, null);
             }
 
