@@ -161,8 +161,7 @@ namespace CustomNetworking
             receiveCallbacks = new Queue<ReceiveCallback>();
             receivePayloads = new Queue<object>();
 
-            // todo: should the final parameter be "null"?
-            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
+            //socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
         }
 
         /// <summary>
@@ -224,6 +223,8 @@ namespace CustomNetworking
             cutLength = length;
             receiveCallbacks.Enqueue(callback);
             receivePayloads.Enqueue(payload);
+
+            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
         }
 
         /// <summary>
@@ -244,6 +245,8 @@ namespace CustomNetworking
                 {
                     if (cutLength <= 0 || cutLength - currentLength > 0)
                     {
+                        currentLength++;
+
                         string temp = incoming.ToString();
 
                         Decoder d = encoding.GetDecoder();
@@ -258,8 +261,6 @@ namespace CustomNetworking
                         {
                             ResetReceive();
                         }
-
-                        currentLength++;
                     }
                     else
                     {
