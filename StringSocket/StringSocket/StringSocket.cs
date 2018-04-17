@@ -99,12 +99,12 @@ namespace CustomNetworking
         /// <summary>
         /// Bytes being received
         /// </summary>
-        private byte[] incomingBytes = new byte[0];
+        private byte[] incomingBytes = new byte[1];
 
         /// <summary>
         /// Received bytes, decoded into chars
         /// </summary>
-        private char[] incomingChars = new char[0];
+        private char[] incomingChars = new char[1];
 
         /// <summary>
         /// Bytes that will be sent
@@ -152,7 +152,7 @@ namespace CustomNetworking
             receivePayloads = new Queue<object>();
 
             // todo: should the final parameter be "null"?
-            //socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
+            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
         }
 
         /// <summary>
@@ -223,8 +223,7 @@ namespace CustomNetworking
             //socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
             //}
 
-            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
-            int i = 5;
+            //socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
         }
 
         /// <summary>
@@ -243,23 +242,20 @@ namespace CustomNetworking
                 }
                 else // socket open; something to send
                 {
+                    string temp = incoming.ToString();
+                    
                     Decoder d = encoding.GetDecoder();
                     int numChars = d.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
-                    incoming.Append(incomingChars, 0, numChars);
 
-                    // todo: stuff in the middle?
-
-                    try // ask for more data
+                    if (incomingChars[0] != '\n')
                     {
+                        incoming.Append(incomingChars, 0, numChars);
                         socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
                     }
-                    // todo: is this the right thing to catch?
-                    catch (ObjectDisposedException) // there is no more data
+                    else // receipt has been terminated by a newline
                     {
                         object payload = receivePayloads.Dequeue();
                         ReceiveCallback callback = receiveCallbacks.Dequeue();
-                        
-                        // todo: see if the first parameter works
                         Task.Run(() => callback(incoming.ToString(), payload));
                     }
                 }
