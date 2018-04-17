@@ -309,6 +309,7 @@ namespace CustomNetworking
         /// </summary>
         public void BeginSend(string s, SendCallback callback, object payload)
         {
+            // todo: is this non-blocking, per the spec?
             // TODO: Implement BeginSend
             lock (sendSync)
             {
