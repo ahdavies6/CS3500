@@ -107,6 +107,16 @@ namespace CustomNetworking
         private char[] incomingChars = new char[1];
 
         /// <summary>
+        /// Keeps track of optional shorter length requirement from BeginReceive
+        /// </summary>
+        private int cutLength = 0;
+
+        /// <summary>
+        /// Keeps track of incoming string length to cut off ahead of time, if requested
+        /// </summary>
+        private int currentLength = 0;
+
+        /// <summary>
         /// Bytes that will be sent
         /// </summary>
         private byte[] pendingBytes = new byte[0];
@@ -211,19 +221,9 @@ namespace CustomNetworking
         /// </summary>
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
-            // TODO: Implement BeginReceive
-
-            // enqueue callback and payload
+            cutLength = length;
             receiveCallbacks.Enqueue(callback);
             receivePayloads.Enqueue(payload);
-
-            // todo: make sure this works
-            //if (incomingBytes.Length > 0)
-            //{
-            //socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
-            //}
-
-            //socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
         }
 
         /// <summary>
@@ -242,24 +242,44 @@ namespace CustomNetworking
                 }
                 else // socket open; something to send
                 {
-                    string temp = incoming.ToString();
-                    
-                    Decoder d = encoding.GetDecoder();
-                    int numChars = d.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
+                    if (cutLength <= 0 || cutLength - currentLength > 0)
+                    {
+                        string temp = incoming.ToString();
 
-                    if (incomingChars[0] != '\n')
-                    {
-                        incoming.Append(incomingChars, 0, numChars);
-                        socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
+                        Decoder d = encoding.GetDecoder();
+                        int numChars = d.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
+
+                        if (incomingChars[0] != '\n')
+                        {
+                            incoming.Append(incomingChars, 0, numChars);
+                            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
+                        }
+                        else // receipt has been terminated by a newline
+                        {
+                            ResetReceive();
+                        }
+
+                        currentLength++;
                     }
-                    else // receipt has been terminated by a newline
+                    else
                     {
-                        object payload = receivePayloads.Dequeue();
-                        ReceiveCallback callback = receiveCallbacks.Dequeue();
-                        Task.Run(() => callback(incoming.ToString(), payload));
+                        ResetReceive();
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Resets receipt-related fields after receiving all data
+        /// </summary>
+        private void ResetReceive()
+        {
+            cutLength = 0;
+            currentLength = 0;
+
+            object payload = receivePayloads.Dequeue();
+            ReceiveCallback callback = receiveCallbacks.Dequeue();
+            Task.Run(() => callback(incoming.ToString(), payload));
         }
 
         /// <summary>
@@ -288,7 +308,6 @@ namespace CustomNetworking
         /// </summary>
         public void BeginSend(string s, SendCallback callback, object payload)
         {
-            // todo: does this need to be locked, since Joe's doc comment calls this method thread safe?
             // TODO: Implement BeginSend
             lock (sendSync)
             {
