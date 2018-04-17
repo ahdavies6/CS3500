@@ -247,8 +247,6 @@ namespace CustomNetworking
                     {
                         currentLength++;
 
-                        string temp = incoming.ToString();
-
                         Decoder d = encoding.GetDecoder();
                         int numChars = d.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
 
