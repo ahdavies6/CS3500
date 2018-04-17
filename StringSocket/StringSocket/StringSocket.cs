@@ -324,6 +324,7 @@ namespace CustomNetworking
 
         /// <summary>
         /// Sends bytes
+        // todo finish doc comments
         /// </summary>
         private void SendBytes()
         {
@@ -364,6 +365,16 @@ namespace CustomNetworking
                     object payload = sendPayloads.Dequeue();
                     SendCallback callback = sendCallbacks.Dequeue();
                     var t = Task.Run(() => callback(true, payload));
+                }
+                //no bytes were able to be sent, socket on the other end is closed
+                else if (numsent == 0)
+                {
+                    while (sendPayloads.Count != 0 && sendCallbacks.Count != 0)
+                    {
+                        object payload = sendPayloads.Dequeue();
+                        SendCallback callback = sendCallbacks.Dequeue();
+                        var t = Task.Run(() => callback(false, payload));
+                    }
                 }
 
                 SendBytes();
