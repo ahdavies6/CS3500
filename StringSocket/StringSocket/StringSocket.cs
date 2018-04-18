@@ -112,7 +112,7 @@ namespace CustomNetworking
         private byte[] incomingBytes = new byte[BUFFER_SIZE];
 
         /// <summary>
-        /// Boolean indicating whether bytes are being recieved at the moment
+        /// Boolean indicating whether bytes are being received at the moment
         /// </summary>
         private bool receiveIsOngoing = false;
 
@@ -151,7 +151,6 @@ namespace CustomNetworking
         {
             socket = s;
             encoding = e;
-            // TODO: Complete implementation of StringSocket
 
             sendRequests = new Queue<string>();
             sendCallbacks = new Queue<SendCallback>();
@@ -161,8 +160,6 @@ namespace CustomNetworking
             receiveCallbacks = new Queue<ReceiveCallback>();
             receivePayloads = new Queue<object>();
             receiveLength = new Queue<int>();
-
-            //socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
         }
 
         /// <summary>
@@ -239,27 +236,31 @@ namespace CustomNetworking
                 }
             }
         }
+
         /// <summary>
-        // todo 
-        /// calls socket
+        /// Deals with received bytes from the socket. Deals with any pending receive requests if possible. If it is not possible,
+        /// calls the socket's beginReceive method. 
         /// </summary>
         private void ReceiveBytes()
         {
             lock (receiveSync)
             {
+                //No bytes stored
                 if (incoming.Length == 0)
                 {
                     socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, BytesReceived, null);
                 }
                 else
                 {
-                    //Indicates if the last pop of the recieve queue was successful and go to the next pop
+                    //Indicates if the last pop of the receive queue was successful and go to the next pop
                     bool nextOperation = true;
 
+                    //Keep going as long as there are valid operations to do and the request queue is non-empty
                     while (nextOperation && receiveLength.Count > 0)
                     {
                         int requested = receiveLength.Peek();
 
+                        //Request string till a new line
                         if (requested == 0)
                         {
                             bool sent = false;
@@ -281,12 +282,15 @@ namespace CustomNetworking
                                 }
                             }
 
+                            //Case there was no newline char
                             if (!sent)
                             {
                                 nextOperation = false;
                             }
 
                         }
+
+                        //Request a string of certain bytes length
                         else if (requested > 0)
                         {
                             if (requested <= incoming.Length)
@@ -301,6 +305,8 @@ namespace CustomNetworking
                                 var t = Task.Run(() => callback(line, payload));
 
                             }
+
+                            //not enough bytes to fit the requested byte length 
                             else
                             {
                                 nextOperation = false;
@@ -326,8 +332,6 @@ namespace CustomNetworking
         /// <summary>
         /// Given a byte size and string, trims to the string to the given amount of bytes
         /// </summary>
-        /// <param name="str"></param>
-        /// <param name="bytes"></param>
         private void TrimStringFromBytes(ref string str, int bytes)
         {
             int currNumBytes = encoding.GetByteCount(str);
@@ -339,10 +343,9 @@ namespace CustomNetworking
         }
 
         /// <summary>
-        // todo
-        /// calls Receive bytes if needed 
+        /// Callback for BeginReceive on the socket. Once bytes are received, converts 
+        /// them and puts it into the incoming StringBuilder then calls ReceiveBytes{};
         /// </summary>
-        /// <param name="result"></param>
         private void BytesReceived(IAsyncResult result)
         {
             int bytesRead = socket.EndReceive(result);
@@ -351,155 +354,6 @@ namespace CustomNetworking
             incoming.Append(charsRead, 0, numChars);
             ReceiveBytes();
         }
-
-        /*
-        private void trydothings()
-        {
-            if (receiveLength.Count == 0)
-            {
-                //do nothing
-            }
-            else if (receiveLength.Peek() == 0)
-            {
-                int newLineLocation = -1;
-                bool received = false;
-                string line = null;
-
-                for (int i = 0; i < incoming.Length; i++)
-                {
-                    if (incoming[i] == '\n')
-                    {
-                        received = true;
-                        newLineLocation = i;
-                        line = incoming.ToString(0, i);
-                        break;
-                    }
-                }
-
-                if (received)
-                {
-                    receiveLength.Dequeue();
-                    object payload = receivePayloads.Dequeue();
-                    ReceiveCallback callback = receiveCallbacks.Dequeue();
-                    var t = Task.Run(() => callback(line, payload));
-                    incoming.Remove(0, newLineLocation + 1);
-                }
-            }
-            else if (receiveLength.Peek() > 0)
-            {
-
-                int requested = receiveLength.Peek();
-
-                if (requested <= incoming.Length)
-                {
-                    byte[] b = encoding.GetBytes(incoming.ToString());
-                    string line = incoming.ToString(0, requested);
-                    incoming.Remove(0, requested);
-                    receiveLength.Dequeue();
-                    object payload = receivePayloads.Dequeue();
-                    ReceiveCallback callback = receiveCallbacks.Dequeue();
-                    var t = Task.Run(() => callback(line, payload));
-                }
-
-            }
-        }
-        
-        /// <summary>
-        /// Called when some data has been received.
-        /// </summary>
-        private void ReceiveBytes(IAsyncResult result)
-        {
-            int bytesRead = socket.EndReceive(result);
-
-            lock (receiveSync)
-            {
-                if (bytesRead > 0)
-                {
-                    for (int i = 0; i < bytesRead; i++)
-                    {
-                        bytes.AddLast(incomingBytes[i]);
-                    }
-                }
-                CheckReceiveStack();
-            }
-            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveBytes, null);
-        }
-
-        private void CheckReceiveStack()
-        {
-            //nothing to be done 
-            if (receiveLength.Count == 0)
-            {
-                return;
-            }
-
-            bool nextOp = true;
-
-            while (nextOp && receiveLength.Count > 0)
-            {
-                if (receiveLength.Peek() == 0)
-                {
-                    Decoder d = encoding.GetDecoder();
-                    bool sent = false;
-                    StringBuilder line = new StringBuilder();
-                    int numBytes = 0;
-
-                    foreach (byte b in bytes)
-                    {
-                        line.Append(b);
-                        numBytes++;
-
-                        if (line[line.Length - 1] == '\n')
-                        {
-                            receiveLength.Dequeue();
-                            object payload = receivePayloads.Dequeue();
-                            ReceiveCallback callback = receiveCallbacks.Dequeue();
-                            var t = Task.Run(() => callback(line.ToString(0, line.Length - 1), payload));
-                            sent = true;
-                            break;
-                        }
-                    }
-
-                    if (!sent)
-                    {
-                        nextOp = false;
-                    }
-                    else
-                    {
-                        for (int i = 0; i < numBytes; i++)
-                        {
-                            bytes.RemoveFirst();
-                        }
-                    }
-                }
-                else if (receiveLength.Peek() > 0)
-                {
-                    if (receiveLength.Peek() > bytes.Count)
-                    {
-                        nextOp = false;
-                    }
-                    else
-                    {
-
-                        Decoder d = encoding.GetDecoder();
-                        byte[] bytearr = new byte[receiveLength.Peek()];
-                        char[] chars = new char[0];
-
-                        for (int i = 0; i < receiveLength.Peek(); i++)
-                        {
-                            bytearr[i] = bytes.First.Value;
-                            bytes.RemoveFirst();
-                        }
-
-                        d.GetChars(bytearr, 0, receiveLength.Peek(), chars, 0, false);
-
-                        object payload = receivePayloads.Dequeue();
-                        ReceiveCallback callback = receiveCallbacks.Dequeue();
-                        var t = Task.Run(() => callback(new string(chars), payload));
-                    }
-                }
-            }
-        }*/
 
 
         /// <summary>
@@ -528,8 +382,6 @@ namespace CustomNetworking
         /// </summary>
         public void BeginSend(string s, SendCallback callback, object payload)
         {
-            // todo: is this non-blocking, per the spec?
-            // TODO: Implement BeginSend
             lock (sendSync)
             {
                 sendRequests.Enqueue(s);
@@ -545,8 +397,10 @@ namespace CustomNetworking
         }
 
         /// <summary>
-        /// Sends bytes
-        // todo finish doc comments
+        /// Sends bytes across the socket. 
+        /// 
+        /// If the current request has no more bytes to be sent, then it get the next request
+        /// and works on that till there are no more requests to be sent.
         /// </summary>
         private void SendBytes()
         {
@@ -571,7 +425,13 @@ namespace CustomNetworking
             }
         }
 
-        // todo: doc comment
+        /// <summary>
+        /// To be sent as a callback to a BeginSend socket request. 
+        /// 
+        /// If a complete send request was finished, calls the appropriate callback with payload.
+        /// If some bytes were sent, calls SendBytes() to send the rest of the bytes in the request.
+        /// If the send failed and nothing was sent, all queued up callbacks are called with false and their respective payloads.
+        /// </summary>
         private void BytesSent(IAsyncResult result)
         {
             int numsent = socket.EndSend(result);
@@ -589,6 +449,7 @@ namespace CustomNetworking
                     var t = Task.Run(() => callback(true, payload));
                 }
                 //no bytes were able to be sent, socket on the other end is closed
+                //send false to all callbacks queued up 
                 else if (numsent == 0)
                 {
                     while (sendPayloads.Count != 0 && sendCallbacks.Count != 0)
