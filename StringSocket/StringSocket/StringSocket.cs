@@ -230,15 +230,14 @@ namespace CustomNetworking
                     length = 0;
                 }
                 receiveLength.Enqueue(length);
-            }
 
-            //Start the receive
-            if (receiveIsOngoing == false)
-            {
-                receiveIsOngoing = true;
-                ReceiveBytes();
+                //Start the receive
+                if (receiveIsOngoing == false)
+                {
+                    receiveIsOngoing = true;
+                    ReceiveBytes();
+                }
             }
-
         }
         /// <summary>
         // todo 
@@ -290,12 +289,12 @@ namespace CustomNetworking
                         }
                         else if (requested > 0)
                         {
-                            if (requested < incoming.Length)
+                            if (requested <= incoming.Length)
                             {
                                 string line = incoming.ToString(0, requested);
                                 TrimStringFromBytes(ref line, requested);
                                 incoming.Remove(0, line.Length);
-
+                                bool unused = incoming.Length == 0;
                                 receiveLength.Dequeue();
                                 object payload = receivePayloads.Dequeue();
                                 ReceiveCallback callback = receiveCallbacks.Dequeue();
@@ -305,6 +304,8 @@ namespace CustomNetworking
                             else
                             {
                                 nextOperation = false;
+                                bool unused = incoming.Length == 0;
+
                             }
                         }
                     }
