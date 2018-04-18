@@ -222,13 +222,14 @@ namespace CustomNetworking
             {
                 receivePayloads.Enqueue(payload);
                 receiveCallbacks.Enqueue(callback);
+
                 if (length < 0)
                 {
                     length = 0;
                 }
                 receiveLength.Enqueue(length);
 
-                //Start the receive
+                // Start the receive
                 if (receiveIsOngoing == false)
                 {
                     receiveIsOngoing = true;
@@ -245,22 +246,22 @@ namespace CustomNetworking
         {
             lock (receiveSync)
             {
-                //No bytes stored
+                // No bytes stored
                 if (incoming.Length == 0)
                 {
                     socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, BytesReceived, null);
                 }
                 else
                 {
-                    //Indicates if the last pop of the receive queue was successful and go to the next pop
+                    // Indicates if the last pop of the receive queue was successful and go to the next pop
                     bool nextOperation = true;
 
-                    //Keep going as long as there are valid operations to do and the request queue is non-empty
+                    // Keep going as long as there are valid operations to do and the request queue is non-empty
                     while (nextOperation && receiveLength.Count > 0)
                     {
                         int requested = receiveLength.Peek();
 
-                        //Request string till a new line
+                        // Request string till a new line
                         if (requested == 0)
                         {
                             bool sent = false;
@@ -276,7 +277,6 @@ namespace CustomNetworking
                                     ReceiveCallback callback = receiveCallbacks.Dequeue();
                                     var t = Task.Run(() => callback(line, payload));
 
-
                                     sent = true;
                                     break;
                                 }
@@ -287,7 +287,6 @@ namespace CustomNetworking
                             {
                                 nextOperation = false;
                             }
-
                         }
 
                         //Request a string of certain bytes length
@@ -303,7 +302,6 @@ namespace CustomNetworking
                                 object payload = receivePayloads.Dequeue();
                                 ReceiveCallback callback = receiveCallbacks.Dequeue();
                                 var t = Task.Run(() => callback(line, payload));
-
                             }
 
                             //not enough bytes to fit the requested byte length 
@@ -311,7 +309,6 @@ namespace CustomNetworking
                             {
                                 nextOperation = false;
                                 bool unused = incoming.Length == 0;
-
                             }
                         }
                     }
@@ -352,9 +349,9 @@ namespace CustomNetworking
             char[] charsRead = new Char[BUFFER_SIZE];
             int numChars = (encoding.GetDecoder()).GetChars(incomingBytes, 0, bytesRead, charsRead, 0, false);
             incoming.Append(charsRead, 0, numChars);
+
             ReceiveBytes();
         }
-
 
         /// <summary>
         /// We can write a string to a StringSocket ss by doing
