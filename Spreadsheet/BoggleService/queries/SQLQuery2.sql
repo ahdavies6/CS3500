@@ -1,0 +1,1 @@
+﻿insert into Users(UserID, Nickname) values('TESTTOKEN','NITHIN')
